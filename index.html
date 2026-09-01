@@ -242,7 +242,7 @@ const I18N = {
       note_power:"Sản lượng điện theo nguồn (GWh) và nhiên liệu đầu vào cho nhà máy điện (PJ). Thủy điện, gió, mặt trời quy đổi theo sản lượng điện tương đương.",
       note_demand:"Tiêu thụ năng lượng cuối theo ngành và nhiên liệu. Công nghiệp có 11 phân ngành chế tạo (từ 2023).",
       note_transport:"Giao thông nội địa theo phương thức, loại phương tiện và công nghệ động cơ. Chi tiết phương tiện/công nghệ có từ 2023.",
-      note_balance:"Bảng cân bằng năng lượng chuẩn cho năm và kịch bản đang chọn, và bộ tra cứu chuỗi số liệu 2000–2060 có thể sao chép sang Excel."}
+      note_balance:"Bảng cân bằng năng lượng chuẩn cho năm và kịch bản đang chọn, và bộ tra cứu chuỗi số liệu 2000–2060."}
  },
  en:{
   title:"Viet Nam Energy Outlook 2060", subtitle:"Energy balances · 2000–2060", scenario:"Scenario", compare:"Compare both scenarios", year:"Year", unit:"Unit",
@@ -278,7 +278,7 @@ const I18N = {
       note_power:"Generation by source (GWh) and fuel inputs to power plants (PJ). Hydro, wind and solar are counted at their electricity equivalent.",
       note_demand:"Final energy consumption by sector and fuel. Industry carries 11 manufacturing sub-sectors from 2023.",
       note_transport:"Domestic transport by mode, vehicle type and drivetrain technology. Vehicle and technology detail exists from 2023.",
-      note_balance:"Standard energy balance table for the selected year and scenario, plus a data explorer for 2000–2060 series that can be copied to Excel."}
+      note_balance:"Standard energy balance table for the selected year and scenario, plus a data explorer for 2000–2060 series."}
  }
 };
 
@@ -627,7 +627,7 @@ function layout(){
     <section class="card"><h3>${c.explorer}</h3>
       <div class="toolbar"><label class="tiny" for="dsSel">${t.ui.dataset}</label><select id="dsSel"></select>
         <div class="seg" id="stepSeg"><button data-st="5" class="${EX.step===5?"on":""}">${t.ui.milestones}</button><button data-st="1" class="${EX.step===1?"on":""}">${t.ui.allyears}</button></div>
-        <span class="tiny" id="exunit"></span><button class="btn" id="copyBtn">${t.ui.copycsv}</button><button class="btn" id="dlBtn">${t.ui.download}</button></div>
+        <span class="tiny" id="exunit"></span></div>
       <div class="tblwrap" id="extable"></div></section>
   </div>`;
   document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>{TAB=b.dataset.t; document.querySelectorAll("#nav button").forEach(x=>x.classList.toggle("on",x===b)); document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x.id==="tab_"+TAB)); render();});
@@ -636,8 +636,6 @@ function layout(){
   document.querySelectorAll("[data-exportall]").forEach(b=>b.onclick=()=>exportAll(b));
   document.getElementById("dsSel").onchange=e=>{EX.ds=e.target.value; renderExplorer();};
   document.querySelectorAll("#stepSeg button").forEach(b=>b.onclick=()=>{EX.step=+b.dataset.st; document.querySelectorAll("#stepSeg button").forEach(x=>x.classList.toggle("on",x===b)); renderExplorer();});
-  document.getElementById("copyBtn").onclick=()=>{ navigator.clipboard.writeText(explorerCSV()).then(()=>toast(t.ui.copied)); };
-  document.getElementById("dlBtn").onclick=()=>saveFile(`vietnam_${EX.ds}_${S.cmp?"both":S.scen}.csv`, new Blob(["﻿"+explorerCSV()],{type:"text/csv"}));
 }
 function syncYear(){ document.getElementById("yearval").textContent=S.year; document.querySelectorAll("#ms button").forEach(b=>b.classList.toggle("on",+b.dataset.y===S.year)); }
 
