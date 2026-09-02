@@ -30,6 +30,13 @@ main{max-width:1080px;margin:0 auto;padding:26px 24px 60px}
 .topic-head h2{font-family:var(--font-head);font-size:21px;font-weight:700}
 .topic-head .en{font-size:13px;color:var(--ink-3);letter-spacing:.05em;text-transform:uppercase;font-weight:600}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px}
+.dcard.featured{grid-column:1/-1;flex-direction:row;min-height:300px}
+.dcard.featured img{width:54%;aspect-ratio:auto;height:auto;object-fit:cover;border-bottom:none;border-right:1px solid var(--line)}
+.dcard.featured .b{padding:22px 26px;justify-content:center;gap:8px}
+.dcard.featured h3{font-size:21px}
+.dcard.featured p{font-size:14.5px;max-width:56ch}
+.dcard.featured .open{font-size:14px}
+@media (max-width:800px){.dcard.featured{flex-direction:column;min-height:0}.dcard.featured img{width:100%;aspect-ratio:8/5;border-right:none;border-bottom:1px solid var(--line)}}
 .dcard{background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden;display:flex;flex-direction:column;text-decoration:none;transition:box-shadow .15s,transform .15s}
 .dcard:hover{box-shadow:0 6px 20px rgba(15,31,51,.13);transform:translateY(-2px)}
 .dcard img{width:100%;aspect-ratio:8/5;object-fit:cover;display:block;border-bottom:1px solid var(--line)}
@@ -58,7 +65,7 @@ main{max-width:1080px;margin:0 auto;padding:26px 24px 60px}
   <section class="topic">
     <div class="topic-head"><h2>Dự báo năng lượng</h2><span class="en">Energy Outlook</span></div>
     <div class="cards">
-      <a class="dcard" href="outlook/">
+      <a class="dcard featured" href="outlook/">
         <img src="assets/outlook-preview.jpg" alt="Giao diện dashboard Energy Outlook 2060">
         <div class="b">
           <h3>Energy Outlook 2060</h3>
