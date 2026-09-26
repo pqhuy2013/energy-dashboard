@@ -236,15 +236,16 @@ function deMucMau06() {
     const soDong = t.slice(1, -1).filter(r => r.length === 9).map(r => r[8]).sort().join(';');
     ok(soDong === DK[y].rows.map(r => vi(r.t, 3)).sort().join(';'), 'năm ' + y + ': ' + DK[y].rows.length + ' dòng phát thải trong .docx khớp phép tính độc lập');
     ok(t.some(r => r.length < 9 && r.join('').includes('không có công thức')), 'năm ' + y + ': dòng quá trình công nghiệp ghi rõ không có công thức, không ra số');
-    ok(P.some(p => p.startsWith('- Năm ' + y + ': độ không chắc chắn của tổng lượng phát thải là ±' + vi(DK[y].u, 1) + ' %')), 'III.4 năm ' + y + ': độ không chắc chắn ±' + vi(DK[y].u, 1) + ' % khớp phương trình 3.2');
+    ok(P.some(p => p === '- Năm ' + y + ': độ không chắc chắn của phần phát thải có đủ số liệu độ không chắc chắn, chiếm ' + vi(DK[y].phu, 1) + ' % tổng lượng phát thải, là ±' + vi(DK[y].u, 1) + ' %.'),
+      'III.4 năm ' + y + ': ±' + vi(DK[y].u, 1) + ' % khớp phương trình 3.2, nói rõ chỉ tính trên ' + vi(DK[y].phu, 1) + ' % phát thải');
   });
   const bTL = D.tables.find(t => t[0][0] === 'Năm' && t[0].length === 5);
   ok(bTL && bTL[1].join('|') === '2022|25.000|25.010,5|+10,5|+0,04 %', 'bảng tính toán lại kỳ trước: ' + (bTL ? bTL[1].join(' | ') : 'không có'));
-  ok(P.some(p => p.includes(sub('Tiềm năng nóng lên toàn cầu theo Báo cáo đánh giá lần thứ năm (AR5) của IPCC: CO₂ = 1; CH₄ = 28; N₂O = 265.')) && p.includes('R410A = 1.924')), 'III.1 ghi bộ GWP AR5 và GWP môi chất lạnh');
+  ok(P.some(p => p.includes('Tiềm năng nóng lên toàn cầu theo Báo cáo đánh giá lần thứ năm (AR5) của IPCC: CO₂ = 1; CH₄ = 28; N₂O = 265.') && p.includes('R410A = 1.924')), 'III.1 ghi bộ GWP AR5 và GWP môi chất lạnh');
   ok(P.some(p => p.includes('tự tính theo công thức điểm 4, hiệu suất lò hơi 85 %')) && P.some(p => p.includes('đính chính tại Quyết định 334/QĐ-BCT')), 'III.1 ghi hệ số hơi tự tính và đính chính Quyết định 334');
-  ok(P.some(p => p.includes(sub('không trừ khỏi phát thải CH₄ tại điểm 5.1'))), 'III.1 nêu rõ không trừ CH₄ thu gom đem đốt, theo Thông tư');
+  ok(P.some(p => p.includes('không trừ khỏi phát thải CH₄ tại điểm 5.1')), 'III.1 nêu rõ không trừ CH₄ thu gom đem đốt, theo Thông tư');
   ok(P.some(p => p.startsWith('Số liệu ước tính: Dầu diesel, Xe tải Hino 29C-12345, Ước theo quãng đường')), 'III.2 ghi số liệu ước tính và cách ước tính');
-  ok(D.subscripts > 20 && !tatCa.includes('₂'), 'chỉ số dưới viết bằng định dạng của Word, không dùng ký tự ₂');
+  ok(tatCa.includes('CO₂') && tatCa.includes('CH₄') && !/CO<\/w:t>/.test(tatCa), 'CO₂, CH₄ ghi bằng ký tự chỉ số dưới trong cùng một run, không tách run để LibreOffice khỏi làm mất chữ số ở cuối dòng');
 
   console.log('\n5. File .xlsx');
   const X = K.xlsx;
@@ -272,8 +273,8 @@ function deMucMau06() {
   const bieu = X.cells['Biểu năm 2024'], bieuC = X.calc['Biểu năm 2024'];
   const tjF = Object.keys(bieu).filter(r => (bieu[r].f || '').startsWith('=IF(')).map(r => bieuC[r]);
   ok(tjF.length === 3 && gan(tjF[0], 10) && gan(tjF[1], 4.33) && gan(tjF[2], 5), 'biểu 1.1: cột tổng tiêu thụ TJ là công thức, ra 10; 4,33; 5');
-  const sumif = Object.keys(bieu).filter(r => (bieu[r].f || '').startsWith('=SUMIF(')).map(r => bieuC[r]);
-  ok(sumif.length === 1 && sumif[0] === 10, 'bảng 2.1 cộng từ bảng 2.2 bằng SUMIF: 10 kg R410A');
+  const sumif = Object.keys(bieu).filter(r => /^C\d+$/.test(r) && /^=[A-Z]+\d+(\+[A-Z]+\d+)*$/.test(bieu[r].f || '')).map(r => bieuC[r]);
+  ok(sumif.length === 1 && sumif[0] === 10, 'bảng 2.1 cộng từ bảng 2.2, khớp đúng tên môi chất như ứng dụng: 10 kg R410A');
   const uk = X.cells['Độ không chắc chắn'], ukc = X.calc['Độ không chắc chắn'];
   const uTong = Object.keys(uk).filter(r => /^H\d+$/.test(r) && (uk[r].f || '').includes('SUMSQ')).map(r => ukc[r]);
   ok(uTong.length === 2 && gan(uTong[0], DK[2024].u, 1e-9) && gan(uTong[1], DK[2025].u, 1e-9), 'độ không chắc chắn tính lại bằng công thức: ±' + uTong.map(u => vi(u, 2)).join(', ±') + ' %');

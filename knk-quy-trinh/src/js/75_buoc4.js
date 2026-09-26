@@ -22,10 +22,12 @@ Object.assign(T,{
   tkKcf:['× khối lượng riêng %c kg/m³ ÷ 1000','× density %c kg/m³ ÷ 1000'],
   tkK52:['× %c kg/m³ × %e % × 44/16 ÷ 1000','× %c kg/m³ × %e % × 44/16 ÷ 1000'],
   tkK53:['× %c kg/m³ × (1 − %e %) ÷ 1000','× %c kg/m³ × (1 − %e %) ÷ 1000'],
+  tkKhongHopLe:['Số liệu hoặc hệ số không hợp lệ, không ra được số','Invalid activity data or factor; no number can be computed'],
   tkCe:['Thiếu hiệu suất đốt CH₄, hoặc hiệu suất không nằm trong khoảng 0 đến 100 %','CH₄ combustion efficiency missing or outside 0 to 100 %'],
   b4gwpH:['Bộ GWP','GWP set'],
-  b4gwpHint:['Tiềm năng nóng lên toàn cầu, điểm a và điểm c khoản 1 Điều 11 Nghị định 06/2022/NĐ-CP','Global warming potentials, Article 11(1)(a) and (c) of Decree 06/2022/ND-CP'],
-  b4gwpP:['Nghị định chỉ quy định dùng hướng dẫn của IPCC, không chỉ định báo cáo đánh giá nào, và Quyết định 2626/QĐ-BTNMT không có GWP. Kiểm kê quốc gia kỳ 2016 trong BUR3 dùng AR5, còn Đóng góp do quốc gia tự quyết định năm 2022 dùng AR4. Ghi rõ bộ đã dùng và giữ nguyên qua các kỳ; đổi bộ thì phải tính toán lại kỳ trước ở Bước 7.','The Decree only requires IPCC guidance without naming an assessment report, and Decision 2626/QD-BTNMT has no GWPs. The 2016 national inventory in BUR3 uses AR5; the 2022 NDC uses AR4. State the set used and keep it across periods; switching requires recalculating the previous period in Step 7.'],
+  b4gwpHint:['Tiềm năng nóng lên toàn cầu, khoản 3 Điều 19 Thông tư 38/2023/TT-BCT','Global warming potentials, Article 19(3) of Circular 38/2023/TT-BCT'],
+  b4gwpP:['Khoản 3 Điều 19 Thông tư 38/2023/TT-BCT: “GWPi là hệ số tiềm năng nóng lên toàn cầu của KNK i, áp dụng theo hướng dẫn mới nhất của IPCC.” Thông tư không nêu tên báo cáo đánh giá nào, và Quyết định 2626/QĐ-BTNMT không có GWP. Kiểm kê quốc gia kỳ 2016 trong BUR3 dùng AR5, còn Đóng góp do quốc gia tự quyết định năm 2022 dùng AR4. Ứng dụng có hai bộ AR4 và AR5; chọn bộ nào là nhận định của cơ sở, nên ghi lý do ở phần mô tả phương pháp. Ghi rõ bộ đã dùng và giữ nguyên qua các kỳ; đổi bộ thì phải tính toán lại kỳ trước ở Bước 7.',
+          'Article 19(3) of Circular 38/2023/TT-BCT: GWPi is the global warming potential of GHG i, applied according to the latest IPCC guidance. The Circular names no assessment report, and Decision 2626/QD-BTNMT has no GWPs. The 2016 national inventory in BUR3 uses AR5; the 2022 NDC uses AR4. The app offers AR4 and AR5; which set to use is the facility’s own judgement and should be justified in the method description. State the set used and keep it across periods; switching requires recalculating the previous period in Step 7.'],
   b4gwpMc:['GWP của môi chất lạnh nhập tay ở Bước 3 phải lấy theo cùng bộ này.','Refrigerant GWPs entered by hand in Step 3 must come from the same set.'],
   b4gwpKhi:['Khí','Gas'],
   b4tongH:['Kết quả tổng hợp','Summary'],
@@ -106,18 +108,18 @@ function veTong4(sec,kq,ys){
   [t('b4ct')].concat(ys.map(function(y){ return fill(t('b2nam'),{y:y}); })).forEach(function(x){ hr.appendChild(el('th',null,x)); });
   var th=el('thead'); th.appendChild(hr); tb.appendChild(th);
   var bd=el('tbody');
-  function dong(nhan,f,dam,cls){
+  function dong(nhan,f,dam,cls,nhom){
     var r=el('tr',cls||null); var c=el('td',null,nhan); if(dam) c.style.fontWeight='650'; r.appendChild(c);
     ys.forEach(function(y){
       var o=kq.tong[y], v=f(o), td=el('td','qt-calc',v==null?'':sGon(v));
       td.setAttribute('data-tong',y+'|'+nhan); if(dam) td.style.fontSize='14px';
-      if(v!=null && (o.loi || o.chuaGwp)){ td.appendChild(document.createTextNode(' ')); td.appendChild(el('span','qt-chip qt-cw',t('b4chuaDu'))); }
+      if(v!=null && chuaDu(o,nhom)){ td.appendChild(document.createTextNode(' ')); td.appendChild(el('span','qt-chip qt-cw',t('b4chuaDu'))); }
       r.appendChild(td);
     });
     bd.appendChild(r);
   }
-  dong(t('b4tt'),function(o){ return o.tt; });
-  dong(t('b4gt'),function(o){ return o.gt; });
+  dong(t('b4tt'),function(o){ return o.tt; },false,null,'tt');
+  dong(t('b4gt'),function(o){ return o.gt; },false,null,'gt');
   dong(t('b4tong'),function(o){ return o.tong; },true);
   var sub=el('tr','qt-tr-trace'), sc=el('td',null,t('b4theoKhi')); sc.colSpan=ys.length+1; sc.style.fontWeight='650'; sub.appendChild(sc); bd.appendChild(sub);
   ['CO2','CH4','N2O','HFC'].forEach(function(k){
@@ -158,14 +160,14 @@ function veChiTiet4(sec,kq,ys){
       var td=el('td',null,d.loi); td.colSpan=5; td.style.color=d.khongCT?'#23458f':'#b42318'; td.style.whiteSpace='normal'; r.appendChild(td);
       bd.appendChild(r); return;
     }
-    var a=el('td','qt-calc',sGon(d.ad,6)+' '+d.adDv); if(d.adGhi) a.appendChild(el('small',null,' = '+d.adGhi)); r.appendChild(a);
+    var a=el('td','qt-calc',sGon(d.ad,6)+' '+dvHien(d.adDv)); if(d.adGhi) a.appendChild(el('small',null,' = '+dvHien(d.adGhi))); r.appendChild(a);
     var e=el('td');
     if(d.muc==='5.2') e.textContent=fill(t('b4dot'),{c:vietSo(d.cf),e:vietSo(d.ce)});
     else if(d.muc==='5.3') e.textContent=fill(t('b4kc'),{c:vietSo(d.cf),e:vietSo(d.ce)});
     else if(d.muc==='2.1') e.textContent='—';
     else {
-      e.appendChild(el('span','qt-calc',vietSo(d.ef,6)+' '+(d.efDv||'')));
-      if(d.efGhi) e.appendChild(el('small',null,' = '+d.efGhi));
+      e.appendChild(el('span','qt-calc',vietSo(d.ef,6)+' '+dvHien(d.efDv||'')));
+      if(d.efGhi) e.appendChild(el('small',null,' = '+dvHien(d.efGhi)));
       if(d.cf!=null) e.appendChild(el('small',null,' × '+fill(t('b4cf'),{c:vietSo(d.cf)})));
       if(d.h && d.h.maHeSo && /^QĐ2626:/.test(d.h.maHeSo)) e.appendChild(el('small',null,' · '+d.h.maHeSo.replace(':',' ')));
     }
@@ -175,7 +177,9 @@ function veChiTiet4(sec,kq,ys){
     var tc=el('td','qt-calc',d.tco2e==null?'':sGon(d.tco2e)); tc.style.fontWeight='650'; r.appendChild(tc);
     bd.appendChild(r);
   });
-  var fr=el('tr'), fc=el('td',null,fill(t('b4tongNam'),{y:y})); fc.colSpan=8; fc.style.textAlign='right'; fc.style.fontWeight='650'; fr.appendChild(fc);
+  var fr=el('tr'), fc=el('td','qt-tong-lab',fill(t('b4tongNam'),{y:y})); fc.colSpan=8; fc.style.fontWeight='650';
+  /* tren dien thoai bang cuon ngang: nhan tong kem luon so, de khong phai cuon moi thay */
+  fc.appendChild(el('span','qt-tong-dt',': '+sGon(kq.tong[y].tong))); fr.appendChild(fc);
   var ft=el('td','qt-calc',sGon(kq.tong[y].tong)); ft.style.fontWeight='700'; ft.setAttribute('data-tong',y+'|chitiet'); fr.appendChild(ft);
   bd.appendChild(fr);
   tb.appendChild(bd); w.appendChild(tb); cb.appendChild(w);

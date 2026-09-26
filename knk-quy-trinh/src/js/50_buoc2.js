@@ -16,6 +16,8 @@ Object.assign(T,{
   b2tt38:['Mục 1 Phụ lục II Thông tư 38/2023/TT-BCT','Section 1, Appendix II of Circular 38/2023/TT-BCT'],
   b2chuTT:['Theo biểu của Thông tư','Circular table column'],
   b2chuThem:['Cột ứng dụng thêm, không có trong biểu của Thông tư','Column added by the app, not in the Circular table'],
+  b2dv:['Đơn vị','Unit'],
+  b2chuaLoai:['(chưa ghi loại môi chất)','(refrigerant not specified)'],
   b2nguonSL:['Nguồn số liệu','Data source'],
   b2chungTu:['Số hiệu chứng từ','Document ref.'],
   b2nguoi:['Người cung cấp','Provided by'],
@@ -35,7 +37,7 @@ Object.assign(T,{
 });
 var NGUON_SL=['Hóa đơn','Phiếu nhập kho','Nhật ký vận hành','Đồng hồ đo, công tơ','Báo cáo sản xuất','Hợp đồng mua bán'];
 var UI2={ nam:null };
-function namKy(){ return (S.ky.namBatDau && S.ky.namKetThuc) ? [S.ky.namBatDau,S.ky.namKetThuc] : []; }
+function namKy(){ var a=S.ky.namBatDau, b=S.ky.namKetThuc; return (a && b && b>a) ? [a,b] : []; }
 
 VE[2]=function(sec){
   var ys=namKy();
@@ -108,7 +110,7 @@ function veBang2(sec,l,ds,y){
         var ctrl=oNhap({ kieu:c.kieu, list:c.list, w:c.w, lab:c.lab },bb,v);
         if(c.donVi){
           var row=el('div','qt-cellrow'); row.appendChild(ctrl);
-          row.appendChild(oNhap({ kieu:'sel', opts:c.donVi.map(function(u){ return [u,[u,u]]; }), lab:c.lab },'s|'+n.id+'|'+y+'|donVi',so.donVi));
+          row.appendChild(oNhap({ kieu:'sel', opts:c.donVi.map(function(u){ return [u,[u,u]]; }), lab:T.b2dv },'s|'+n.id+'|'+y+'|donVi',so.donVi));
           td.appendChild(row);
         } else td.appendChild(ctrl);
       }
@@ -131,7 +133,8 @@ function veBang2(sec,l,ds,y){
   if(l.k==='moichat') veBang21(cb,ds,y);
 }
 function veBang21(cb,ds,y){
-  var loai=[]; ds.forEach(function(n){ var k=n.phanLoai.trim(); if(k && loai.indexOf(k)<0) loai.push(k); });
+  /* nhom theo loai moi chat; nguon chua ghi loai gom vao mot dong rieng, khong bi bo */
+  var loai=[]; ds.forEach(function(n){ var k=n.phanLoai.trim(); if(loai.indexOf(k)<0) loai.push(k); });
   cb.appendChild(el('div','qt-hsn',t('b221')));
   cb.appendChild(el('p','qt-note',t('b221h')));
   var w=el('div','qt-tbw'), tb=el('table','qt-t'), thead=el('thead'), tr=el('tr');
@@ -139,7 +142,7 @@ function veBang21(cb,ds,y){
   thead.appendChild(tr); tb.appendChild(thead);
   var tbody=el('tbody');
   loai.forEach(function(k,i){
-    var r=el('tr'); r.appendChild(el('td','qt-stt',String(i+1))); r.appendChild(el('td',null,k));
+    var r=el('tr'); r.appendChild(el('td','qt-stt',String(i+1))); r.appendChild(el('td',null,k||t('b2chuaLoai')));
     var td=el('td'), sp=el('span','qt-calc'); sp.setAttribute('data-calc','mc21|'+encodeURIComponent(k)+'|'+y); td.appendChild(sp); r.appendChild(td);
     tbody.appendChild(r);
   });
@@ -168,7 +171,7 @@ function thieuSo(n,y){
     if(c.req==='nhietTri'){ if(HE_TJ[(so.donVi||'').toLowerCase()]==null && v==null) m.push(lv(c.lab)); return; }
     if(c.req==='hoi'){ if(v==null && !(so.chiTiet.khoiLuongGio!=null && so.chiTiet.soGio!=null)) m.push(lv(c.lab)); return; }
     if(rong(v)) m.push(lv(c.lab));
-    if(c.donVi && rong(so.donVi)) m.push(lv(c.lab));
+    if(c.donVi && rong(so.donVi)) m.push(lv(c.lab)+': '+t('b2dv'));
   });
   if(so.laUocTinh && rong(so.cachUocTinh)) m.push(t('b2cach'));
   return m;

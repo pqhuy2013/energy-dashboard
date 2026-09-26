@@ -31,7 +31,7 @@ Object.assign(T,{
   b7fRieng:['Theo bộ GWP của file (%g):','With the file’s GWP set (%g):'],
   b7fNay:['Theo bộ GWP đang chọn (%g):','With the currently chosen GWP set (%g):'],
   b7fNam:['năm %y: %v','%y: %v'],
-  b7fChuaDu:['năm %y: chưa đủ, %n dòng không tính được','%y: incomplete, %n rows not computed'],
+  b7fChuaDu:['năm %y: chưa đủ, %n dòng chưa tính được hoặc không có công thức','%y: incomplete, %n rows not computed or without a formula'],
   b7fDienCu:['Điền vào cột đã báo cáo','Fill “as reported”'],
   b7fDienMoi:['Điền vào cột tính lại','Fill “recalculated”'],
   b7fChuaGwp:['chưa chọn','not chosen'],
@@ -45,6 +45,10 @@ Object.assign(T,{
   b7mGt:['Giải thích nguyên nhân chênh lệch','Explanation of the difference']
 });
 var UI7={ file:null };
+KHI_DOI_HO_SO.push(function(){ UI7.file=null; });
+/* Tong ky truoc theo bo GWP dang chon: tinh moi lan can, vi nguoi dung co the doi bo GWP
+   o Buoc 4 sau khi da nap file ky truoc */
+function tongNay(f){ if(!S.gwp) return null; var c=clone(f.o); c.gwp=S.gwp; return tinhVoi(c).tong; }
 /* Tinh voi mot ho so khac, khong dong vao ho so dang mo */
 function tinhVoi(o){ var giu=S; S=o; try{ return tinhToan(); } finally { S=giu; } }
 function kyTruoc(){ var k=S.tinhLai.kyTruoc; return (k.namBatDau && k.namKetThuc) ? [k.namBatDau,k.namKetThuc] : []; }
@@ -80,12 +84,13 @@ VE[7]=function(sec){
     var f=UI7.file, box=el('div','qt-ct');
     box.appendChild(el('p',null,fill(t('b7fTen'),{f:f.ten,a:f.ky[0],b:f.ky[1]})));
     function dong(nhanK,tong){
+      if(!tong) return;
       var p=el('p'); p.appendChild(el('b',null,nhanK+' '));
-      p.appendChild(document.createTextNode(f.ky.map(function(y){ var o=tong[y]; return (o.loi||o.chuaGwp) ? fill(t('b7fChuaDu'),{y:y,n:o.loi+o.chuaGwp}) : fill(t('b7fNam'),{y:y,v:vietSo(o.tong,3)}); }).join('; ')));
+      p.appendChild(document.createTextNode(f.ky.map(function(y){ var o=tong[y]; return chuaDu(o) ? fill(t('b7fChuaDu'),{y:y,n:o.loi+o.chuaGwp+o.khongCT}) : fill(t('b7fNam'),{y:y,v:vietSo(o.tong,3)}); }).join('; ')));
       box.appendChild(p);
     }
     dong(fill(t('b7fRieng'),{g:f.gwp||t('b7fChuaGwp')}),f.rieng);
-    if(S.gwp) dong(fill(t('b7fNay'),{g:S.gwp}),f.nay);
+    if(S.gwp) dong(fill(t('b7fNay'),{g:S.gwp}),tongNay(f));
     var a=el('div','qt-acts');
     a.appendChild(nut(t('b7fDienCu'),'dien7|cu','qt-pri'));
     if(S.gwp) a.appendChild(nut(t('b7fDienMoi'),'dien7|moi'));
@@ -133,8 +138,7 @@ function napKyTruoc(file){
     o=chuanHoa(o);
     var ky=[o.ky.namBatDau,o.ky.namKetThuc];
     if(!ky[0] || !ky[1]){ loi(fill(t('eShape'),{f:file.name})); return; }
-    var rieng=tinhVoi(o).tong, c=clone(o); c.gwp=S.gwp;
-    UI7.file={ ten:file.name, ky:ky, gwp:o.gwp, rieng:rieng, nay:S.gwp?tinhVoi(c).tong:null };
+    UI7.file={ ten:file.name, ky:ky, gwp:o.gwp, rieng:tinhVoi(o).tong, o:o };
     hetLoi(); veLai();
   };
   r.readAsText(file,'utf-8');
@@ -142,9 +146,10 @@ function napKyTruoc(file){
 ACT.napKy7=function(){ var i=$('qt-file7'); if(i){ i.value=''; i.click(); } };
 ACT.dien7=function(p){
   var f=UI7.file; if(!f) return;
-  var tl=S.tinhLai, nguon=p[0]==='cu'?f.rieng:f.nay, dich=p[0]==='cu'?'ketQuaCu':'ketQuaMoi';
+  var tl=S.tinhLai, nguon=p[0]==='cu'?f.rieng:tongNay(f), dich=p[0]==='cu'?'ketQuaCu':'ketQuaMoi';
+  if(!nguon) return;
   tl.kyTruoc.namBatDau=f.ky[0]; tl.kyTruoc.namKetThuc=f.ky[1]; tl.fileKyTruoc=f.ten;
-  f.ky.forEach(function(y){ var o=nguon[y]; if(o && !o.loi && !o.chuaGwp) tl[dich][y]=o.tong; });
+  f.ky.forEach(function(y){ var o=nguon[y]; if(o && !chuaDu(o)) tl[dich][y]=o.tong; });
   daSua(); veLai(); toast(t('b7fDaDien'));
 };
 THIEU[7]=function(){

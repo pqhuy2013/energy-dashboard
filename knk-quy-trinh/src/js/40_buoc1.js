@@ -23,7 +23,7 @@ Object.assign(T,{
   b1them:['+ Thêm nguồn','+ Add source'],
   b1nhan:['Nhân bản','Duplicate'],
   b1xoa:['Xóa','Delete'],
-  b1xoaHoi:['Xóa %n? Số liệu và hệ số đã nhập cho nguồn này cũng bị xóa.','Delete %n? Its activity data and factors will be deleted too.'],
+  b1xoaHoi:['Xóa %n? Số liệu, hệ số và độ không chắc chắn đã nhập cho nguồn này cũng bị xóa.','Delete %n? Its activity data, factors and uncertainty inputs will be deleted too.'],
   b1bhtH:['Bể hấp thụ khí nhà kính','Greenhouse gas sinks'],
   b1bhtHint:['Mục II.3 Mẫu số 06 có nêu bể hấp thụ; Điều 16 Thông tư 38 chỉ liệt kê nguồn phát thải','Form 06 item II.3 mentions sinks; Article 16 of Circular 38 lists emission sources only'],
   b1bhtQ:['Trong phạm vi hoạt động, cơ sở có bể hấp thụ khí nhà kính không?','Does the facility have any greenhouse gas sinks within its boundary?'],
@@ -137,9 +137,10 @@ ACT.xoa=function(p){
     S.nguon=S.nguon.filter(function(x){ return x.id!==n.id; });
     S.soLieu=S.soLieu.filter(function(x){ return x.nguonId!==n.id; });
     S.heSo=S.heSo.filter(function(x){ return x.nguonId!==n.id; });
+    S.khongChacChan.bangU=S.khongChacChan.bangU.filter(function(x){ return x.nguonId!==n.id; });
     daSua(); veLai();
   }
-  var coDuLieu=S.soLieu.some(function(x){ return x.nguonId===n.id; }) || S.heSo.some(function(x){ return x.nguonId===n.id; });
+  var coDuLieu=[S.soLieu,S.heSo,S.khongChacChan.bangU].some(function(ds){ return ds.some(function(x){ return x.nguonId===n.id; }); });
   if(coDuLieu) hoi(fill(t('b1xoaHoi'),{n:nhanNguon(n)}), [{ k:'b1xoa', pri:true, fn:lam }]);
   else lam();
 };

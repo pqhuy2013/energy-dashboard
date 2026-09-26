@@ -7,13 +7,14 @@
    Thu tu phan tu trong pPr, rPr, tcPr, tblPr, sectPr theo luoc do ECMA-376, vi Word bao
    loi khi sai thu tu du LibreOffice van mo duoc.
 
-   Run: { x, b, i, u, hl (to vang), sub, sup, co (co chu pt) }. Chu so duoi ₀-₉ trong x
-   duoc doi ra chu so thuong dat o vi tri chi so duoi, vi phong Times New Roman khong
-   chac co cac ky tu nay. */
+   Run: { x, b, i, u, hl (to vang), sub, sup, co (co chu pt) }. Chu so duoi ₀-₉ (CO₂, CH₄) giu
+   nguyen ky tu Unicode trong cung mot run: neu tach thanh run rieng dinh dang chi so duoi thi
+   LibreOffice (va WPS dung chung cach dan dong) bo mat chu so khi no roi dung cuoi dong can
+   deu, doc thanh "CO". Phong thieu ky tu thi Word, LibreOffice tu lay phong khac. Chi so chu
+   (TPT_F trong cong thuc) khong co ky tu Unicode nen van dung vertAlign. */
 var DX=(function(){
   var W='xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';
   var RONG=9071;   /* be rong vung chu: 11906 - 1701 - 1134 */
-  var SO_DUOI='₀₁₂₃₄₅₆₇₈₉';
   function rPr(r){
     var s='';
     if(r.b) s+='<w:b/><w:bCs/>';
@@ -26,19 +27,7 @@ var DX=(function(){
     return s ? '<w:rPr>'+s+'</w:rPr>' : '';
   }
   function mot(r){ return '<w:r>'+rPr(r)+'<w:t xml:space="preserve">'+xmlEsc(r.x)+'</w:t></w:r>'; }
-  function run(r){
-    var x=String(r.x==null?'':r.x); if(!x) return '';
-    if(r.sub || r.sup) return mot(r);
-    var out='', buf='';
-    for(var i=0;i<x.length;i++){
-      var k=SO_DUOI.indexOf(x[i]);
-      if(k<0){ buf+=x[i]; continue; }
-      if(buf){ out+=mot(gan(r,{ x:buf })); buf=''; }
-      out+=mot(gan(r,{ x:String(k), sub:true }));
-    }
-    if(buf) out+=mot(gan(r,{ x:buf }));
-    return out;
-  }
+  function run(r){ var x=String(r.x==null?'':r.x); return x ? mot(r) : ''; }
   function gan(a,b){ var o={}, k; for(k in a) o[k]=a[k]; for(k in b) o[k]=b[k]; return o; }
   /* o: can ('left','center','right','both'), thut (thut dong dau, twip), trai, phai, treo (thut treo),
         truoc, sau (twip), dong (khoang cach dong, 240 = don), giu (keepNext), vien (duong ke duoi),

@@ -65,8 +65,11 @@ function onNhap(ev){
   var e=ev.target; if(!e || !e.getAttribute) return;
   var b=e.getAttribute('data-b'); if(!b) return;
   var k=e.getAttribute('data-k')||'text';
-  var doiCauTruc=(k==='sel'||k==='bool'||k==='radio'||k==='date');
-  if(ev.type==='input' && doiCauTruc) return;
+  var doiCauTruc=(k==='sel'||k==='bool'||k==='radio');
+  /* o ngay: chi luu khi 'change' va ngay da day du, khong dung lai man hinh. Chromium ban
+     'change' sau moi phim khi o da co gia tri; dung lai man hinh luc do lam con tro ve dau o */
+  if(ev.type==='input' && (doiCauTruc || k==='date')) return;
+  if(k==='date' && e.value && !ngayHopLe(e.value)) return;
   if(ev.type==='change' && k==='text') return;
   if(b.indexOf('th|')===0){
     var th=b.slice(3), ds=S.tinhLai.truongHop, j=ds.indexOf(th);
@@ -88,7 +91,12 @@ function onNhap(ev){
   var v;
   if(k==='num'){
     var r=docSo(e.value);
-    if(!r.ok){ if(ev.type==='change'){ e.classList.add('qt-bad'); toast(fill(t('eSo'),{s:e.value}),true); } return; }
+    if(!r.ok){
+      /* khong giu gia tri doc duoc tu phan dang go do (3.86 cua 3.86E-05): de trong de bao thieu */
+      var g0=banGhi(b,false); if(g0 && g0.o && getP(g0.o,g0.path)!=null){ setP(g0.o,g0.path,null); daSua(); }
+      if(ev.type==='change'){ e.classList.add('qt-bad'); toast(fill(t('eSo'),{s:e.value}),true); }
+      return;
+    }
     e.classList.remove('qt-bad'); v=r.v;
     if(ev.type==='change') e.value=vietSo(v);
   } else if(k==='bool') v=e.checked;

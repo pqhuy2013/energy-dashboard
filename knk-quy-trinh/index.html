@@ -184,6 +184,8 @@ table.qt-t td.qt-lock{color:var(--ink)}
 table.qt-t td.qt-lock small{display:block;color:var(--ink3);font-size:11px;line-height:1.4;margin-top:2px}
 table.qt-t tr.qt-tr-note td{background:#fffaf5;font-size:12px;color:#7a3e12;line-height:1.5;padding:6px 8px}
 table.qt-t tr.qt-tr-note td.qt-okn{background:#f7fbf8;color:#14532d}
+table.qt-t td.qt-tong-lab,table.qt-a4t td.qt-tong-lab{text-align:right}
+.qt-tong-dt{display:none}
 table.qt-t tr.qt-tr-note input{min-width:80px;width:120px;display:inline-block;margin:0 6px}
 table.qt-t tr.qt-tr-note input.qt-wide{width:300px;max-width:100%}
 /* ============ tra cuu ============ */
@@ -259,6 +261,9 @@ table.qt-a4t td.qt-c{text-align:center}
 .qt-a4-ky b{display:block}
 .qt-a4-kyten{margin-top:72px}
 @media (max-width:760px){
+  table.qt-t td.qt-tong-lab,table.qt-a4t td.qt-tong-lab{text-align:left}
+  table.qt-t td.qt-tong-lab .qt-tong-dt,table.qt-a4t td.qt-tong-lab .qt-tong-dt{display:inline}
+  table.qt-t tr.qt-tr-note .qt-note-in{position:sticky;left:8px;max-width:calc(100vw - 96px)}
   .qt-a4{padding:18px 14px;font-size:14px}
   .qt-a4-dau{grid-template-columns:minmax(0,1fr)}
   .qt-a4-ky{width:auto}
@@ -348,7 +353,7 @@ table.qt-a4t td.qt-c{text-align:center}
       <div class="qt-card">
         <div class="qt-ch"><h3 data-i="nhomh">Nhóm đối tượng</h3><span class="qt-hint" data-i="nhomhint">Khoản 4 Điều 11 Nghị định 06/2022/NĐ-CP, sửa đổi bởi Nghị định 119/2025/NĐ-CP</span></div>
         <div class="qt-cb">
-          <p data-i="nhomp">Ba nhóm có kỳ số liệu đầu tiên, nơi nộp và mốc nộp khác nhau. Chọn nhóm của cơ sở. Tra danh mục Quyết định 42/2026/QĐ-TTg và Quyết định 699/QĐ-BNNMT để gợi ý nhóm sẽ có ở bản sau.</p>
+          <p data-i="nhomp">Ba nhóm có kỳ số liệu đầu tiên, nơi nộp và mốc nộp khác nhau. Chọn nhóm của cơ sở; có thể dùng ô tra danh mục Quyết định 42/2026/QĐ-TTg và Quyết định 699/QĐ-BNNMT ở trên để được gợi ý.</p>
           <div class="qt-radios" id="qt-nhom">
             <label class="qt-radio" data-v="A"><input type="radio" name="nhom" value="A" data-f="coSo.nhom"><div><b data-i="nhomA">Nhóm A</b><span data-i="nhomAd"></span><small data-i="nhomAc"></small></div></label>
             <label class="qt-radio" data-v="B"><input type="radio" name="nhom" value="B" data-f="coSo.nhom"><div><b data-i="nhomB">Nhóm B</b><span data-i="nhomBd"></span><small data-i="nhomBc"></small></div></label>
@@ -365,6 +370,7 @@ table.qt-a4t td.qt-c{text-align:center}
               <label for="f-ky"><span data-i="kylab">Hai năm của kỳ số liệu</span><span class="qt-req">*</span></label>
               <select id="f-ky"></select>
               <span class="qt-help" data-i="kyhelp">Báo cáo định kỳ hai năm một lần gồm kết quả kiểm kê của hai năm liền kề năm nộp báo cáo.</span>
+              <span class="qt-warnmsg" id="w-ky"></span>
             </div>
           </div>
           <div class="qt-title-preview" id="qt-title-preview"></div>
@@ -457,6 +463,7 @@ var T = {
   build:['Bản dựng ngày %d','Build of %d'],
   storeOk:['Lưu tạm trong trình duyệt: đang bật.','Browser autosave: on.'],
   storeLast:['Lần cuối %t.','Last saved %t.'],
+  storeFail:['Lưu tạm trong trình duyệt không ghi được, có thể bộ nhớ đã đầy. Tải file .json về máy để không mất số liệu.','Browser autosave could not write, storage may be full. Download the .json file so no data is lost.'],
   storeBad:['Lưu tạm trong trình duyệt: không dùng được. Nhớ tải file .json về máy.','Browser autosave: unavailable. Remember to download the .json file.'],
   btnfull:['Mở toàn màn hình','Open full screen'],
   btnsave:['Tải file .json','Download .json'],
@@ -496,21 +503,24 @@ var T = {
          'The app currently serves facilities under the Ministry of Industry and Trade, following the 8-step procedure of Circular 38/2023/TT-BCT. Construction-sector facilities follow Circular 13/2024/TT-BXD with 10 steps and are not supported yet.'],
   nhomh:['Nhóm đối tượng','Obligation group'],
   nhomhint:['Khoản 4 Điều 11 Nghị định 06/2022/NĐ-CP, sửa đổi bởi Nghị định 119/2025/NĐ-CP','Article 11(4) of Decree 06/2022/ND-CP as amended by Decree 119/2025/ND-CP'],
-  nhomp:['Ba nhóm có kỳ số liệu đầu tiên, nơi nộp và mốc nộp khác nhau. Chọn nhóm của cơ sở. Tra danh mục Quyết định 42/2026/QĐ-TTg và Quyết định 699/QĐ-BNNMT để gợi ý nhóm sẽ có ở bản sau.',
-         'The three groups differ in first data year, recipient and deadline. Choose the facility’s group. A lookup in Decision 42/2026/QD-TTg and Decision 699/QD-BNNMT to suggest the group will come in a later version.'],
+  nhomp:['Ba nhóm có kỳ số liệu đầu tiên, nơi nộp và mốc nộp khác nhau. Chọn nhóm của cơ sở; có thể dùng ô tra danh mục Quyết định 42/2026/QĐ-TTg và Quyết định 699/QĐ-BNNMT ở trên để được gợi ý.',
+         'The three groups differ in first data year, recipient and deadline. Choose the facility’s group; the lookup in Decision 42/2026/QD-TTg and Decision 699/QD-BNNMT above can suggest one.'],
   nhomA:['Nhóm A','Group A'],
   nhomAd:['Cơ sở không được phân bổ hạn ngạch. Kỳ số liệu đầu tiên cho năm 2024 trở đi. Nộp Ủy ban nhân dân cấp tỉnh trước 31/3, kể từ năm 2025.',
           'Facilities without an emission allowance allocation. First data year 2024 onward. Submit to the provincial People’s Committee by 31 March, from 2025.'],
   nhomAc:['Điểm b khoản 4 Điều 11','Article 11(4)(b)'],
   nhomB:['Nhóm B','Group B'],
-  nhomBd:['Nhà máy nhiệt điện, cơ sở sản xuất sắt thép, xi măng được phân bổ hạn ngạch giai đoạn 2025 đến 2026, gồm 110 cơ sở theo Quyết định 699/QĐ-BNNMT. Kỳ số liệu đầu tiên cho năm 2026 trở đi. Báo cáo phải được thẩm định, nộp Bộ Nông nghiệp và Môi trường trước 01/12, kể từ năm 2027.',
-          'Thermal power, iron and steel, and cement facilities allocated allowances for 2025 to 2026, the 110 facilities in Decision 699/QD-BNNMT. First data year 2026 onward. The report must be verified and sent to the Ministry of Agriculture and Environment by 1 December, from 2027.'],
+  nhomBd:['Nhà máy nhiệt điện, cơ sở sản xuất sắt thép, cơ sở sản xuất xi măng thuộc danh mục cơ sở phải kiểm kê khí nhà kính do Thủ tướng Chính phủ ban hành; 110 cơ sở trong số này được phân bổ hạn ngạch giai đoạn 2025 đến 2026 theo Quyết định 699/QĐ-BNNMT. Kỳ số liệu đầu tiên cho năm 2026 trở đi. Báo cáo phải được thẩm định, nộp Bộ Nông nghiệp và Môi trường trước 01/12, kể từ năm 2027.',
+          'Thermal power plants, iron and steel producers and cement producers on the Prime Minister’s list of facilities that must inventory GHGs; 110 of them were allocated allowances for 2025 to 2026 in Decision 699/QD-BNNMT. First data year 2026 onward. The report must be verified and sent to the Ministry of Agriculture and Environment by 1 December, from 2027.'],
   nhomBc:['Điểm c khoản 4 và khoản 6a Điều 11','Article 11(4)(c) and 11(6a)'],
   nhomC:['Nhóm C','Group C'],
-  nhomCd:['Cơ sở được phân bổ hạn ngạch giai đoạn từ năm 2027. Kỳ số liệu đầu tiên cho năm 2028 trở đi. Báo cáo phải được thẩm định, nộp Bộ Nông nghiệp và Môi trường trước 01/12, kể từ năm 2027.',
-          'Facilities allocated allowances from the 2027 phase. First data year 2028 onward. The report must be verified and sent to the Ministry of Agriculture and Environment by 1 December, from 2027.'],
+  nhomCd:['Cơ sở không thuộc điểm c (nhiệt điện, sắt thép, xi măng) được phân bổ hạn ngạch giai đoạn từ năm 2027. Kỳ số liệu đầu tiên cho năm 2028 trở đi. Báo cáo phải được thẩm định, nộp Bộ Nông nghiệp và Môi trường trước 01/12, kể từ năm 2027.',
+          'Facilities not covered by point c (thermal power, steel, cement) that are allocated allowances from the 2027 phase. First data year 2028 onward. The report must be verified and sent to the Ministry of Agriculture and Environment by 1 December, from 2027.'],
   nhomCc:['Điểm d khoản 4 và khoản 6a Điều 11','Article 11(4)(d) and 11(6a)'],
   kyh:['Kỳ báo cáo','Reporting period'],
+  kyLienKe:['Kỳ báo cáo phải gồm hai năm liền kề (điểm e khoản 1 Điều 11)','The period must be two consecutive years (Article 11(1)(e))'],
+  wKyTruoc:['Nhóm %g có kỳ số liệu đầu tiên cho năm %d (%c); kỳ %a–%b nằm trước kỳ đó.','Group %g has its first data year in %d (%c); the period %a–%b comes before it.'],
+  wKyLech:['Nhóm %g báo cáo hai năm một lần từ năm %d (%c): kỳ %d–%e, %f–%h và tiếp theo; kỳ %a–%b lệch chu kỳ này.','Group %g reports every two years from %d (%c): %d–%e, %f–%h and so on; the period %a–%b is off this cycle.'],
   kyhint:['Điểm e khoản 1 Điều 11, bổ sung bởi Nghị định 119/2025/NĐ-CP','Article 11(1)(e), added by Decree 119/2025/ND-CP'],
   kylab:['Hai năm của kỳ số liệu','The two data years'],
   kyhelp:['Báo cáo định kỳ hai năm một lần gồm kết quả kiểm kê của hai năm liền kề năm nộp báo cáo.','The biennial report covers the two years immediately before the year of submission.'],
@@ -568,6 +578,11 @@ var T = {
   cfFullGo:['Mở luôn','Open anyway'],
   tSaved:['Đã tải file %f.','Downloaded %f.'],
   tLoaded:['Đã nạp file %f.','Loaded %f.'],
+  nKy:['Kỳ báo cáo trong file không phải hai năm tăng dần nên đã bỏ, chọn lại ở Bước 0.','The period in the file is not two increasing years and was cleared; choose it again in Step 0.'],
+  nBoNguon:['%n nguồn thiếu mã hoặc có loại nguồn không hợp lệ đã bị bỏ.','%n sources with no id or an invalid source type were dropped.'],
+  nSoMoHo:['%n giá trị số ghi dạng chữ đọc được theo hai cách (ví dụ 1.500 là 1500 hay 1,5) nên đã để trống, cần nhập lại.','%n numbers stored as text could be read two ways (e.g. 1.500 as 1500 or 1.5) and were left empty; enter them again.'],
+  nTrungId:['%n nguồn trùng mã đã được cấp mã mới, không kèm số liệu và hệ số.','%n sources with a duplicate id got a new id, without activity data or factors.'],
+  eHong:['Không mở được file %f: dữ liệu trong file không hợp lệ (%e). Hồ sơ đang mở được giữ nguyên.','Could not open %f: the data in the file is invalid (%e). The current record is unchanged.'],
   tNew:['Đã mở hồ sơ trống.','Opened an empty record.'],
   eJson:['Không đọc được file %f: nội dung không phải JSON hợp lệ.','Could not read %f: the content is not valid JSON.'],
   eShape:['File %f không phải dữ liệu của ứng dụng này: thiếu trường phienBan hoặc coSo.','%f is not a data file of this app: the phienBan or coSo field is missing.'],
@@ -625,7 +640,13 @@ function nod(s){ return (s||'').normalize('NFD').replace(DAU_TO_HOP,'').replace(
 function isObj(x){ return x!==null && typeof x==='object' && !Array.isArray(x); }
 function clone(x){ return JSON.parse(JSON.stringify(x)); }
 function p2(n){ return (n<10?'0':'')+n; }
-function dmyv(iso){ var p=iso.split('-'); return (+p[2])+'/'+(+p[1])+'/'+p[0]; }
+/* Ngay luu dang YYYY-MM-DD, nam 1900 den 2100, ngay co that tren lich */
+function ngayHopLe(s){
+  var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(typeof s==='string'?s:''); if(!m) return false;
+  var y=+m[1], mo=+m[2], d=+m[3];
+  return y>=1900 && y<=2100 && mo>=1 && mo<=12 && d>=1 && d<=new Date(Date.UTC(y,mo,0)).getUTCDate();
+}
+function dmyv(iso){ if(!ngayHopLe(iso)) return ''; var p=iso.split('-'); return (+p[2])+'/'+(+p[1])+'/'+p[0]; }
 function gio(iso){ if(!iso) return ''; var d=new Date(iso); if(isNaN(d)) return ''; return p2(d.getHours())+':'+p2(d.getMinutes())+' '+d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear(); }
 function fill(s,m){ return s.replace(/%(\w)/g,function(a,k){ return (k in m) ? m[k] : a; }); }
 function taoId(){ return 'n'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
@@ -638,13 +659,17 @@ function taoId(){ return 'n'+Date.now().toString(36)+Math.random().toString(36).
    Roi o nhap, so duoc viet lai theo ngon ngu dang chon de nguoi dung thay may da
    hieu the nao. */
 function nhomNghin(s,sep){
-  var p=s.split(sep); if(p.length<2 || !/^\d{1,3}$/.test(p[0])) return false;
+  /* nhom dau khong bat dau bang 0: "0.681" la so thap phan, khong phai 681 */
+  var p=s.split(sep); if(p.length<2 || !/^[1-9]\d{0,2}$/.test(p[0])) return false;
   for(var i=1;i<p.length;i++) if(!/^\d{3}$/.test(p[i])) return false;
   return true;
 }
 function docSo(raw){
   var s=String(raw==null?'':raw).replace(/\s/g,'');
   if(s==='') return { ok:true, v:null };
+  /* dang luy thua nhu Excel hien so nho: 3,86E-05 hoac 3.86E-05 */
+  var mu=/^(\d+)(?:[.,](\d+))?[eE]([+-]?\d{1,3})$/.exec(s);
+  if(mu){ var x=+(mu[1]+'.'+(mu[2]||'0')+'e'+mu[3]); return isFinite(x) ? { ok:true, v:x } : { ok:false }; }
   if(!/^[0-9.,]+$/.test(s) || !/[0-9]/.test(s)) return { ok:false };
   var d=s.indexOf('.')>=0, c=s.indexOf(',')>=0, n, nghin=(L==='vi')?'.':',';
   if(d && c){
@@ -721,9 +746,10 @@ var NANG_CAP = {};  /* NANG_CAP[n](o) tra ve doi tuong phienBan n+1 */
 function chuanHoa(o){
   while(o.phienBan<PHIEN_BAN){ o=NANG_CAP[o.phienBan](o); }
   o=ghep(o,khuon());
-  var y1=o.ky.namBatDau, y2=o.ky.namKetThuc;
-  function nam(y){ return (typeof y==='number' && y%1===0 && y>=1990 && y<=2100) ? y : null; }
-  o.ky.namBatDau=nam(y1); o.ky.namKetThuc=nam(y2);
+  NAP_GHI=[]; SO_MO_HO=0;
+  o.ky.namBatDau=namHoacNull(o.ky.namBatDau); o.ky.namKetThuc=namHoacNull(o.ky.namKetThuc);
+  /* ky phai la hai nam tang dan; trung nam hoac dao nguoc thi moi dong bi tinh hai lan */
+  if(o.ky.namBatDau && o.ky.namKetThuc && o.ky.namKetThuc<=o.ky.namBatDau){ o.ky.namBatDau=null; o.ky.namKetThuc=null; NAP_GHI.push(t('nKy')); }
   if(['A','B','C'].indexOf(o.coSo.nhom)<0) o.coSo.nhom='';
   if(o.gwp!=='AR4' && o.gwp!=='AR5') o.gwp=null;
   chuanHoaMang(o);
@@ -735,9 +761,51 @@ function chuanHoa(o){
 function chuoi(x){ return (typeof x==='string') ? x : (x==null ? '' : String(x)); }
 function soHoacNull(x){ return (typeof x==='number' && isFinite(x)) ? x : null; }
 function namHoacNull(x){ return (typeof x==='number' && x%1===0 && x>=1990 && x<=2100) ? x : null; }
+/* So trong file sua tay co the la chuoi: doc nhu o nhap, khong doc duoc thi de trong */
+/* File khong gan voi ngon ngu giao dien: chuoi phai doc ra cung mot so theo ca cach viet Viet
+   Nam lan tieng Anh ("0,0433", "1.000.000", "24000"); chuoi hai nghia nhu "1.500" (1500 hay 1,5)
+   thi de trong va dem vao thong bao nap file */
+var SO_MO_HO=0;
+function soTuFile(x){
+  if(typeof x==='number') return isFinite(x) ? x : null;
+  if(typeof x!=='string') return null;
+  var giu=L, a, b;
+  try{ L='vi'; a=docSo(x); L='en'; b=docSo(x); } finally { L=giu; }
+  if(a.ok && b.ok && a.v===b.v) return a.v;
+  if(a.ok || b.ok) SO_MO_HO++;
+  return null;
+}
+function ngayTuFile(x){ return ngayHopLe(x) ? x : ''; }
+/* Kieu cua truong chiTiet (so lieu) va thuocTinh (nguon) lay tu cau hinh 20_loai */
+var KIEU_CT=null, KIEU_TT=null;   /* dung lan dau khi can, vi LOAI nam o 20_loai.js nap sau */
+function kieuTruong(){
+  if(KIEU_CT) return;
+  KIEU_CT=Object.create(null); KIEU_TT=Object.create(null);
+  LOAI.forEach(function(l){
+    l.bang.cot.forEach(function(c){ if(c.s && /^ct\./.test(c.s)) KIEU_CT[c.s.slice(3)]=c.kieu; });
+    l.nf.forEach(function(f){ if(/^tt\./.test(f.f)) KIEU_TT[f.f.slice(3)]=f.kieu||'text'; });
+  });
+}
+function epKieu(obj,bang){
+  Object.keys(obj).forEach(function(k){
+    var kieu=bang[k]; if(!kieu) return;
+    if(kieu==='num') obj[k]=soTuFile(obj[k]);
+    else if(kieu==='date') obj[k]=ngayTuFile(obj[k]);
+    else obj[k]=chuoi(obj[k]);
+  });
+}
+/* ghi chu khi nap file: phan tu bi bo hoac doi, hien cung thong bao da nap */
+var NAP_GHI=[];
+/* Trang thai man hinh gan voi mot ho so (vd file ky truoc da nap o Buoc 7): cac buoc dang ky
+   ham xoa vao day, goi khi mo ho so khac hoac bat dau ky moi */
+var KHI_DOI_HO_SO=[];
+function doiHoSo(){ KHI_DOI_HO_SO.forEach(function(f){ f(); }); }
 function chuanHoaMang(o){
-  var loaiOk={}; LOAI.forEach(function(l){ loaiOk[l.k]=true; });
-  var ids={}, doiId={};
+  /* Object.create(null): ten loai hay id trung ten thuoc tinh cua Object (constructor,
+     __proto__...) khong duoc coi la hop le */
+  kieuTruong();
+  var loaiOk=Object.create(null); LOAI.forEach(function(l){ loaiOk[l.k]=true; });
+  var ids=Object.create(null), doiId=Object.create(null), soNguon=o.nguon.length, trung=0;
   /* id nam trong duong dan data-b dang a|b|c: id la hoac trung thi cap id moi va doi theo
      o so lieu, he so, de khong mat du lieu cua file sua tay */
   o.nguon.forEach(function(n){
@@ -745,41 +813,67 @@ function chuanHoaMang(o){
   });
   [o.soLieu,o.heSo].forEach(function(ds){ ds.forEach(function(r){ if(isObj(r) && doiId[r.nguonId]) r.nguonId=doiId[r.nguonId]; }); });
   o.nguon=o.nguon.filter(function(n){
-    if(!isObj(n) || typeof n.id!=='string' || !n.id || ids[n.id] || !loaiOk[n.loai]) return false;
+    if(!isObj(n) || typeof n.id!=='string' || !n.id || !loaiOk[n.loai]) return false;
+    /* id trung: nguon sau duoc cap id moi, khong kem so lieu, he so vi khong biet cua nguon nao */
+    if(ids[n.id]){ n.id=taoId(); trung++; }
     ids[n.id]=true;
     ['phanLoai','thietBi','viTri','ghiChu'].forEach(function(k){ n[k]=chuoi(n[k]); });
     if(!isObj(n.thuocTinh)) n.thuocTinh={};
+    epKieu(n.thuocTinh,KIEU_TT);
+    var cn=LOAI_BY[n.loai].nf.filter(function(f){ return f.kieu==='sel' && /^tt\./.test(f.f); });
+    cn.forEach(function(f){ var k=f.f.slice(3); if(k in n.thuocTinh && !f.opts.some(function(x){ return x[0]===n.thuocTinh[k]; })) n.thuocTinh[k]=''; });
     return true;
   });
+  if(soNguon>o.nguon.length) NAP_GHI.push(fill(t('nBoNguon'),{n:soNguon-o.nguon.length}));
+  if(trung) NAP_GHI.push(fill(t('nTrungId'),{n:trung}));
+  var coSL=Object.create(null), coHS=Object.create(null);
   o.soLieu=o.soLieu.filter(function(r){
-    if(!isObj(r) || !ids[r.nguonId] || namHoacNull(r.nam)===null) return false;
-    r.gioTri=soHoacNull(r.gioTri);
+    if(!isObj(r) || typeof r.nguonId!=='string' || !ids[r.nguonId] || namHoacNull(r.nam)===null) return false;
+    var kk=r.nguonId+'|'+r.nam; if(coSL[kk]) return false; coSL[kk]=true;
+    r.gioTri=soTuFile(r.gioTri);
     ['donVi','nguonSoLieu','chungTu','nguoiCungCap','cachUocTinh','ghiChu'].forEach(function(k){ r[k]=chuoi(r[k]); });
     r.laUocTinh=(r.laUocTinh===true);
     if(!isObj(r.chiTiet)) r.chiTiet={};
+    epKieu(r.chiTiet,KIEU_CT);
     return true;
   });
   o.heSo=o.heSo.filter(function(h){
-    if(!isObj(h) || !ids[h.nguonId] || ['CO2','CH4','N2O','GWP'].indexOf(h.khi)<0) return false;
+    if(!isObj(h) || typeof h.nguonId!=='string' || !ids[h.nguonId] || ['CO2','CH4','N2O','GWP'].indexOf(h.khi)<0) return false;
     h.nam=namHoacNull(h.nam);
-    h.giaTri=soHoacNull(h.giaTri);
+    var kh=h.nguonId+'|'+h.khi+'|'+h.nam; if(coHS[kh]) return false; coHS[kh]=true;
+    h.giaTri=soTuFile(h.giaTri);
     ['maHeSo','tenHeSo','donVi','nguonGoc'].forEach(function(k){ h[k]=chuoi(h[k]); });
     if(['rieng','qd2626','ipcc','muc2'].indexOf(h.bac)<0) h.bac='';
     if(!isObj(h.thamSo)) h.thamSo={};
+    ['cf','hieuSuat','efNhienLieu'].forEach(function(k){ if(k in h.thamSo) h.thamSo[k]=soTuFile(h.thamSo[k]); });
+    ['cachTinh','cfNguon','efNguon'].forEach(function(k){ if(k in h.thamSo) h.thamSo[k]=chuoi(h.thamSo[k]); });
+    if('cachTinh' in h.thamSo && ['','nhaCungCap','congThuc'].indexOf(h.thamSo.cachTinh)<0) h.thamSo.cachTinh='';
     return true;
   });
   o.loaiKhongCo=o.loaiKhongCo.filter(function(k){ return loaiOk[k]; });
   o.qc=o.qc.filter(isObj);
-  o.qc.forEach(function(q){ ['ma','noiDung','nguoiKiem','ngay','ketQua','loiPhatHien','cachXuLy'].forEach(function(k){ q[k]=chuoi(q[k]); }); });
+  o.qc.forEach(function(q){
+    ['ma','noiDung','nguoiKiem','ngay','ketQua','loiPhatHien','cachXuLy'].forEach(function(k){ q[k]=chuoi(q[k]); });
+    q.ngay=ngayTuFile(q.ngay);
+    if(['','dat','saiSot'].indexOf(q.ketQua)<0) q.ketQua='';
+  });
+  o.coSo.giayPhep.ngayCap=ngayTuFile(o.coSo.giayPhep.ngayCap);
   var kc=o.khongChacChan;
-  Object.keys(kc.dinhTinh).forEach(function(k){ kc.dinhTinh[k]=chuoi(kc.dinhTinh[k]); });
-  kc.bangU=kc.bangU.filter(function(u){ return isObj(u) && ids[u.nguonId] && typeof u.khi==='string'; });
-  kc.bangU.forEach(function(u){ u.muc=chuoi(u.muc); u.uAd=soHoacNull(u.uAd); u.uEf=soHoacNull(u.uEf); });
+  ['a','b','c','d','dd','e'].forEach(function(k){ kc.dinhTinh[k]=chuoi(kc.dinhTinh[k]); });
+  var coU=Object.create(null);
+  kc.bangU=kc.bangU.filter(function(u){
+    if(!isObj(u) || typeof u.nguonId!=='string' || !ids[u.nguonId] || typeof u.khi!=='string') return false;
+    var ku=u.nguonId+'|'+chuoi(u.muc)+'|'+u.khi; if(coU[ku]) return false; coU[ku]=true; return true;
+  });
+  kc.bangU.forEach(function(u){ u.muc=chuoi(u.muc); u.uAd=soTuFile(u.uAd); u.uEf=soTuFile(u.uEf); });
   var tl=o.tinhLai;
   if(['kyDau','khongDoi','coDoi'].indexOf(tl.tinhTrang)<0) tl.tinhTrang='';
   tl.truongHop=tl.truongHop.filter(function(x){ return ['a','b','c'].indexOf(x)>=0; });
   tl.kyTruoc.namBatDau=namHoacNull(tl.kyTruoc.namBatDau); tl.kyTruoc.namKetThuc=namHoacNull(tl.kyTruoc.namKetThuc);
-  ['ketQuaCu','ketQuaMoi'].forEach(function(k){ var m={}; Object.keys(tl[k]).forEach(function(y){ var v=soHoacNull(tl[k][y]); if(/^\d{4}$/.test(y) && v!=null) m[y]=v; }); tl[k]=m; });
+  if(tl.kyTruoc.namBatDau && tl.kyTruoc.namKetThuc && tl.kyTruoc.namKetThuc<=tl.kyTruoc.namBatDau){ tl.kyTruoc.namBatDau=null; tl.kyTruoc.namKetThuc=null; }
+  ['ketQuaCu','ketQuaMoi'].forEach(function(k){ var m={}; Object.keys(tl[k]).forEach(function(y){ var v=soTuFile(tl[k][y]); if(/^\d{4}$/.test(y) && v!=null) m[y]=v; }); tl[k]=m; });
+  tl.lyDo=chuoi(tl.lyDo); tl.giaiThich=chuoi(tl.giaiThich); tl.fileKyTruoc=chuoi(tl.fileKyTruoc);
+  if(SO_MO_HO) NAP_GHI.push(fill(t('nSoMoHo'),{n:SO_MO_HO}));
 }
 function coNoiDung(o){
   function bo(x){ var c=clone(x); delete c.taoBoi; delete c.ngayCapNhat; return JSON.stringify(c); }
@@ -796,12 +890,21 @@ var cur = 'dau';
 var saveTimer = null;
 
 function luuTam(){
+  saveTimer=null;
   if(!store.ok) return;
-  M.luuTamLuc = new Date().toISOString();
-  store.set(KEY, JSON.stringify(S));
-  store.set(KEY_META, JSON.stringify(M));
+  /* chi ghi thoi diem luu khi ho so ghi duoc; bo nho day thi bao, khong bao da luu */
+  var tg=new Date().toISOString();
+  if(store.set(KEY, JSON.stringify(S))){
+    M.luuTamLuc=tg; store.loi=false;
+    store.set(KEY_META, JSON.stringify(M));
+  } else {
+    if(!store.loi) toast(t('storeFail'),true);
+    store.loi=true;
+  }
   veNavFoot();
 }
+/* ghi ngay phan sua dang cho 400 ms, goi khi dong hoac an trang */
+function xaLuu(){ if(saveTimer){ clearTimeout(saveTimer); luuTam(); } }
 function luuMeta(){ if(store.ok) store.set(KEY_META, JSON.stringify(M)); }
 function daSua(){
   S.ngayCapNhat = new Date().toISOString();
@@ -834,7 +937,10 @@ function hoi(msg, acts){
 /* ---------- tai ve va nap file ---------- */
 /* Ten file tai ve: <tien to>_<ten co so>_<ky>_<ngay gio>.<duoi> */
 function tenFile(tienTo,duoi){
-  var slug=nod(S.coSo.ten).replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40)||'co-so';
+  var slug=nod(S.coSo.ten).replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+  /* ngan gon nhung khong cat giua mot tu */
+  if(slug.length>48){ slug=slug.slice(0,49); slug=slug.slice(0,slug.lastIndexOf('-')>20?slug.lastIndexOf('-'):48); }
+  slug=slug||'co-so';
   var d=new Date(), stamp=d.getFullYear()+p2(d.getMonth()+1)+p2(d.getDate())+'-'+p2(d.getHours())+p2(d.getMinutes());
   var ky=(S.ky.namBatDau&&S.ky.namKetThuc) ? '_'+S.ky.namBatDau+'-'+S.ky.namKetThuc : '';
   return (tienTo||'KNK')+'_'+slug+ky+'_'+stamp+'.'+(duoi||'json');
@@ -861,11 +967,20 @@ function docFile(file){
     if(!isObj(o) || typeof o.phienBan!=='number' || o.phienBan%1!==0 || o.phienBan<1 || !isObj(o.coSo)){ loi(fill(t('eShape'),{f:f})); return; }
     if(o.phienBan>PHIEN_BAN){ loi(fill(t('eNewer'),{f:f,v:o.phienBan})); return; }
     function napVao(){
-      S=chuanHoa(o);
-      M={ coThayDoi:false, luuTamLuc:null, taiVeLuc:null, napTuFile:f, napLuc:new Date().toISOString(), buocCuoi:0 };
-      luuTam(); SAVED=null;
-      veHet(); go('buoc-0');
-      toast(fill(t('tLoaded'),{f:f}));
+      /* dung man hinh truoc, luu tam sau: file lam hong man hinh thi khong bi luu tam,
+         khong lam hong trang o lan mo sau */
+      var cuS=S, cuM=M;
+      try{
+        S=chuanHoa(o);
+        M={ coThayDoi:false, luuTamLuc:null, taiVeLuc:null, napTuFile:f, napLuc:new Date().toISOString(), buocCuoi:0 };
+        doiHoSo(); veHet(); go('buoc-0');
+      }catch(e){
+        S=cuS; M=cuM; doiHoSo();
+        try{ veHet(); go('buoc-0'); }catch(e2){}
+        loi(fill(t('eHong'),{f:f,e:e && e.message || String(e)})); return;
+      }
+      SAVED=null; luuTam();
+      toast(fill(t('tLoaded'),{f:f})+(NAP_GHI.length?' '+NAP_GHI.join(' '):''));
     }
     if(coNoiDung(S) && M.coThayDoi){
       hoi(fill(t('cfLoad'),{f:f})+' '+t('cfDirty'), [
@@ -882,6 +997,7 @@ function kyMoi(){
   function lam(){
     S=macDinh();
     M={ coThayDoi:false, luuTamLuc:null, taiVeLuc:null, napTuFile:null, napLuc:null, buocCuoi:0 };
+    doiHoSo();
     SAVED=null; store.del(KEY); luuMeta();
     veHet(); go('buoc-0'); toast(t('tNew'));
   }
@@ -1075,8 +1191,11 @@ function onNhap(ev){
   var e=ev.target; if(!e || !e.getAttribute) return;
   var b=e.getAttribute('data-b'); if(!b) return;
   var k=e.getAttribute('data-k')||'text';
-  var doiCauTruc=(k==='sel'||k==='bool'||k==='radio'||k==='date');
-  if(ev.type==='input' && doiCauTruc) return;
+  var doiCauTruc=(k==='sel'||k==='bool'||k==='radio');
+  /* o ngay: chi luu khi 'change' va ngay da day du, khong dung lai man hinh. Chromium ban
+     'change' sau moi phim khi o da co gia tri; dung lai man hinh luc do lam con tro ve dau o */
+  if(ev.type==='input' && (doiCauTruc || k==='date')) return;
+  if(k==='date' && e.value && !ngayHopLe(e.value)) return;
   if(ev.type==='change' && k==='text') return;
   if(b.indexOf('th|')===0){
     var th=b.slice(3), ds=S.tinhLai.truongHop, j=ds.indexOf(th);
@@ -1098,7 +1217,12 @@ function onNhap(ev){
   var v;
   if(k==='num'){
     var r=docSo(e.value);
-    if(!r.ok){ if(ev.type==='change'){ e.classList.add('qt-bad'); toast(fill(t('eSo'),{s:e.value}),true); } return; }
+    if(!r.ok){
+      /* khong giu gia tri doc duoc tu phan dang go do (3.86 cua 3.86E-05): de trong de bao thieu */
+      var g0=banGhi(b,false); if(g0 && g0.o && getP(g0.o,g0.path)!=null){ setP(g0.o,g0.path,null); daSua(); }
+      if(ev.type==='change'){ e.classList.add('qt-bad'); toast(fill(t('eSo'),{s:e.value}),true); }
+      return;
+    }
     e.classList.remove('qt-bad'); v=r.v;
     if(ev.type==='change') e.value=vietSo(v);
   } else if(k==='bool') v=e.checked;
@@ -1156,8 +1280,8 @@ function veStrip(){
 }
 function veNavFoot(){
   var st=$('qt-store-state');
-  st.className=store.ok?'':'qt-bad';
-  st.textContent=store.ok ? t('storeOk')+(M.luuTamLuc?' '+fill(t('storeLast'),{t:gio(M.luuTamLuc)}):'') : t('storeBad');
+  st.className=(store.ok && !store.loi)?'':'qt-bad';
+  st.textContent=!store.ok ? t('storeBad') : store.loi ? t('storeFail') : t('storeOk')+(M.luuTamLuc?' '+fill(t('storeLast'),{t:gio(M.luuTamLuc)}):'');
   $('qt-build').textContent=fill(t('build'),{d:dmyv(BUILD)});
 }
 function veHome(){
@@ -1277,12 +1401,12 @@ var LOAI = [
     ten:['Môi chất lạnh','Refrigerants'],
     mo:['Phát thải KNK là các dung môi chất lạnh từ thiết bị và quá trình sản xuất, kinh doanh môi chất lạnh','Refrigerant emissions from equipment and from refrigerant production and trade'],
     pp:{ m2:'2' },
-    nf:[ { f:'thietBi', lab:['Thông tin thiết bị (Nhãn hiệu và kiểu máy)','Equipment (make and model)'], req:true, w:190 },
-         { f:'viTri', lab:['Vị trí lắp đặt','Installed at'], w:130 },
-         { f:'tt.ngayBatDau', lab:['Ngày bắt đầu sử dụng (lắp đặt)','Date put into use (installed)'], kieu:'date', w:150 },
-         { f:'phanLoai', lab:['Loại môi chất lạnh được sử dụng (R22, R410a, R134a,...)','Refrigerant used (R22, R410a, R134a,...)'], kieu:'list', list:['R22','R32','R134a','R404A','R407C','R410A','R507A'], req:true, w:160 },
-         { f:'tt.congSuatLanh', lab:['Công suất lạnh (BTU/giờ)','Cooling capacity (BTU/h)'], kieu:'num', w:120 },
-         { f:'tt.khoiLuongNapDay', lab:['Khối lượng môi chất lạnh khi nạp đầy (kg)','Full charge (kg)'], kieu:'num', w:130 } ],
+    nf:[ { f:'thietBi', lab:['Thông tin thiết bị (Nhãn hiệu và kiểu máy)','Equipment (make and model)'], req:true, w:150 },
+         { f:'viTri', lab:['Vị trí lắp đặt','Installed at'], w:110 },
+         { f:'tt.ngayBatDau', lab:['Ngày bắt đầu sử dụng (lắp đặt)','Date put into use (installed)'], kieu:'date', w:136 },
+         { f:'phanLoai', lab:['Loại môi chất lạnh được sử dụng (R22, R410a, R134a,...)','Refrigerant used (R22, R410a, R134a,...)'], kieu:'list', list:['R22','R32','R134a','R404A','R407C','R410A','R507A'], req:true, w:116 },
+         { f:'tt.congSuatLanh', lab:['Công suất lạnh (BTU/giờ)','Cooling capacity (BTU/h)'], kieu:'num', w:96 },
+         { f:'tt.khoiLuongNapDay', lab:['Khối lượng môi chất lạnh khi nạp đầy (kg)','Full charge (kg)'], kieu:'num', w:100 } ],
     bang:{ so:'2.2', ten:['Thông tin về các thiết bị lạnh sử dụng','Refrigeration equipment in use'],
       cot:[ { n:'thietBi', lab:['Thông tin thiết bị (Nhãn hiệu và kiểu máy)','Equipment (make and model)'] },
             { n:'viTri', lab:['Vị trí lắp đặt','Installed at'] },
@@ -1347,7 +1471,7 @@ var LOAI = [
       donVi:'tấn', ghiThem:['Hai cột cuối do ứng dụng thêm: Điểm 4 Mục 2 cần tổng lượng hơi theo tấn, còn bảng 4.2 ghi tấn/giờ. Nhập tổng lượng hơi, hoặc nhập số giờ cấp hơi để ứng dụng đổi ra tấn.','The last two columns are added by the app: Point 4 of Section 2 needs total steam in tonnes, while table 4.2 records tonnes per hour. Enter the total, or the hours of supply so the app can convert.'] },
     hs:{ khi:['CO2'], bac:['muc2'], mau:'tCO₂/tấn hơi' } }
 ];
-var LOAI_BY={}; LOAI.forEach(function(l){ LOAI_BY[l.k]=l; });
+var LOAI_BY=Object.create(null); LOAI.forEach(function(l){ LOAI_BY[l.k]=l; });
 function nguonTheoLoai(k){ return S.nguon.filter(function(n){ return n.loai===k; }); }
 function timNguon(id){ for(var i=0;i<S.nguon.length;i++) if(S.nguon[i].id===id) return S.nguon[i]; return null; }
 function nhanNguon(n){
@@ -1409,6 +1533,7 @@ function thieuB0(){
   var m=[];
   if(!S.coSo.nhom) m.push(t('nhomh'));
   if(!(S.ky.namBatDau&&S.ky.namKetThuc)) m.push(t('kyh'));
+  else if(S.ky.namKetThuc!==S.ky.namBatDau+1) m.push(t('kyLienKe'));
   if(!S.coSo.ten.trim()) m.push(t('ften'));
   if(!S.coSo.diaChi.trim()) m.push(t('fdiachi'));
   return m;
@@ -1423,6 +1548,7 @@ function veB0(){
   } else tp.textContent=t('tpNone');
   var mst=S.coSo.maSoThue.trim();
   $('w-mst').textContent=(mst && !/^\d{10}(-\d{3})?$/.test(mst)) ? t('wmst') : '';
+  $('w-ky').textContent=canhBaoKy();
   var bo=S.coSo.boQuanLy;
   $('w-bo').textContent=(bo && bo!==BO_MAC_DINH) ? t('wbo') : '';
   var miss=thieuB0(), mb=$('qt-b0-miss');
@@ -1469,7 +1595,12 @@ Object.assign(T,{
   traGoiY:['Gợi ý: nhóm %g.','Suggestion: group %g.'],
   traB:['Cơ sở có tên trong Quyết định 699/QĐ-BNNMT ngày 27/2/2026, thuộc nhóm %n. Hạn ngạch năm 2025: %a, năm 2026: %b tấn CO₂ tương đương.','The facility is in Decision 699/QD-BNNMT of 27 Feb 2026, category %n. Quota 2025: %a, 2026: %b tCO₂e.'],
   traBRoi:['Cơ sở có tên trong Quyết định 699/QĐ-BNNMT nhưng không ghép được với dòng nào của danh mục Quyết định 42/2026/QĐ-TTg.','The facility is in Decision 699/QD-BNNMT but could not be matched to a row of Decision 42/2026/QD-TTg.'],
-  traANganh:['Ngành nghề ghi trong danh mục thuộc diện có thể được phân bổ hạn ngạch, nhưng cơ sở không có tên trong Quyết định 699/QĐ-BNNMT, nên hiện áp dụng nghĩa vụ nhóm A. Nếu cơ sở được phân bổ hạn ngạch từ giai đoạn 2027 thì thuộc nhóm C.','The listed activity is one that may receive a quota, but the facility is not in Decision 699/QD-BNNMT, so group A obligations currently apply. If the facility is allocated a quota from the 2027 phase, it belongs to group C.'],
+  traANganh:['Ngành nghề ghi trong danh mục là nhiệt điện, sắt thép hoặc xi măng. Điểm c khoản 4 Điều 11 áp dụng cho nhà máy nhiệt điện, cơ sở sản xuất sắt thép, cơ sở sản xuất xi măng thuộc danh mục do Thủ tướng Chính phủ ban hành, không nêu điều kiện phải có tên trong Quyết định 699/QĐ-BNNMT; cơ sở thuộc điểm c không thực hiện điểm b (nhóm A) và không thuộc điểm d (nhóm C). Cơ sở không có tên trong Quyết định 699/QĐ-BNNMT, nên cần xác định với bộ quản lý lĩnh vực mình có thuộc điểm c hay không: thuộc thì chọn nhóm B; không thuộc, ví dụ chỉ đúc hoặc gia công sản phẩm thép, thì chọn nhóm A.',
+              'The listed activity is thermal power, iron and steel, or cement. Article 11(4)(c) covers thermal power plants, iron and steel producers and cement producers on the Prime Minister’s list, with no condition of being in Decision 699/QD-BNNMT; such facilities do not follow point b (group A) and are not under point d (group C). This facility is not in Decision 699/QD-BNNMT, so it should confirm with its managing ministry whether point c applies: if so, choose group B; if not, for example if it only casts or processes steel products, choose group A.'],
+  traGoiY2:['Gợi ý: nhóm B hoặc nhóm A.','Suggestion: group B or group A.'],
+  traBNhieu:['Cơ sở ứng với %n dòng của Quyết định 699/QĐ-BNNMT ngày 27/2/2026, có thể là các pháp nhân khác nhau; đối chiếu tên và mã số thuế:','The facility matches %n rows of Decision 699/QD-BNNMT of 27 Feb 2026, possibly different legal entities; check the name and tax code:'],
+  traBDong:['%t, mã số thuế %m, nhóm %n: hạn ngạch năm 2025 %a, năm 2026 %b tấn CO₂ tương đương.','%t, tax code %m, category %n: quota 2025 %a, 2026 %b tCO₂e.'],
+  traMstNhieu:['Có nhiều mã số thuế khác nhau nên không tự điền mã số thuế; nhập tay mã của cơ sở.','Several different tax codes, so the tax code was not filled in; enter the facility’s own code.'],
   traA:['Cơ sở có tên trong danh mục Quyết định 42/2026/QĐ-TTg và không có tên trong Quyết định 699/QĐ-BNNMT.','The facility is in Decision 42/2026/QD-TTg and not in Decision 699/QD-BNNMT.'],
   traLuuY:['Đây là gợi ý dựa trên danh mục, không phải kết luận pháp lý. Cơ sở tự xác định nhóm của mình, bấm áp dụng xong vẫn sửa lại được.','This is a suggestion based on the lists, not a legal conclusion. The facility determines its own group and can change it after applying.'],
   traDien:['Điền thông tin từ danh mục','Fill in from the list'],
@@ -1492,9 +1623,22 @@ function dungTra(){
   DATA.hqRoi.forEach(function(j){ var x=DATA.hq[j]; TRA.push({ cs:null, hq:[j], s:nod(x[2]+' '+x[3]+' '+x[4]) }); });
   return TRA;
 }
+/* B: co ten trong QD 699. BA: nganh nhiet dien, sat thep, xi mang nhung khong co ten trong
+   QD 699, diem c khoan 4 Dieu 11 co the ap dung, co so tu xac dinh. A: con lai. */
 function nhomGoiY(it){
   if(it.hq.length) return 'B';
+  if(it.cs!=null && DATA.cs[it.cs][7]) return 'BA';
   return 'A';
+}
+/* Ky so lieu dau tien cua tung nhom, diem b, c, d khoan 4 Dieu 11 sua doi boi Nghi dinh 119 */
+var NAM_DAU={ A:2024, B:2026, C:2028 };
+function canhBaoKy(){
+  var a=S.ky.namBatDau, b=S.ky.namKetThuc, g=S.coSo.nhom, d=NAM_DAU[g];
+  if(!a || !b || b!==a+1 || !d) return '';
+  var c=t('nhom'+g+'c'); c=c.charAt(0).toLocaleLowerCase()+c.slice(1);
+  if(a<d) return fill(t('wKyTruoc'),{g:g,d:d,c:c,a:a,b:b});
+  if((a-d)%2) return fill(t('wKyLech'),{g:g,d:d,e:d+1,f:d+2,h:d+3,c:c,a:a,b:b});
+  return '';
 }
 function veTra(){
   var host=$('qt-tra'); if(!host) return;
@@ -1552,17 +1696,23 @@ function veCt(){
   } else { var x0=DATA.hq[it.hq[0]]; dong(t('ften'),x0[2]); dong(t('fdiachi'),x0[3]); }
   it.hq.forEach(function(j){ dong(t('fmst'), DATA.hq[j][4]); });
   ct.appendChild(kv);
-  var p=el('p'); p.appendChild(el('b',null,fill(t('traGoiY'),{g:g}))); p.appendChild(document.createTextNode(' '));
-  var ly;
+  var p=el('p'); p.appendChild(el('b',null,g==='BA'?t('traGoiY2'):fill(t('traGoiY'),{g:g}))); p.appendChild(document.createTextNode(' '));
+  var ly, ul=null;
+  function nhomHq(x){ return DATA.hqNhom[x[0]]?lv(DATA.hqNhom[x[0]]):''; }
   if(it.hq.length && it.cs==null) ly=t('traBRoi');
-  else if(it.hq.length){ var x=DATA.hq[it.hq[0]]; ly=fill(t('traB'),{ n:DATA.hqNhom[x[0]]?lv(DATA.hqNhom[x[0]]):'', a:vietSo(x[5]), b:vietSo(x[6]) }); }
+  else if(it.hq.length===1){ var x=DATA.hq[it.hq[0]]; ly=fill(t('traB'),{ n:nhomHq(x), a:vietSo(x[5]), b:vietSo(x[6]) }); }
+  else if(it.hq.length){
+    ly=fill(t('traBNhieu'),{n:it.hq.length}); ul=el('ul','qt-missing');
+    it.hq.forEach(function(j){ var x=DATA.hq[j]; ul.appendChild(el('li',null,fill(t('traBDong'),{ t:x[2], m:x[4], n:nhomHq(x), a:vietSo(x[5]), b:vietSo(x[6]) }))); });
+  }
   else if(DATA.cs[it.cs][7]) ly=t('traANganh');
   else ly=t('traA');
   p.appendChild(document.createTextNode(ly)); ct.appendChild(p);
+  if(ul) ct.appendChild(ul);
   ct.appendChild(el('p','qt-note',t('traLuuY')));
   var acts=el('div','qt-acts');
   acts.appendChild(nut(t('traDien'),'traDien',''));
-  acts.appendChild(nut(fill(t('traNhom'),{g:g}),'traNhom|'+g,'qt-pri'));
+  (g==='BA'?['B','A']:[g]).forEach(function(x){ acts.appendChild(nut(fill(t('traNhom'),{g:x}),'traNhom|'+x,'qt-pri')); });
   ct.appendChild(acts);
 }
 ACT.traChon=function(p){ traChon=+p[0]; veKq(); };
@@ -1578,9 +1728,11 @@ ACT.traDien=function(){
     dat('phuLuc',String(r[0])); dat('stt',String(r[2]));
     if(!c.linhVuc.trim()) dat('linhVuc',DATA.nganh[r[5]]||'');
   } else { var x=DATA.hq[it.hq[0]]; dat('ten',x[2]); dat('diaChi',x[3]); }
-  if(it.hq.length && !c.maSoThue.trim()) dat('maSoThue',DATA.hq[it.hq[0]][4]);
+  /* nhieu dong QD 699 co the la cac phap nhan khac nhau: chi dien ma so thue khi chi co mot ma */
+  var ms=[]; it.hq.forEach(function(j){ var m=DATA.hq[j][4]; if(ms.indexOf(m)<0) ms.push(m); });
+  if(ms.length===1 && !c.maSoThue.trim()) dat('maSoThue',ms[0]);
   dienForm(); if(n) daSua();
-  toast(fill(t('traDaDien'),{n:n}));
+  toast(fill(t('traDaDien'),{n:n})+(ms.length>1?' '+t('traMstNhieu'):''));
 };
 ACT.traNhom=function(p){ S.coSo.nhom=p[0]; dienForm(); daSua(); toast(fill(t('traDaNhom'),{g:p[0]})); };
 
@@ -1610,7 +1762,7 @@ Object.assign(T,{
   b1them:['+ Thêm nguồn','+ Add source'],
   b1nhan:['Nhân bản','Duplicate'],
   b1xoa:['Xóa','Delete'],
-  b1xoaHoi:['Xóa %n? Số liệu và hệ số đã nhập cho nguồn này cũng bị xóa.','Delete %n? Its activity data and factors will be deleted too.'],
+  b1xoaHoi:['Xóa %n? Số liệu, hệ số và độ không chắc chắn đã nhập cho nguồn này cũng bị xóa.','Delete %n? Its activity data, factors and uncertainty inputs will be deleted too.'],
   b1bhtH:['Bể hấp thụ khí nhà kính','Greenhouse gas sinks'],
   b1bhtHint:['Mục II.3 Mẫu số 06 có nêu bể hấp thụ; Điều 16 Thông tư 38 chỉ liệt kê nguồn phát thải','Form 06 item II.3 mentions sinks; Article 16 of Circular 38 lists emission sources only'],
   b1bhtQ:['Trong phạm vi hoạt động, cơ sở có bể hấp thụ khí nhà kính không?','Does the facility have any greenhouse gas sinks within its boundary?'],
@@ -1724,9 +1876,10 @@ ACT.xoa=function(p){
     S.nguon=S.nguon.filter(function(x){ return x.id!==n.id; });
     S.soLieu=S.soLieu.filter(function(x){ return x.nguonId!==n.id; });
     S.heSo=S.heSo.filter(function(x){ return x.nguonId!==n.id; });
+    S.khongChacChan.bangU=S.khongChacChan.bangU.filter(function(x){ return x.nguonId!==n.id; });
     daSua(); veLai();
   }
-  var coDuLieu=S.soLieu.some(function(x){ return x.nguonId===n.id; }) || S.heSo.some(function(x){ return x.nguonId===n.id; });
+  var coDuLieu=[S.soLieu,S.heSo,S.khongChacChan.bangU].some(function(ds){ return ds.some(function(x){ return x.nguonId===n.id; }); });
   if(coDuLieu) hoi(fill(t('b1xoaHoi'),{n:nhanNguon(n)}), [{ k:'b1xoa', pri:true, fn:lam }]);
   else lam();
 };
@@ -1750,6 +1903,8 @@ Object.assign(T,{
   b2tt38:['Mục 1 Phụ lục II Thông tư 38/2023/TT-BCT','Section 1, Appendix II of Circular 38/2023/TT-BCT'],
   b2chuTT:['Theo biểu của Thông tư','Circular table column'],
   b2chuThem:['Cột ứng dụng thêm, không có trong biểu của Thông tư','Column added by the app, not in the Circular table'],
+  b2dv:['Đơn vị','Unit'],
+  b2chuaLoai:['(chưa ghi loại môi chất)','(refrigerant not specified)'],
   b2nguonSL:['Nguồn số liệu','Data source'],
   b2chungTu:['Số hiệu chứng từ','Document ref.'],
   b2nguoi:['Người cung cấp','Provided by'],
@@ -1769,7 +1924,7 @@ Object.assign(T,{
 });
 var NGUON_SL=['Hóa đơn','Phiếu nhập kho','Nhật ký vận hành','Đồng hồ đo, công tơ','Báo cáo sản xuất','Hợp đồng mua bán'];
 var UI2={ nam:null };
-function namKy(){ return (S.ky.namBatDau && S.ky.namKetThuc) ? [S.ky.namBatDau,S.ky.namKetThuc] : []; }
+function namKy(){ var a=S.ky.namBatDau, b=S.ky.namKetThuc; return (a && b && b>a) ? [a,b] : []; }
 
 VE[2]=function(sec){
   var ys=namKy();
@@ -1842,7 +1997,7 @@ function veBang2(sec,l,ds,y){
         var ctrl=oNhap({ kieu:c.kieu, list:c.list, w:c.w, lab:c.lab },bb,v);
         if(c.donVi){
           var row=el('div','qt-cellrow'); row.appendChild(ctrl);
-          row.appendChild(oNhap({ kieu:'sel', opts:c.donVi.map(function(u){ return [u,[u,u]]; }), lab:c.lab },'s|'+n.id+'|'+y+'|donVi',so.donVi));
+          row.appendChild(oNhap({ kieu:'sel', opts:c.donVi.map(function(u){ return [u,[u,u]]; }), lab:T.b2dv },'s|'+n.id+'|'+y+'|donVi',so.donVi));
           td.appendChild(row);
         } else td.appendChild(ctrl);
       }
@@ -1865,7 +2020,8 @@ function veBang2(sec,l,ds,y){
   if(l.k==='moichat') veBang21(cb,ds,y);
 }
 function veBang21(cb,ds,y){
-  var loai=[]; ds.forEach(function(n){ var k=n.phanLoai.trim(); if(k && loai.indexOf(k)<0) loai.push(k); });
+  /* nhom theo loai moi chat; nguon chua ghi loai gom vao mot dong rieng, khong bi bo */
+  var loai=[]; ds.forEach(function(n){ var k=n.phanLoai.trim(); if(loai.indexOf(k)<0) loai.push(k); });
   cb.appendChild(el('div','qt-hsn',t('b221')));
   cb.appendChild(el('p','qt-note',t('b221h')));
   var w=el('div','qt-tbw'), tb=el('table','qt-t'), thead=el('thead'), tr=el('tr');
@@ -1873,7 +2029,7 @@ function veBang21(cb,ds,y){
   thead.appendChild(tr); tb.appendChild(thead);
   var tbody=el('tbody');
   loai.forEach(function(k,i){
-    var r=el('tr'); r.appendChild(el('td','qt-stt',String(i+1))); r.appendChild(el('td',null,k));
+    var r=el('tr'); r.appendChild(el('td','qt-stt',String(i+1))); r.appendChild(el('td',null,k||t('b2chuaLoai')));
     var td=el('td'), sp=el('span','qt-calc'); sp.setAttribute('data-calc','mc21|'+encodeURIComponent(k)+'|'+y); td.appendChild(sp); r.appendChild(td);
     tbody.appendChild(r);
   });
@@ -1902,7 +2058,7 @@ function thieuSo(n,y){
     if(c.req==='nhietTri'){ if(HE_TJ[(so.donVi||'').toLowerCase()]==null && v==null) m.push(lv(c.lab)); return; }
     if(c.req==='hoi'){ if(v==null && !(so.chiTiet.khoiLuongGio!=null && so.chiTiet.soGio!=null)) m.push(lv(c.lab)); return; }
     if(rong(v)) m.push(lv(c.lab));
-    if(c.donVi && rong(so.donVi)) m.push(lv(c.lab));
+    if(c.donVi && rong(so.donVi)) m.push(lv(c.lab)+': '+t('b2dv'));
   });
   if(so.laUocTinh && rong(so.cachUocTinh)) m.push(t('b2cach'));
   return m;
@@ -2003,11 +2159,14 @@ function oHs(n){
   if(c.theoNam) namKy().forEach(function(y){ out.push({ khi:c.khi[0], nam:y, req:true }); });
   else c.khi.forEach(function(k){ out.push({ khi:k, nam:null, req:!c.itNhat }); });
   if(n.loai==='phattan'){
-    out.forEach(function(o){ o.cf=true; });
+    /* Muc 2 chi co cong thuc cho khai thac than ham lo, lo thien: nguon khac khong bat buoc he so */
+    out.forEach(function(o){ o.cf=true; if(!ptCoCongThuc(n)) o.req=false; });
     if(n.thuocTinh.congNghe==='lothien') out.push({ khi:'CO2', nam:null, req:false, cf:true, lt:true });
   }
   return out;
 }
+/* Don vi mau cua o he so theo khi cua o: o CO2 cua mo lo thien (diem 5.5) khong lay don vi CH4 */
+function mauCua(c,khi){ return (c.mau && khi!=='CH4' && c.mau.indexOf('CH₄')>=0) ? c.mau.replace('CH₄',KHI_NHAN[khi]||khi) : (c.mau||''); }
 function khiNhan(o,n){ return o.khi==='GWP' ? fill(t('b3gwp'),{m:n.phanLoai.trim()||t('b3gwpMc')}) : (KHI_NHAN[o.khi]||o.khi); }
 function hsDu(h,o){
   if(h && h.thamSo.cachTinh==='congThuc') return h.thamSo.hieuSuat!=null && h.thamSo.efNhienLieu!=null && !rong(h.thamSo.efNguon);
@@ -2018,7 +2177,7 @@ function macDinhHs(h){
   var n=timNguon(h.nguonId); if(!n) return;
   var c=LOAI_BY[n.loai].hs;
   if(!h.bac && c.bac.length===1) h.bac=c.bac[0];
-  if(rong(h.donVi) && c.mau && h.khi!=='GWP' && h.thamSo.cachTinh!=='congThuc') h.donVi=c.mau;
+  if(rong(h.donVi) && c.mau && h.khi!=='GWP' && h.thamSo.cachTinh!=='congThuc') h.donVi=mauCua(c,h.khi);
   if(n.loai==='hoi' && h.thamSo.cachTinh==='congThuc' && rong(h.nguonGoc)) h.nguonGoc='Tính theo Điểm 4 Mục 2 Phụ lục II Thông tư 38/2023/TT-BCT, đã áp dụng đính chính tại Quyết định 334/QĐ-BCT ngày 06/02/2025';
   if(n.loai==='phattan' && h.khi==='CH4' && h.thamSo.cf==null){ h.thamSo.cf=0.67; h.thamSo.cfNguon='IPCC 2006, Tập 2, Chương 4: 0,67 kg/m³ ở 20 °C và 1 atm'; }
 }
@@ -2066,7 +2225,7 @@ function veHs(cb,l,n){
       var t1=el('td'); t1.appendChild(oNhap({ kieu:'num', w:110, lab:[khiNhan(o,n),khiNhan(o,n)] },bp+'giaTri',h?h.giaTri:null)); r.appendChild(t1);
       var t2=el('td');
       if(o.khi==='GWP') t2.appendChild(el('span','qt-ro',t('b3ktn')));
-      else t2.appendChild(oNhap({ kieu:'text', w:110, ph:[c.mau||'',c.mau||''] },bp+'donVi',h?h.donVi:''));
+      else t2.appendChild(oNhap({ kieu:'text', w:110, ph:[mauCua(c,o.khi),mauCua(c,o.khi)] },bp+'donVi',h?h.donVi:''));
       r.appendChild(t2);
       var t3=el('td'), ops=c.bac.map(function(b){ return [b,T['bac_'+b]]; });
       var sel=oNhap({ kieu:'sel', opts:ops, w:190 },bp+'bac',h?h.bac:(c.bac.length===1?c.bac[0]:''));
@@ -2077,7 +2236,8 @@ function veHs(cb,l,n){
         (c.luoi && n.phanLoai==='Điện lưới' && luoiNam(o.nam)) ? nut(fill(t('b3luoi'),{y:o.nam}),'luoi|'+key,'qt-pri') : null ]));
     }
     tbody.appendChild(r);
-    function ghiChu(txt,ok){ var rr=el('tr','qt-tr-note'), td=el('td',ok?'qt-okn':null,txt); td.colSpan=nc; rr.appendChild(td); tbody.appendChild(rr); return td; }
+    /* noi dung ghi chu nam trong mot khoi dinh ben trai: bang cuon ngang tren dien thoai van doc duoc */
+    function ghiChu(txt,ok){ var rr=el('tr','qt-tr-note'), td=el('td',ok?'qt-okn':null), inn=el('div','qt-note-in',txt); td.appendChild(inn); td.colSpan=nc; rr.appendChild(td); tbody.appendChild(rr); return inn; }
     if(h && h.giaTri!=null && o.khi!=='GWP' && !rong(h.donVi) && !hsQuyDoiDuoc(h.donVi)) ghiChu(t('b3kqd'));
     if(c.luoi && n.phanLoai==='Điện lưới' && !luoiNam(o.nam) && !hsKhoa(h)) ghiChu(fill(t('b3luoiThieu'),{y:o.nam}));
     if(o.cf){
@@ -2184,7 +2344,8 @@ function veKqHs(){
     rr.appendChild(el('td',null,maHs(r)));
     var tn=el('td',null,L==='vi'?r[5]:r[6]); tn.appendChild(el('small',null,' · '+(L==='vi'?r[8]:r[9]))); rr.appendChild(tn);
     rr.appendChild(el('td',null,r[7]));
-    rr.appendChild(el('td','qt-calc',r[10]));
+    /* gia tri in trong QD 2626 viet kieu Viet Nam; giao dien tieng Anh viet lai so da doc */
+    rr.appendChild(el('td','qt-calc',(L==='vi' || r[11]==null) ? r[10] : vietSo(r[11])));
     var dv=el('td',null,L==='vi'?r[12]:r[13]);
     var ci=tuSoDv(tuDv(r[12]));
     if(r[15]!=='hc' && r[11]!=null){
@@ -2192,7 +2353,7 @@ function veKqHs(){
       else if(ci.m3){ dv.appendChild(document.createTextNode(' ')); dv.appendChild(el('span','qt-chip',t('trM3'))); }
     }
     rr.appendChild(dv);
-    rr.appendChild(el('td',null,r[14]));
+    rr.appendChild(el('td',null,L==='vi' ? r[14] : String(r[14]).replace(/^Bậc (\d)/,'Tier $1').replace('Phương pháp Tăng-giảm','mass-balance (increase-decrease) method')));
     var ta=el('td','qt-acts');
     if(r[15]==='hc') ta.appendChild(el('small',null,t('trHc')));
     else if(r[11]==null) ta.appendChild(el('small',null,t('trNull')));
@@ -2254,7 +2415,7 @@ function veHoiCT(cb,n){
 TINH.efhoi=function(a){
   var n=timNguon(a[0]); if(!n) return '';
   var y=+a[1], ef=efHoi(n,y,laySo(n.id,y,false));
-  return fill(t('b3hNam'),{y:y})+(ef.loi ? ef.loi : 'EF_H,p = '+ef.ghi+' = '+vietSo(ef.v,4)+' tCO₂/tấn hơi');
+  return fill(t('b3hNam'),{y:y})+(ef.loi ? ef.loi : 'EF_H,p = '+dvHien(ef.ghi)+' = '+vietSo(ef.v,4)+' '+dvHien('tCO₂/tấn hơi'));
 };
 
 /* ---- 70_tinh.js ---- */
@@ -2391,9 +2552,12 @@ function tinhHoi(n,y,so){                        /* Diem 4: TPT_H,p = AD_H,p × 
   var ef=efHoi(n,y,so); if(ef.loi) return [loiDong(n,y,'4','CO2',ef.loi)];
   return [{ n:n, y:y, muc:'4', khi:'CO2', ad:ad, adDv:'tấn', adGhi:adGhi, ef:ef.v, efDv:'tCO₂/tấn hơi', efGhi:ef.ghi, h:ef.h, k:1, kGhi:'', luong:ad*ef.v }];
 }
+/* Muc 2 chi co cong thuc cho khai thac than ham lo va lo thien */
+function ptCoCongThuc(n){ var cn=n.thuocTinh.congNghe; return /than/.test(nod(n.phanLoai)) && (cn==='hamlo' || cn==='lothien'); }
 function tinhPhatTan(n,y,so){                    /* Diem 5.1 den 5.5, chi cho khai thac than */
   var cn=n.thuocTinh.congNghe;
-  if(!/than/.test(nod(n.phanLoai)) || (cn!=='hamlo' && cn!=='lothien')) return [loiDong(n,y,'5','CH4',t('tkPtKhong'))];
+  /* khoang san khac hoac phat tan tu may moc: nhu qua trinh cong nghiep, khong co cong thuc */
+  if(!ptCoCongThuc(n)) return [{ n:n, y:y, muc:'5', khi:'', khongCT:true, loi:t('tkPtKhong') }];
   var hl=(cn==='hamlo'), mucCH4=hl?'5.1':'5.4', out=[];
   if(!so || so.gioTri==null) return [loiDong(n,y,mucCH4,'CH4',t('tkThieuAd'))];
   if(so.donVi!=='tấn') return [loiDong(n,y,mucCH4,'CH4',t('tkPtTan'))];
@@ -2424,6 +2588,14 @@ function tinhPhatTan(n,y,so){                    /* Diem 5.1 den 5.5, chi cho kh
   return out;
 }
 
+/* Tong cua mot nam co thieu khong: 'tt', 'gt' theo nhom nguon, mac dinh la ca tong.
+   Dung chung cho Buoc 4, 7, 8 va ban thao de cung mot tong mang cung mot nhan. */
+function chuaDu(o,k){ return k==='tt' ? o.thieuTT>0 : k==='gt' ? o.thieuGT>0 : (o.loi+o.chuaGwp+o.khongCT)>0; }
+/* Don vi do bo tinh ghi bang tieng Viet (file xuat giu tieng Viet); giao dien tieng Anh doi luc hien */
+function dvHien(s){
+  if(L==='vi' || !s) return s;
+  return String(s).replace(/tấn hơi/g,'t steam').replace(/tấn\/giờ/g,'t/h').replace(/giờ/g,'h').replace(/tấn/g,'t').replace(/lít/g,'L').replace(/\bđv\b/g,'unit');
+}
 /* Toan bo bang tinh cua ky. Tra ve { dong:[...], tong:{ nam: {...} } } */
 function tinhToan(){
   var ys=namKy(), dong=[];
@@ -2441,13 +2613,16 @@ function tinhToan(){
   });
   dong.forEach(function(d){
     if(d.loi) return;
+    /* luoi an toan: so khong hop le (NaN, vo cung) thanh dong loi co ly do, khong lan vao tong */
+    if(!isFinite(d.luong)){ d.loi=t('tkKhongHopLe'); return; }
     d.gwp = d.gwpRieng!=null ? d.gwpRieng : gwpCua(d.khi);
     d.tco2e = d.gwp==null ? null : d.luong*d.gwp;
   });
   var tong={};
   ys.forEach(function(y){
-    var o={ tong:0, tt:0, gt:0, khi:{ CO2:0, CH4:0, N2O:0, HFC:0 }, loai:{}, loi:0, khongCT:0, chuaGwp:0 };
+    var o={ tong:0, tt:0, gt:0, khi:{ CO2:0, CH4:0, N2O:0, HFC:0 }, loai:{}, loi:0, khongCT:0, chuaGwp:0, thieuTT:0, thieuGT:0 };
     dong.filter(function(d){ return d.y===y; }).forEach(function(d){
+      if(d.khongCT || d.loi || d.tco2e==null){ if(LOAI_BY[d.n.loai].gt) o.thieuGT++; else o.thieuTT++; }
       if(d.khongCT){ o.khongCT++; return; }
       if(d.loi){ o.loi++; return; }
       if(d.tco2e==null){ o.chuaGwp++; return; }
@@ -2486,10 +2661,12 @@ Object.assign(T,{
   tkKcf:['× khối lượng riêng %c kg/m³ ÷ 1000','× density %c kg/m³ ÷ 1000'],
   tkK52:['× %c kg/m³ × %e % × 44/16 ÷ 1000','× %c kg/m³ × %e % × 44/16 ÷ 1000'],
   tkK53:['× %c kg/m³ × (1 − %e %) ÷ 1000','× %c kg/m³ × (1 − %e %) ÷ 1000'],
+  tkKhongHopLe:['Số liệu hoặc hệ số không hợp lệ, không ra được số','Invalid activity data or factor; no number can be computed'],
   tkCe:['Thiếu hiệu suất đốt CH₄, hoặc hiệu suất không nằm trong khoảng 0 đến 100 %','CH₄ combustion efficiency missing or outside 0 to 100 %'],
   b4gwpH:['Bộ GWP','GWP set'],
-  b4gwpHint:['Tiềm năng nóng lên toàn cầu, điểm a và điểm c khoản 1 Điều 11 Nghị định 06/2022/NĐ-CP','Global warming potentials, Article 11(1)(a) and (c) of Decree 06/2022/ND-CP'],
-  b4gwpP:['Nghị định chỉ quy định dùng hướng dẫn của IPCC, không chỉ định báo cáo đánh giá nào, và Quyết định 2626/QĐ-BTNMT không có GWP. Kiểm kê quốc gia kỳ 2016 trong BUR3 dùng AR5, còn Đóng góp do quốc gia tự quyết định năm 2022 dùng AR4. Ghi rõ bộ đã dùng và giữ nguyên qua các kỳ; đổi bộ thì phải tính toán lại kỳ trước ở Bước 7.','The Decree only requires IPCC guidance without naming an assessment report, and Decision 2626/QD-BTNMT has no GWPs. The 2016 national inventory in BUR3 uses AR5; the 2022 NDC uses AR4. State the set used and keep it across periods; switching requires recalculating the previous period in Step 7.'],
+  b4gwpHint:['Tiềm năng nóng lên toàn cầu, khoản 3 Điều 19 Thông tư 38/2023/TT-BCT','Global warming potentials, Article 19(3) of Circular 38/2023/TT-BCT'],
+  b4gwpP:['Khoản 3 Điều 19 Thông tư 38/2023/TT-BCT: “GWPi là hệ số tiềm năng nóng lên toàn cầu của KNK i, áp dụng theo hướng dẫn mới nhất của IPCC.” Thông tư không nêu tên báo cáo đánh giá nào, và Quyết định 2626/QĐ-BTNMT không có GWP. Kiểm kê quốc gia kỳ 2016 trong BUR3 dùng AR5, còn Đóng góp do quốc gia tự quyết định năm 2022 dùng AR4. Ứng dụng có hai bộ AR4 và AR5; chọn bộ nào là nhận định của cơ sở, nên ghi lý do ở phần mô tả phương pháp. Ghi rõ bộ đã dùng và giữ nguyên qua các kỳ; đổi bộ thì phải tính toán lại kỳ trước ở Bước 7.',
+          'Article 19(3) of Circular 38/2023/TT-BCT: GWPi is the global warming potential of GHG i, applied according to the latest IPCC guidance. The Circular names no assessment report, and Decision 2626/QD-BTNMT has no GWPs. The 2016 national inventory in BUR3 uses AR5; the 2022 NDC uses AR4. The app offers AR4 and AR5; which set to use is the facility’s own judgement and should be justified in the method description. State the set used and keep it across periods; switching requires recalculating the previous period in Step 7.'],
   b4gwpMc:['GWP của môi chất lạnh nhập tay ở Bước 3 phải lấy theo cùng bộ này.','Refrigerant GWPs entered by hand in Step 3 must come from the same set.'],
   b4gwpKhi:['Khí','Gas'],
   b4tongH:['Kết quả tổng hợp','Summary'],
@@ -2570,18 +2747,18 @@ function veTong4(sec,kq,ys){
   [t('b4ct')].concat(ys.map(function(y){ return fill(t('b2nam'),{y:y}); })).forEach(function(x){ hr.appendChild(el('th',null,x)); });
   var th=el('thead'); th.appendChild(hr); tb.appendChild(th);
   var bd=el('tbody');
-  function dong(nhan,f,dam,cls){
+  function dong(nhan,f,dam,cls,nhom){
     var r=el('tr',cls||null); var c=el('td',null,nhan); if(dam) c.style.fontWeight='650'; r.appendChild(c);
     ys.forEach(function(y){
       var o=kq.tong[y], v=f(o), td=el('td','qt-calc',v==null?'':sGon(v));
       td.setAttribute('data-tong',y+'|'+nhan); if(dam) td.style.fontSize='14px';
-      if(v!=null && (o.loi || o.chuaGwp)){ td.appendChild(document.createTextNode(' ')); td.appendChild(el('span','qt-chip qt-cw',t('b4chuaDu'))); }
+      if(v!=null && chuaDu(o,nhom)){ td.appendChild(document.createTextNode(' ')); td.appendChild(el('span','qt-chip qt-cw',t('b4chuaDu'))); }
       r.appendChild(td);
     });
     bd.appendChild(r);
   }
-  dong(t('b4tt'),function(o){ return o.tt; });
-  dong(t('b4gt'),function(o){ return o.gt; });
+  dong(t('b4tt'),function(o){ return o.tt; },false,null,'tt');
+  dong(t('b4gt'),function(o){ return o.gt; },false,null,'gt');
   dong(t('b4tong'),function(o){ return o.tong; },true);
   var sub=el('tr','qt-tr-trace'), sc=el('td',null,t('b4theoKhi')); sc.colSpan=ys.length+1; sc.style.fontWeight='650'; sub.appendChild(sc); bd.appendChild(sub);
   ['CO2','CH4','N2O','HFC'].forEach(function(k){
@@ -2622,14 +2799,14 @@ function veChiTiet4(sec,kq,ys){
       var td=el('td',null,d.loi); td.colSpan=5; td.style.color=d.khongCT?'#23458f':'#b42318'; td.style.whiteSpace='normal'; r.appendChild(td);
       bd.appendChild(r); return;
     }
-    var a=el('td','qt-calc',sGon(d.ad,6)+' '+d.adDv); if(d.adGhi) a.appendChild(el('small',null,' = '+d.adGhi)); r.appendChild(a);
+    var a=el('td','qt-calc',sGon(d.ad,6)+' '+dvHien(d.adDv)); if(d.adGhi) a.appendChild(el('small',null,' = '+dvHien(d.adGhi))); r.appendChild(a);
     var e=el('td');
     if(d.muc==='5.2') e.textContent=fill(t('b4dot'),{c:vietSo(d.cf),e:vietSo(d.ce)});
     else if(d.muc==='5.3') e.textContent=fill(t('b4kc'),{c:vietSo(d.cf),e:vietSo(d.ce)});
     else if(d.muc==='2.1') e.textContent='—';
     else {
-      e.appendChild(el('span','qt-calc',vietSo(d.ef,6)+' '+(d.efDv||'')));
-      if(d.efGhi) e.appendChild(el('small',null,' = '+d.efGhi));
+      e.appendChild(el('span','qt-calc',vietSo(d.ef,6)+' '+dvHien(d.efDv||'')));
+      if(d.efGhi) e.appendChild(el('small',null,' = '+dvHien(d.efGhi)));
       if(d.cf!=null) e.appendChild(el('small',null,' × '+fill(t('b4cf'),{c:vietSo(d.cf)})));
       if(d.h && d.h.maHeSo && /^QĐ2626:/.test(d.h.maHeSo)) e.appendChild(el('small',null,' · '+d.h.maHeSo.replace(':',' ')));
     }
@@ -2639,7 +2816,9 @@ function veChiTiet4(sec,kq,ys){
     var tc=el('td','qt-calc',d.tco2e==null?'':sGon(d.tco2e)); tc.style.fontWeight='650'; r.appendChild(tc);
     bd.appendChild(r);
   });
-  var fr=el('tr'), fc=el('td',null,fill(t('b4tongNam'),{y:y})); fc.colSpan=8; fc.style.textAlign='right'; fc.style.fontWeight='650'; fr.appendChild(fc);
+  var fr=el('tr'), fc=el('td','qt-tong-lab',fill(t('b4tongNam'),{y:y})); fc.colSpan=8; fc.style.fontWeight='650';
+  /* tren dien thoai bang cuon ngang: nhan tong kem luon so, de khong phai cuon moi thay */
+  fc.appendChild(el('span','qt-tong-dt',': '+sGon(kq.tong[y].tong))); fr.appendChild(fc);
   var ft=el('td','qt-calc',sGon(kq.tong[y].tong)); ft.style.fontWeight='700'; ft.setAttribute('data-tong',y+'|chitiet'); fr.appendChild(ft);
   bd.appendChild(fr);
   tb.appendChild(bd); w.appendChild(tb); cb.appendChild(w);
@@ -2899,8 +3078,8 @@ function goiY6(k,kq){
   var ys=namKy();
   if(k==='a'){ var chua=[0,1,2,3,4,5].filter(function(n){ return !xong(n); }).map(function(n){ return (L==='vi'?'Bước ':'Step ')+n; }); return chua.length ? fill(t('b6gA'),{s:chua.join(', ')}) : t('b6gAok'); }
   if(k==='b'){
-    var dem={ qd2626:0, rieng:0, ipcc:0, muc2:0 }; S.heSo.forEach(function(h){ if(dem[h.bac]!=null && h.giaTri!=null) dem[h.bac]++; });
-    var kct=S.nguon.filter(function(n){ return !!LOAI_BY[n.loai].pp.canhBao; }).length;
+    var dem={ qd2626:0, rieng:0, ipcc:0, muc2:0 }; S.heSo.forEach(function(h){ if(dem[h.bac]!=null && (h.giaTri!=null || h.thamSo.cachTinh==='congThuc')) dem[h.bac]++; });
+    var kct=S.nguon.filter(function(n){ return !!LOAI_BY[n.loai].pp.canhBao || (n.loai==='phattan' && !ptCoCongThuc(n)); }).length;
     return fill(t('b6gB'),{ a:dem.qd2626, b:dem.rieng, c:dem.ipcc, d:dem.muc2, e:kct });
   }
   if(k==='c'){ var n=kq.dong.filter(function(d){ return d.loi && !d.khongCT; }).length; return n ? fill(t('b6gC'),{n:n}) : t('b6gCok'); }
@@ -2935,7 +3114,13 @@ VE[6]=function(sec){
   cb=theCard(sec,t('b6dlH'),t('b6dlHint')); cb.parentNode.id='b6-dinhluong';
   cb.appendChild(el('p','qt-note',t('b6dlP')));
   if(ys.length){
-    var dong=kq.dong.filter(function(d){ return d.y===ys[0] && !d.loi; });
+    /* dong cua ca hai nam, moi khoa nguon|diem|khi mot lan, giu thu tu nguon: nguon chi
+       phat thai o nam thu hai (moi dua vao, chi dot CH4 nam sau) van nhap duoc U */
+    var seen=Object.create(null), dong=[];
+    S.nguon.forEach(function(n){ kq.dong.forEach(function(d){
+      if(d.n!==n || d.loi || ys.indexOf(d.y)<0) return;
+      var k=n.id+'|'+d.muc+'|'+d.khi; if(seen[k]) return; seen[k]=1; dong.push(d);
+    }); });
     if(dong.length){
       var w=el('div','qt-tbw'), tb=el('table','qt-t'), hr=el('tr');
       [t('b4cN'),t('b4cD'),t('b4cK'),t('b6uA'),t('b6uE'),t('b6uK')].forEach(function(x){ hr.appendChild(el('th',null,x)); });
@@ -2999,7 +3184,7 @@ Object.assign(T,{
   b7fRieng:['Theo bộ GWP của file (%g):','With the file’s GWP set (%g):'],
   b7fNay:['Theo bộ GWP đang chọn (%g):','With the currently chosen GWP set (%g):'],
   b7fNam:['năm %y: %v','%y: %v'],
-  b7fChuaDu:['năm %y: chưa đủ, %n dòng không tính được','%y: incomplete, %n rows not computed'],
+  b7fChuaDu:['năm %y: chưa đủ, %n dòng chưa tính được hoặc không có công thức','%y: incomplete, %n rows not computed or without a formula'],
   b7fDienCu:['Điền vào cột đã báo cáo','Fill “as reported”'],
   b7fDienMoi:['Điền vào cột tính lại','Fill “recalculated”'],
   b7fChuaGwp:['chưa chọn','not chosen'],
@@ -3013,6 +3198,10 @@ Object.assign(T,{
   b7mGt:['Giải thích nguyên nhân chênh lệch','Explanation of the difference']
 });
 var UI7={ file:null };
+KHI_DOI_HO_SO.push(function(){ UI7.file=null; });
+/* Tong ky truoc theo bo GWP dang chon: tinh moi lan can, vi nguoi dung co the doi bo GWP
+   o Buoc 4 sau khi da nap file ky truoc */
+function tongNay(f){ if(!S.gwp) return null; var c=clone(f.o); c.gwp=S.gwp; return tinhVoi(c).tong; }
 /* Tinh voi mot ho so khac, khong dong vao ho so dang mo */
 function tinhVoi(o){ var giu=S; S=o; try{ return tinhToan(); } finally { S=giu; } }
 function kyTruoc(){ var k=S.tinhLai.kyTruoc; return (k.namBatDau && k.namKetThuc) ? [k.namBatDau,k.namKetThuc] : []; }
@@ -3048,12 +3237,13 @@ VE[7]=function(sec){
     var f=UI7.file, box=el('div','qt-ct');
     box.appendChild(el('p',null,fill(t('b7fTen'),{f:f.ten,a:f.ky[0],b:f.ky[1]})));
     function dong(nhanK,tong){
+      if(!tong) return;
       var p=el('p'); p.appendChild(el('b',null,nhanK+' '));
-      p.appendChild(document.createTextNode(f.ky.map(function(y){ var o=tong[y]; return (o.loi||o.chuaGwp) ? fill(t('b7fChuaDu'),{y:y,n:o.loi+o.chuaGwp}) : fill(t('b7fNam'),{y:y,v:vietSo(o.tong,3)}); }).join('; ')));
+      p.appendChild(document.createTextNode(f.ky.map(function(y){ var o=tong[y]; return chuaDu(o) ? fill(t('b7fChuaDu'),{y:y,n:o.loi+o.chuaGwp+o.khongCT}) : fill(t('b7fNam'),{y:y,v:vietSo(o.tong,3)}); }).join('; ')));
       box.appendChild(p);
     }
     dong(fill(t('b7fRieng'),{g:f.gwp||t('b7fChuaGwp')}),f.rieng);
-    if(S.gwp) dong(fill(t('b7fNay'),{g:S.gwp}),f.nay);
+    if(S.gwp) dong(fill(t('b7fNay'),{g:S.gwp}),tongNay(f));
     var a=el('div','qt-acts');
     a.appendChild(nut(t('b7fDienCu'),'dien7|cu','qt-pri'));
     if(S.gwp) a.appendChild(nut(t('b7fDienMoi'),'dien7|moi'));
@@ -3101,8 +3291,7 @@ function napKyTruoc(file){
     o=chuanHoa(o);
     var ky=[o.ky.namBatDau,o.ky.namKetThuc];
     if(!ky[0] || !ky[1]){ loi(fill(t('eShape'),{f:file.name})); return; }
-    var rieng=tinhVoi(o).tong, c=clone(o); c.gwp=S.gwp;
-    UI7.file={ ten:file.name, ky:ky, gwp:o.gwp, rieng:rieng, nay:S.gwp?tinhVoi(c).tong:null };
+    UI7.file={ ten:file.name, ky:ky, gwp:o.gwp, rieng:tinhVoi(o).tong, o:o };
     hetLoi(); veLai();
   };
   r.readAsText(file,'utf-8');
@@ -3110,9 +3299,10 @@ function napKyTruoc(file){
 ACT.napKy7=function(){ var i=$('qt-file7'); if(i){ i.value=''; i.click(); } };
 ACT.dien7=function(p){
   var f=UI7.file; if(!f) return;
-  var tl=S.tinhLai, nguon=p[0]==='cu'?f.rieng:f.nay, dich=p[0]==='cu'?'ketQuaCu':'ketQuaMoi';
+  var tl=S.tinhLai, nguon=p[0]==='cu'?f.rieng:tongNay(f), dich=p[0]==='cu'?'ketQuaCu':'ketQuaMoi';
+  if(!nguon) return;
   tl.kyTruoc.namBatDau=f.ky[0]; tl.kyTruoc.namKetThuc=f.ky[1]; tl.fileKyTruoc=f.ten;
-  f.ky.forEach(function(y){ var o=nguon[y]; if(o && !o.loi && !o.chuaGwp) tl[dich][y]=o.tong; });
+  f.ky.forEach(function(y){ var o=nguon[y]; if(o && !chuaDu(o)) tl[dich][y]=o.tong; });
   daSua(); veLai(); toast(t('b7fDaDien'));
 };
 THIEU[7]=function(){
@@ -3173,7 +3363,17 @@ var ZIP=(function(){
 /* Thoat ky tu cho XML, bo ky tu dieu khien khong hop le trong XML 1.0 */
 var KY_TU_CAM=new RegExp('['+String.fromCharCode(0)+'-'+String.fromCharCode(8)+String.fromCharCode(11)+String.fromCharCode(12)+String.fromCharCode(14)+'-'+String.fromCharCode(31)+']','g');
 function xmlEsc(s){
-  return String(s==null?'':s).replace(KY_TU_CAM,'').replace(/[&<>"]/g,function(m){ return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[m]; });
+  s=String(s==null?'':s).replace(KY_TU_CAM,'');
+  /* XML 1.0 cung cam U+FFFE, U+FFFF va nua cap thay the dung le (dan tu chuong trinh khac) */
+  var out='';
+  for(var i=0;i<s.length;i++){
+    var c=s.charCodeAt(i);
+    if(c===0xFFFE || c===0xFFFF) continue;
+    if(c>=0xD800 && c<=0xDBFF){ var d=s.charCodeAt(i+1); if(d>=0xDC00 && d<=0xDFFF){ out+=s.charAt(i)+s.charAt(i+1); i++; } continue; }
+    if(c>=0xDC00 && c<=0xDFFF) continue;
+    out+=s.charAt(i);
+  }
+  return out.replace(/[&<>"]/g,function(m){ return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[m]; });
 }
 function taiBlob(blob,name){
   var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
@@ -3305,13 +3505,14 @@ function propApp(app){
    Thu tu phan tu trong pPr, rPr, tcPr, tblPr, sectPr theo luoc do ECMA-376, vi Word bao
    loi khi sai thu tu du LibreOffice van mo duoc.
 
-   Run: { x, b, i, u, hl (to vang), sub, sup, co (co chu pt) }. Chu so duoi ₀-₉ trong x
-   duoc doi ra chu so thuong dat o vi tri chi so duoi, vi phong Times New Roman khong
-   chac co cac ky tu nay. */
+   Run: { x, b, i, u, hl (to vang), sub, sup, co (co chu pt) }. Chu so duoi ₀-₉ (CO₂, CH₄) giu
+   nguyen ky tu Unicode trong cung mot run: neu tach thanh run rieng dinh dang chi so duoi thi
+   LibreOffice (va WPS dung chung cach dan dong) bo mat chu so khi no roi dung cuoi dong can
+   deu, doc thanh "CO". Phong thieu ky tu thi Word, LibreOffice tu lay phong khac. Chi so chu
+   (TPT_F trong cong thuc) khong co ky tu Unicode nen van dung vertAlign. */
 var DX=(function(){
   var W='xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';
   var RONG=9071;   /* be rong vung chu: 11906 - 1701 - 1134 */
-  var SO_DUOI='₀₁₂₃₄₅₆₇₈₉';
   function rPr(r){
     var s='';
     if(r.b) s+='<w:b/><w:bCs/>';
@@ -3324,19 +3525,7 @@ var DX=(function(){
     return s ? '<w:rPr>'+s+'</w:rPr>' : '';
   }
   function mot(r){ return '<w:r>'+rPr(r)+'<w:t xml:space="preserve">'+xmlEsc(r.x)+'</w:t></w:r>'; }
-  function run(r){
-    var x=String(r.x==null?'':r.x); if(!x) return '';
-    if(r.sub || r.sup) return mot(r);
-    var out='', buf='';
-    for(var i=0;i<x.length;i++){
-      var k=SO_DUOI.indexOf(x[i]);
-      if(k<0){ buf+=x[i]; continue; }
-      if(buf){ out+=mot(gan(r,{ x:buf })); buf=''; }
-      out+=mot(gan(r,{ x:String(k), sub:true }));
-    }
-    if(buf) out+=mot(gan(r,{ x:buf }));
-    return out;
-  }
+  function run(r){ var x=String(r.x==null?'':r.x); return x ? mot(r) : ''; }
   function gan(a,b){ var o={}, k; for(k in a) o[k]=a[k]; for(k in b) o[k]=b[k]; return o; }
   /* o: can ('left','center','right','both'), thut (thut dong dau, twip), trai, phai, treo (thut treo),
         truoc, sau (twip), dong (khoang cach dong, 240 = don), giu (keepNext), vien (duong ke duoi),
@@ -3485,7 +3674,7 @@ function bangTinhXlsx(){ return voiTiengViet(function(){
         var ghi=[];
         if(d.adGhi) ghi.push('AD = '+d.adGhi);
         if(d.efGhi) ghi.push('EF = '+d.efGhi);
-        if(d.muc==='2.1') ghi.push('GWP của môi chất '+d.n.phanLoai.trim()+' nhập ở Bước 3');
+        if(d.muc==='2.1') ghi.push('GWP của môi chất '+(d.n.phanLoai.trim()||'(chưa ghi loại)')+' nhập ở Bước 3');
         if(d.h && d.h.maHeSo && /^QĐ2626:/.test(d.h.maHeSo)) ghi.push('Mã '+d.h.maHeSo.replace(':',' '));
         if(d.h && !rong(d.h.nguonGoc)) ghi.push('Nguồn gốc hệ số: '+d.h.nguonGoc.trim());
         row.push(C(d.ad),C(d.adDv),d.ef!=null?C(d.ef):C(''),C(d.efDv||''),C(d.k),C(d.kGhi||''),
@@ -3526,7 +3715,8 @@ function bangTinhXlsx(){ return voiTiengViet(function(){
   dongTH('Tổng phát thải',function(y,o,c){ return F(c+rTT+'+'+c+rGT,o.tong,'soDam'); },true);
   th.push([N('Theo khí')]);
   ['CO2','CH4','N2O','HFC'].forEach(function(k){
-    if(!ys.some(function(y){ return kq.dong.some(function(d){ return d.y===y && d.khi===k && !d.loi; }); })) return;
+    /* nhu Buoc 4: khi chua quy doi duoc (chua chon bo GWP) khong hien 0 */
+    if(!ys.some(function(y){ return kq.tong[y].khi[k]; })) return;
     dongTH(KHI_NHAN[k],function(y,o){ return tongIf(','+qBT+'$B$2:$B$'+n+','+y+','+qBT+'$G$2:$G$'+n+','+chuoi(KHI_NHAN[k]),o.khi[k]||0); });
   });
   th.push([N('Theo loại nguồn')]);
@@ -3584,10 +3774,14 @@ function bangTinhXlsx(){ return voiTiengViet(function(){
       var r1=R.length;
       if(l.k==='moichat' && cP && cG){
         R.push([],[N('Bảng 2.1. Lượng môi chất lạnh nạp hàng năm')],[H('STT'),H('Loại môi chất lạnh'),H('Lượng môi chất nạp (kg)')]);
-        var loai=[]; ds.forEach(function(nn){ var k=nn.phanLoai.trim(); if(k && loai.indexOf(k)<0) loai.push(k); });
+        /* cong dung nhung dong ung dung gom vao mot loai moi chat (bo khoang trang hai dau, phan
+           biet hoa thuong, giu khoang trang giua): cong truc tiep cac o, khong dung SUMIF hay TRIM
+           vi SUMIF khong phan biet hoa thuong va coi * ? ~ la ky tu dai dien, TRIM gop khoang trang giua */
+        var loai=[]; ds.forEach(function(nn){ var k=nn.phanLoai.trim(); if(loai.indexOf(k)<0) loai.push(k); });
         loai.forEach(function(k,i){
-          var tong=0; ds.forEach(function(nn){ if(nn.phanLoai.trim()!==k) return; var so=laySo(nn.id,y,false); if(so && so.gioTri!=null) tong+=so.gioTri; });
-          R.push([C(i+1),C(k),F('SUMIF('+cP+r0+':'+cP+r1+','+chuoi(k)+','+cG+r0+':'+cG+r1+')',tong,'soTho')]);
+          var tong=null, o=[];
+          ds.forEach(function(nn,j){ if(nn.phanLoai.trim()!==k) return; var so=laySo(nn.id,y,false); if(so && so.gioTri!=null){ tong=(tong||0)+so.gioTri; o.push(cG+(r0+j)); } });
+          R.push([C(i+1),C(k||'(chưa ghi loại môi chất)'),o.length?F(o.join('+'),tong,'soTho'):C('')]);
         });
       }
       R.push([]);
@@ -3709,7 +3903,7 @@ var M06_CT={
   '2':'Môi chất lạnh, điểm 2.1: TPT_{mcl} = Σ_{j} (AD_{j} × GWP_{j}) / 1000, trong đó AD_{j} là lượng môi chất lạnh nạp bổ sung trong năm, tính theo kg.',
   '3':'Điện mua ngoài, điểm 3: TPT_{Đ} = AD_{n} × EF_{n}, trong đó AD_{n} tính theo MWh, EF_{n} tính theo tấn CO₂/MWh.',
   '4':'Hơi mua ngoài, điểm 4: TPT_{H,p} = AD_{H,p} × EF_{H,p}, trong đó AD_{H,p} tính theo tấn hơi.',
-  '4ct':'Hệ số phát thải của hơi tự tính theo công thức điểm 4, đã áp dụng đính chính tại Quyết định 334/QĐ-BCT: EF_{H,p} = Entanpi_{H,p} / η_{lò} × EF_{nhiên liệu} / 10⁹, hiệu suất lò hơi dùng dạng phân số.',
+  '4ct':'Hệ số phát thải của hơi tự tính theo công thức điểm 4, đã áp dụng đính chính tại Quyết định 334/QĐ-BCT ngày 06/02/2025: EF_{H,p} = Entanpi_{H,p} / η_{lò} × EF_{nhiên liệu} / 10⁹, hiệu suất lò hơi dùng dạng phân số.',
   '5':'Khai thác than, điểm 5: E_{CH4} = PQ × EF × CF / 1000 (điểm 5.1 hầm lò, 5.4 lộ thiên); E_{CO2} = PQ × EF_{CO2} × CF_{CO2} / 1000 (điểm 5.5); khối lượng riêng CF tính theo kg/m³.',
   '5dot':'CH₄ thu gom đem đốt: E_{CO2(CH4)} = AB × CF × CE × 44/16 / 1000 (điểm 5.2) và E_{CH4,kc} = AB × CF × (1 − CE) / 1000 (điểm 5.3), hiệu suất đốt CE dùng dạng phân số. Lượng CH₄ thu gom đem đốt không trừ khỏi phát thải CH₄ tại điểm 5.1, theo đúng Mục 2 Phụ lục II Thông tư 38/2023/TT-BCT.'
 };
@@ -3738,6 +3932,8 @@ function doanVan(s,nhan){
 /* Luong khi (tan): so lon giu 3 chu so thap phan, so nho giu 6 de khong mat CH4, N2O */
 function soLuong(v){ return v==null ? '' : vietSo(v,Math.abs(v)>=1?3:6); }
 function soVi(v,d){ return v==null ? '' : vietSo(v,d==null?3:d); }
+/* Ten loai moi chat lanh cua nguon, chua ghi thi danh dau thieu */
+function mcTen(n){ return rong(n.phanLoai) ? Rt('loại môi chất lạnh') : R(n.phanLoai.trim()); }
 function moTaNguon(n){ var s=[n.phanLoai,n.thietBi,n.viTri].filter(function(x){ return x && String(x).trim(); }).join(', '); return s || nhanNguon(n); }
 function boCuoi(s){ return String(s).replace(/[;.”\s]+$/,''); }
 function chuD16(l){ return l.d16.slice(1); }
@@ -3762,8 +3958,8 @@ function mau06(){ return voiTiengViet(function(){
   gach(dc);
   gach([R('Mã số thuế: '),Rv(cs.maSoThue,'mã số thuế')]);
   var gp=cs.giayPhep;
-  gach([R('Giấy phép kinh doanh: số '),Rv(gp.so,'số giấy phép'),R(', ngày cấp '),rong(gp.ngayCap)?Rt('ngày cấp'):R(dmyv(gp.ngayCap)),R(', nơi cấp '),Rv(gp.noiCap,'nơi cấp')]);
-  if(!rong(cs.phuLuc) || !rong(cs.stt)) gach([R('Số thứ tự trong danh mục tại Quyết định 42/2026/QĐ-TTg: Phụ lục '),Rv(cs.phuLuc,'phụ lục'),R(', số thứ tự '),Rv(cs.stt,'số thứ tự')]);
+  gach([R('Giấy phép kinh doanh: số '),Rv(gp.so,'số giấy phép'),R(', ngày cấp '),ngayHopLe(gp.ngayCap)?R(dmyv(gp.ngayCap)):Rt('ngày cấp'),R(', nơi cấp '),Rv(gp.noiCap,'nơi cấp')]);
+  gach([R('Số thứ tự trong danh mục tại Quyết định 42/2026/QĐ-TTg: Phụ lục '),Rv(cs.phuLuc,'phụ lục'),R(', số thứ tự '),Rv(cs.stt,'số thứ tự')]);
   if(!rong(cs.boQuanLy)) gach([R('Bộ quản lý lĩnh vực: Bộ '+cs.boQuanLy.trim())]);
   muc2(M06.I2);
   gach([R('Họ và tên: '),Rv(cs.daiDien.hoTen,'họ và tên người đại diện')]);
@@ -3803,6 +3999,7 @@ function mau06(){ return voiTiengViet(function(){
   muc2(M06.III1);
   var co={}; S.nguon.forEach(function(n){ co[n.loai]=1; });
   p([R('Phát thải khí nhà kính của cơ sở được tính theo Điều 19 và Mục 2 Phụ lục II Thông tư 38/2023/TT-BCT: lượng phát thải của từng khí nhà kính bằng số liệu hoạt động nhân với hệ số phát thải; tổng lượng phát thải quy đổi ra tấn CO₂ tương đương theo tiềm năng nóng lên toàn cầu (GWP) của từng khí. Công thức áp dụng cho các nguồn của cơ sở:')]);
+  if(!S.nguon.length) gach([Rt('nguồn phát thải, Bước 1')]);
   if(co.codinh || co.didong) gach(Rct(M06_CT['1']));
   if(co.moichat) gach(Rct(M06_CT['2']));
   if(co.dien) gach(Rct(M06_CT['3']));
@@ -3810,9 +4007,11 @@ function mau06(){ return voiTiengViet(function(){
     gach(Rct(M06_CT['4']));
     if(S.heSo.some(function(h){ var n=timNguon(h.nguonId); return n && n.loai==='hoi' && h.thamSo.cachTinh==='congThuc'; })) gach(Rct(M06_CT['4ct']));
   }
-  if(co.phattan){
+  var ptCo=nguonTheoLoai('phattan').filter(ptCoCongThuc), ptKhong=nguonTheoLoai('phattan').filter(function(n){ return !ptCoCongThuc(n); });
+  if(ptKhong.length) gach([R(lv(LOAI_BY.phattan.ten)+' ('+ptKhong.map(moTaNguon).join('; ')+'): '),Rt('phương pháp tính, Mục 2 Phụ lục II Thông tư 38/2023/TT-BCT chỉ có công thức cho khai thác than hầm lò và lộ thiên')]);
+  if(ptCo.length){
     gach(Rct(M06_CT['5']));
-    if(nguonTheoLoai('phattan').some(function(n){ return ys.some(function(y){ var so=laySo(n.id,y,false); return so && so.chiTiet.ch4Dot>0; }); })) gach(Rct(M06_CT['5dot']));
+    if(ptCo.some(function(n){ return ys.some(function(y){ var so=laySo(n.id,y,false); return so && so.chiTiet.ch4Dot>0; }); })) gach(Rct(M06_CT['5dot']));
   }
   LOAI.filter(function(l){ return l.pp.canhBao && co[l.k]; }).forEach(function(l){
     gach([R(lv(l.ten)+': '),Rt('phương pháp tính, Thông tư 38/2023/TT-BCT không có công thức cho loại nguồn này')]);
@@ -3820,8 +4019,13 @@ function mau06(){ return voiTiengViet(function(){
   if(S.gwp){
     var g=DATA.gwp[S.gwp];
     var gr=[R('Tiềm năng nóng lên toàn cầu theo '+GWP_TEN[S.gwp]+': CO₂ = 1; CH₄ = '+vietSo(g.CH4)+'; N₂O = '+vietSo(g.N2O)+'.')];
-    var mc=[]; nguonTheoLoai('moichat').forEach(function(n){ var h=layHs(n.id,'GWP',null,false); if(h && h.giaTri!=null){ var s=n.phanLoai.trim()+' = '+vietSo(h.giaTri); if(mc.indexOf(s)<0) mc.push(s); } });
-    if(mc.length) gr.push(R(' GWP của môi chất lạnh: '+mc.join('; ')+'.'));
+    var mc=[], mcR=[]; nguonTheoLoai('moichat').forEach(function(n){
+      var h=layHs(n.id,'GWP',null,false); if(!h || h.giaTri==null) return;
+      var s=n.phanLoai.trim()+' = '+vietSo(h.giaTri); if(mc.indexOf(s)>=0) return; mc.push(s);
+      if(mcR.length) mcR.push(R('; '));
+      mcR.push(mcTen(n),R(' = '+vietSo(h.giaTri)));
+    });
+    if(mcR.length) gr=gr.concat([R(' GWP của môi chất lạnh: ')],mcR,[R('.')]);
     p(gr);
   } else p([R('Tiềm năng nóng lên toàn cầu: '),Rt('bộ GWP')]);
   var nsl=[]; S.soLieu.forEach(function(so){ if(ys.indexOf(so.nam)>=0 && !rong(so.nguonSoLieu) && nsl.indexOf(so.nguonSoLieu.trim())<0) nsl.push(so.nguonSoLieu.trim()); });
@@ -3842,10 +4046,12 @@ function mau06(){ return voiTiengViet(function(){
     var ds=theoBac[bac]; if(!ds) return; coHs=true;
     gach([R((BAC_M06[bac]||'Chưa ghi bậc hệ số')+':')]);
     ds.forEach(function(o){
-      var kh=o.h.khi==='GWP' ? 'GWP '+o.n.phanLoai.trim() : (KHI_NHAN[o.h.khi]||o.h.khi);
+      var kh=o.h.khi==='GWP' ? 'GWP '+(o.n.phanLoai.trim()||'môi chất lạnh') : (KHI_NHAN[o.h.khi]||o.h.khi);
       var ts=o.h.thamSo, r;
       if(ts.cachTinh==='congThuc'){
-        r=[R('+ '+moTaNguon(o.n)+', '+kh+': tự tính theo công thức điểm 4, hiệu suất lò hơi '+vietSo(ts.hieuSuat)+' %, hệ số CO₂ của nhiên liệu lò hơi '+vietSo(ts.efNhienLieu)+' kg CO₂/TJ; nguồn gốc hệ số nhiên liệu: '),Rv(ts.efNguon,'nguồn gốc')];
+        r=[R('+ '+moTaNguon(o.n)+', '+kh+': tự tính theo công thức điểm 4, hiệu suất lò hơi '),
+           ts.hieuSuat==null?Rt('hiệu suất lò hơi'):R(vietSo(ts.hieuSuat)+' %'),R(', hệ số CO₂ của nhiên liệu lò hơi '),
+           ts.efNhienLieu==null?Rt('hệ số CO₂ của nhiên liệu'):R(vietSo(ts.efNhienLieu)+' kg CO₂/TJ'),R('; nguồn gốc hệ số nhiên liệu: '),Rv(ts.efNguon,'nguồn gốc')];
       } else {
         r=[R('+ '+moTaNguon(o.n)+', '+kh+(o.y?', năm '+o.y:'')+': '+vietSo(o.h.giaTri)+(o.h.donVi?' '+o.h.donVi:''))];
         if(ts.cf!=null) r.push(R(', khối lượng riêng '+vietSo(ts.cf)+' kg/m³'));
@@ -3863,11 +4069,13 @@ function mau06(){ return voiTiengViet(function(){
   if(!ys.length) p([Rt('kỳ báo cáo')]);
   else if(!S.nguon.length) p([Rt('nguồn phát thải, Bước 1')]);
   ys.forEach(function(y){
-    B.push({ k:'p', r:[R('Năm '+y,{ b:true, i:true })] });
+    B.push({ k:'p', r:[R('Năm '+y,{ b:true, i:true })], giu:true });
     LOAI.forEach(function(l){
       var ds=nguonTheoLoai(l.k); if(!ds.length) return;
       if(l.k==='moichat') B.push(bang21(ds,y));
-      B.push(bangSoLieu(l,ds,y));
+      var bsl=bangSoLieu(l,ds,y); B.push(bsl);
+      if(bsl.them.length) B.push({ k:'nho', r:[R('Số liệu dùng để tính, ngoài các cột của biểu: '+bsl.them.join('. ')+'.')] });
+      if(bsl.thieu.length) B.push({ k:'nho', r:[Rt(bsl.thieu.join('; '))] });
       var uoc=ds.filter(function(n){ var so=laySo(n.id,y,false); return so && so.laUocTinh; });
       if(uoc.length) B.push({ k:'nho', r:[R('Số liệu ước tính: '+uoc.map(function(n){ var so=laySo(n.id,y,false); return moTaNguon(n)+(rong(so.cachUocTinh)?'':', '+so.cachUocTinh.trim()); }).join('; ')+'.')] });
     });
@@ -3891,7 +4099,7 @@ function mau06(){ return voiTiengViet(function(){
   if(S.qc.length){
     p([R('Kiểm soát chất lượng: ',{ i:true }),R('cơ sở thực hiện kiểm soát chất lượng theo Điều 20 Thông tư 38/2023/TT-BCT với các nội dung sau:')]);
     S.qc.forEach(function(q){
-      var r=[Rv(q.noiDung,'nội dung kiểm soát'),R(': '),Rv(q.nguoiKiem,'người kiểm tra'),R(' kiểm tra ngày '),rong(q.ngay)?Rt('ngày'):R(dmyv(q.ngay)),R('; kết quả: ')];
+      var r=[Rv(q.noiDung,'nội dung kiểm soát'),R(': '),Rv(q.nguoiKiem,'người kiểm tra'),R(' kiểm tra ngày '),ngayHopLe(q.ngay)?R(dmyv(q.ngay)):Rt('ngày'),R('; kết quả: ')];
       if(q.ketQua==='dat') r.push(R('đạt.'));
       else if(q.ketQua==='saiSot'){ r.push(R('có sai sót. Sai sót phát hiện: ')); r.push(Rv(q.loiPhatHien,'sai sót')); r.push(R('. Cách xử lý: ')); r.push(Rv(q.cachXuLy,'cách xử lý')); r.push(R('.')); }
       else r.push(Rt('kết quả'));
@@ -3905,7 +4113,12 @@ function mau06(){ return voiTiengViet(function(){
   var uys=ys.map(function(y){ return { y:y, u:uTong(kq,y) }; }).filter(function(o){ return o.u; });
   if(uys.length){
     p([R('Định lượng độ không chắc chắn: ',{ i:true }),R('theo Phương pháp 1, Chương 3, Quyển 1 Hướng dẫn IPCC 2006, phương trình 3.1 cho từng nguồn và phương trình 3.2 cho tổng, giả định các sai số độc lập với nhau.')]);
-    uys.forEach(function(o){ gach([R('Năm '+o.y+': độ không chắc chắn của tổng lượng phát thải là ±'+vietSo(o.u.u,1)+' %, tính trên '+vietSo(o.u.phu,1)+' % tổng lượng phát thải có đủ số liệu độ không chắc chắn.')]); });
+    /* chi goi la do khong chac chan cua tong khi moi dong phat thai deu co so lieu U */
+    uys.forEach(function(o){
+      gach([R(o.u.phu>=99.95
+        ? 'Năm '+o.y+': độ không chắc chắn của tổng lượng phát thải là ±'+vietSo(o.u.u,1)+' %.'
+        : 'Năm '+o.y+': độ không chắc chắn của phần phát thải có đủ số liệu độ không chắc chắn, chiếm '+vietSo(o.u.phu,1)+' % tổng lượng phát thải, là ±'+vietSo(o.u.u,1)+' %.')]);
+    });
   } else p([R('Định lượng độ không chắc chắn: ',{ i:true }),R('chưa định lượng do chưa có số liệu độ không chắc chắn của số liệu hoạt động và hệ số phát thải.')]);
   B=B.concat(doanVan(S.khongChacChan.dinhLuong));
 
@@ -3921,7 +4134,12 @@ function batBuoc(c,so){
 }
 /* O cua bang so lieu: gia tri theo cot cua bieu */
 function oSoLieu(n,so,c){
-  if(c.n) return { x:giaTriNguon(n,c) };
+  if(c.n){
+    var gv=giaTriNguon(n,c);
+    /* truong bat buoc cua nguon (khai o Buoc 1) con trong thi danh dau thieu */
+    var nf=LOAI_BY[n.loai].nf.filter(function(f){ return f.f===c.n; })[0];
+    return (rong(gv) && nf && nf.req) ? { r:[Rt()] } : { x:gv };
+  }
   if(c.calc==='tj'){ var tj=tjCua(n,so); return { x:tj?vietSo(tj.v,6):'', can:'right' }; }
   var v=getP(so,duongDan(c.s));
   if(rong(v) || v==null) return batBuoc(c,so) ? { r:[Rt()] } : { x:'' };
@@ -3933,17 +4151,34 @@ function bangSoLieu(l,ds,y){
   var b=l.bang, cols=b.cot.filter(function(c){ return c.tt38!==false; });
   var tieu=(b.so?'Bảng '+b.so+'. ':'')+lv(b.ten)+', năm '+y;
   var cot=[{ x:'STT', w:7, can:'center' }].concat(cols.map(function(c){ return { x:lv(c.lab), w:12 }; }));
+  var thieuThem=[], them=[];
   var dong=ds.map(function(n,i){
     var so=laySo(n.id,y,false)||{ gioTri:null, donVi:b.donVi||'', chiTiet:{} };
+    /* cot ung dung them (nhiet tri, TJ, tong luong hoi, CH4 dem dot...) khong co trong bieu cua
+       Thong tu nhung la so lieu da dung de tinh: ghi duoi bang de nguoi tham dinh lan lai duoc */
+    var gt=[];
+    b.cot.forEach(function(c){
+      if(c.tt38!==false) return;
+      var v=c.calc==='tj' ? (tjCua(n,so)||{}).v : getP(so,duongDan(c.s));
+      if(v==null || rong(v)) return;
+      gt.push(lv(c.lab)+': '+(typeof v==='number'?vietSo(v,c.calc?6:10):String(v)));
+    });
+    if(gt.length) them.push(moTaNguon(n)+': '+gt.join('; '));
+    /* cot ung dung them khong in vao bang nhung can cho cong thuc: con thieu thi ghi duoi bang */
+    b.cot.forEach(function(c){ if(c.tt38===false && c.s && batBuoc(c,so) && (getP(so,duongDan(c.s))==null || rong(getP(so,duongDan(c.s))))) thieuThem.push(lv(c.lab).toLocaleLowerCase('vi')+' của '+moTaNguon(n)); });
     return [{ x:String(i+1), can:'center' }].concat(cols.map(function(c){ return oSoLieu(n,so,c); }));
   });
-  return { k:'bang', tieu:tieu, cot:cot, dong:dong };
+  return { k:'bang', tieu:tieu, cot:cot, dong:dong, thieu:thieuThem, them:them };
 }
 function bang21(ds,y){
-  var loai=[]; ds.forEach(function(n){ var k=n.phanLoai.trim(); if(k && loai.indexOf(k)<0) loai.push(k); });
+  /* nguon chua ghi loai gom vao mot dong rieng, danh dau thieu loai; dong co thiet bi chua co
+     so lieu thi ghi ro tong chua day du */
+  var loai=[]; ds.forEach(function(n){ var k=n.phanLoai.trim(); if(loai.indexOf(k)<0) loai.push(k); });
   var dong=loai.map(function(k,i){
-    var tong=null; ds.forEach(function(n){ if(n.phanLoai.trim()!==k) return; var so=laySo(n.id,y,false); if(so && so.gioTri!=null) tong=(tong||0)+so.gioTri; });
-    return [{ x:String(i+1), can:'center' },{ x:k },tong==null?{ r:[Rt()] }:{ x:vietSo(tong,6), can:'right' }];
+    var tong=null, thieu=0;
+    ds.forEach(function(n){ if(n.phanLoai.trim()!==k) return; var so=laySo(n.id,y,false); if(so && so.gioTri!=null) tong=(tong||0)+so.gioTri; else thieu++; });
+    var o=tong==null ? { r:[Rt()] } : thieu ? { r:[R(vietSo(tong,6)),R(' '),{ x:'[Chưa đầy đủ: '+thieu+' thiết bị chưa có số liệu]', hl:true }], can:'right' } : { x:vietSo(tong,6), can:'right' };
+    return [{ x:String(i+1), can:'center' },k?{ x:k }:{ r:[Rt('loại môi chất lạnh')] },o];
   });
   return { k:'bang', tieu:'Bảng 2.1. Lượng môi chất lạnh nạp hàng năm, năm '+y, cot:[{ x:'STT', w:6, can:'center' },{ x:'Loại môi chất lạnh', w:30 },{ x:'Lượng môi chất nạp (kg)', w:20 }], dong:dong };
 }
@@ -3958,7 +4193,7 @@ function bangKetQua(kq,y){
       var d=ds[k], r=[];
       if(k===i) r.push({ x:nhanNguon(n), rs:j-i });
       if(d.loi){
-        var ten=d.khi ? (d.khi==='HFC'?n.phanLoai:KHI_NHAN[d.khi]||d.khi)+': ' : '';
+        var ten=d.khi ? (d.khi==='HFC'?(n.phanLoai.trim()||'môi chất lạnh'):KHI_NHAN[d.khi]||d.khi)+': ' : '';
         r.push({ r:[{ x:d.khongCT?'[Thông tư 38/2023/TT-BCT không có công thức cho loại nguồn này; cơ sở tự tính và bổ sung]':'['+ten+'chưa tính được: '+boCuoi(d.loi)+']', hl:true }], gop:8 });
         dong.push(r); continue;
       }
@@ -3967,7 +4202,7 @@ function bangKetQua(kq,y){
       else if(d.muc==='2.1'){ ef='—'; efDv=''; }
       else ef=vietSo(d.ef,6)+(d.cf!=null?' (CF = '+vietSo(d.cf)+' kg/m³)':'');
       r.push({ x:vietSo(d.ad,6), can:'right' },{ x:d.adDv },{ x:ef, can:d.ef!=null?'right':'left' },{ x:efDv },
-             { x:d.khi==='HFC'?n.phanLoai.trim():KHI_NHAN[d.khi] },{ x:soLuong(d.luong), can:'right' },
+             d.khi==='HFC'?{ r:[mcTen(n)] }:{ x:KHI_NHAN[d.khi] },{ x:soLuong(d.luong), can:'right' },
              d.gwp==null?{ r:[Rt('bộ GWP')] }:{ x:vietSo(d.gwp), can:'right' },
              { x:d.tco2e==null?'':soVi(d.tco2e), can:'right' });
       dong.push(r);
@@ -3975,8 +4210,8 @@ function bangKetQua(kq,y){
     i=j;
   }
   var o=kq.tong[y], nh=[R('Tổng cộng',{ b:true })];
-  if(o.loi || o.chuaGwp || o.khongCT) nh.push(R(' '),{ x:'[chưa đầy đủ]', hl:true });
-  dong.push([{ r:nh, gop:8, can:'right' },{ r:[R(soVi(o.tong),{ b:true })], can:'right' }]);
+  if(chuaDu(o)) nh.push(R(' '),{ x:'[chưa đầy đủ]', hl:true });
+  dong.push([{ r:nh, gop:8, can:'right', tongDt:soVi(o.tong) },{ r:[R(soVi(o.tong),{ b:true })], can:'right' }]);
   return { k:'bang', tieu:'Bảng tổng hợp kết quả kiểm kê khí nhà kính năm '+y, cot:cot, dong:dong, nho:true };
 }
 function tinhLaiM06(B){
@@ -4027,7 +4262,7 @@ function mau06Docx(B){
     }
     else if(k.k==='muc') out+=DX.p([R(k.x,{ b:true })],{ thut:TH, giu:true, truoc:180 });
     else if(k.k==='muc2') out+=DX.p([R(k.x,{ b:true })],{ thut:TH, giu:true, truoc:120 });
-    else if(k.k==='p') out+=DX.p(k.r,{ thut:TH });
+    else if(k.k==='p') out+=DX.p(k.r,{ thut:TH, giu:k.giu });
     else if(k.k==='gach') out+=DX.p(k.cap===2?k.r:[R('- ')].concat(k.r),{ thut:k.cap===2?TH*2:TH });
     else if(k.k==='nho') out+=DX.p(k.r,{ i:true, co:12, thut:TH, truoc:0 });
     else if(k.k==='bang'){
@@ -4096,7 +4331,13 @@ function mau06Html(B){
       var bd=el('tbody');
       k.dong.forEach(function(d){
         var tr=el('tr');
-        d.forEach(function(c){ var td=vRuns(el('td',c.can==='right'?'qt-r':c.can==='center'?'qt-c':null),c.r||[{ x:c.x==null?'':String(c.x) }]); if(c.gop) td.colSpan=c.gop; if(c.rs) td.rowSpan=c.rs; if(c.b) td.style.fontWeight='700'; tr.appendChild(td); });
+        d.forEach(function(c){
+          var td=vRuns(el('td',c.can==='right'?'qt-r':c.can==='center'?'qt-c':null),c.r||[{ x:c.x==null?'':String(c.x) }]);
+          if(c.gop) td.colSpan=c.gop; if(c.rs) td.rowSpan=c.rs; if(c.b) td.style.fontWeight='700';
+          /* dong tong tren dien thoai: nhan kem so, bang cuon ngang khong che mat so */
+          if(c.tongDt){ td.classList.add('qt-tong-lab'); td.appendChild(el('span','qt-tong-dt',': '+c.tongDt)); }
+          tr.appendChild(td);
+        });
         bd.appendChild(tr);
       });
       tb.appendChild(bd); w.appendChild(tb); root.appendChild(w);
@@ -4195,7 +4436,9 @@ function kiemPhanF(kq){
   var nhom=S.coSo.nhom, ghiNhom=nhom ? t('nhom'+nhom+'d') : '';
   out.push({ kq:nhom?'dat':'chua', ghi:nhom?lv(['Nhóm ','Group '])+nhom:'' });
   var thieuNam=ys.map(function(y){ var o=kq.tong[y], n=o.loi+o.chuaGwp+o.khongCT; return n ? fill(t('f2nam'),{y:y,n:n}) : ''; }).filter(Boolean);
-  out.push({ kq:(ys.length===2 && S.nguon.length && !thieuNam.length)?'dat':'chua', ghi:!ys.length?t('b2mKy'):!S.nguon.length?t('b2mNguon'):thieuNam.join('; ') });
+  var lechKy=ys.length ? (ys[1]!==ys[0]+1 ? t('kyLienKe') : canhBaoKy()) : '';
+  out.push({ kq:(ys.length===2 && !lechKy && S.nguon.length && !thieuNam.length)?'dat':'chua',
+             ghi:!ys.length?t('b2mKy'):lechKy?lechKy:!S.nguon.length?t('b2mNguon'):thieuNam.join('; ') });
   out.push({ kq:LOAI.every(function(l){ return nguonTheoLoai(l.k).length || S.loaiKhongCo.indexOf(l.k)>=0; })?'dat':'chua' });
   if(nguonTheoLoai('dien').length) out.push({ kq:'dat' });
   else if(S.loaiKhongCo.indexOf('dien')>=0) out.push({ kq:'tu', ghi:t('f4dien') });
@@ -4250,7 +4493,7 @@ VE[8]=function(sec){
       var r=el('tr'), c0=el('td',null,x[1]); if(x[0]==='tong') c0.style.fontWeight='650'; r.appendChild(c0);
       ys.forEach(function(y){
         var o=kq.tong[y], td=el('td','qt-calc',sGon(o[x[0]])); td.setAttribute('data-kq8',y+'|'+x[0]);
-        if(o.loi || o.chuaGwp || o.khongCT){ td.appendChild(document.createTextNode(' ')); td.appendChild(el('span','qt-chip qt-cw',t('b4chuaDu'))); }
+        if(chuaDu(o,x[0])){ td.appendChild(document.createTextNode(' ')); td.appendChild(el('span','qt-chip qt-cw',t('b4chuaDu'))); }
         r.appendChild(td);
       });
       bd.appendChild(r);
@@ -4334,10 +4577,16 @@ function init(){
   document.addEventListener('keydown',function(e){ if(e.key==='Escape' && !$('qt-modal').hidden) ACT.dongTra(); });
   $('qt-modal').addEventListener('click',function(e){ if(e.target===this) ACT.dongTra(); });
   window.addEventListener('hashchange',function(){ go(location.hash.slice(1),true); });
+  window.addEventListener('pagehide',xaLuu);
+  document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='hidden') xaLuu(); });
   var h=location.hash.slice(1);
   cur=(h==='dau'||/^buoc-[0-8]$/.test(h))?h:'dau';
-  applyLang();
-  dienForm();
+  try{ applyLang(); dienForm(); }
+  catch(e){
+    /* ban luu tam lam hong man hinh: bo ban do, mo ho so trong thay vi de trang trang */
+    S=macDinh(); SAVED=null; store.del(KEY); doiHoSo();
+    applyLang(); dienForm();
+  }
 }
 init();
 })();</script>

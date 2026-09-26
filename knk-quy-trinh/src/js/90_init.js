@@ -32,9 +32,15 @@ function init(){
   document.addEventListener('keydown',function(e){ if(e.key==='Escape' && !$('qt-modal').hidden) ACT.dongTra(); });
   $('qt-modal').addEventListener('click',function(e){ if(e.target===this) ACT.dongTra(); });
   window.addEventListener('hashchange',function(){ go(location.hash.slice(1),true); });
+  window.addEventListener('pagehide',xaLuu);
+  document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='hidden') xaLuu(); });
   var h=location.hash.slice(1);
   cur=(h==='dau'||/^buoc-[0-8]$/.test(h))?h:'dau';
-  applyLang();
-  dienForm();
+  try{ applyLang(); dienForm(); }
+  catch(e){
+    /* ban luu tam lam hong man hinh: bo ban do, mo ho so trong thay vi de trang trang */
+    S=macDinh(); SAVED=null; store.del(KEY); doiHoSo();
+    applyLang(); dienForm();
+  }
 }
 init();

@@ -86,7 +86,9 @@ function kiemPhanF(kq){
   var nhom=S.coSo.nhom, ghiNhom=nhom ? t('nhom'+nhom+'d') : '';
   out.push({ kq:nhom?'dat':'chua', ghi:nhom?lv(['Nhóm ','Group '])+nhom:'' });
   var thieuNam=ys.map(function(y){ var o=kq.tong[y], n=o.loi+o.chuaGwp+o.khongCT; return n ? fill(t('f2nam'),{y:y,n:n}) : ''; }).filter(Boolean);
-  out.push({ kq:(ys.length===2 && S.nguon.length && !thieuNam.length)?'dat':'chua', ghi:!ys.length?t('b2mKy'):!S.nguon.length?t('b2mNguon'):thieuNam.join('; ') });
+  var lechKy=ys.length ? (ys[1]!==ys[0]+1 ? t('kyLienKe') : canhBaoKy()) : '';
+  out.push({ kq:(ys.length===2 && !lechKy && S.nguon.length && !thieuNam.length)?'dat':'chua',
+             ghi:!ys.length?t('b2mKy'):lechKy?lechKy:!S.nguon.length?t('b2mNguon'):thieuNam.join('; ') });
   out.push({ kq:LOAI.every(function(l){ return nguonTheoLoai(l.k).length || S.loaiKhongCo.indexOf(l.k)>=0; })?'dat':'chua' });
   if(nguonTheoLoai('dien').length) out.push({ kq:'dat' });
   else if(S.loaiKhongCo.indexOf('dien')>=0) out.push({ kq:'tu', ghi:t('f4dien') });
@@ -141,7 +143,7 @@ VE[8]=function(sec){
       var r=el('tr'), c0=el('td',null,x[1]); if(x[0]==='tong') c0.style.fontWeight='650'; r.appendChild(c0);
       ys.forEach(function(y){
         var o=kq.tong[y], td=el('td','qt-calc',sGon(o[x[0]])); td.setAttribute('data-kq8',y+'|'+x[0]);
-        if(o.loi || o.chuaGwp || o.khongCT){ td.appendChild(document.createTextNode(' ')); td.appendChild(el('span','qt-chip qt-cw',t('b4chuaDu'))); }
+        if(chuaDu(o,x[0])){ td.appendChild(document.createTextNode(' ')); td.appendChild(el('span','qt-chip qt-cw',t('b4chuaDu'))); }
         r.appendChild(td);
       });
       bd.appendChild(r);

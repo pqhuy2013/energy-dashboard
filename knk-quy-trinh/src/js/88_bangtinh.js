@@ -35,7 +35,7 @@ function bangTinhXlsx(){ return voiTiengViet(function(){
         var ghi=[];
         if(d.adGhi) ghi.push('AD = '+d.adGhi);
         if(d.efGhi) ghi.push('EF = '+d.efGhi);
-        if(d.muc==='2.1') ghi.push('GWP của môi chất '+d.n.phanLoai.trim()+' nhập ở Bước 3');
+        if(d.muc==='2.1') ghi.push('GWP của môi chất '+(d.n.phanLoai.trim()||'(chưa ghi loại)')+' nhập ở Bước 3');
         if(d.h && d.h.maHeSo && /^QĐ2626:/.test(d.h.maHeSo)) ghi.push('Mã '+d.h.maHeSo.replace(':',' '));
         if(d.h && !rong(d.h.nguonGoc)) ghi.push('Nguồn gốc hệ số: '+d.h.nguonGoc.trim());
         row.push(C(d.ad),C(d.adDv),d.ef!=null?C(d.ef):C(''),C(d.efDv||''),C(d.k),C(d.kGhi||''),
@@ -76,7 +76,8 @@ function bangTinhXlsx(){ return voiTiengViet(function(){
   dongTH('Tổng phát thải',function(y,o,c){ return F(c+rTT+'+'+c+rGT,o.tong,'soDam'); },true);
   th.push([N('Theo khí')]);
   ['CO2','CH4','N2O','HFC'].forEach(function(k){
-    if(!ys.some(function(y){ return kq.dong.some(function(d){ return d.y===y && d.khi===k && !d.loi; }); })) return;
+    /* nhu Buoc 4: khi chua quy doi duoc (chua chon bo GWP) khong hien 0 */
+    if(!ys.some(function(y){ return kq.tong[y].khi[k]; })) return;
     dongTH(KHI_NHAN[k],function(y,o){ return tongIf(','+qBT+'$B$2:$B$'+n+','+y+','+qBT+'$G$2:$G$'+n+','+chuoi(KHI_NHAN[k]),o.khi[k]||0); });
   });
   th.push([N('Theo loại nguồn')]);
@@ -134,10 +135,14 @@ function bangTinhXlsx(){ return voiTiengViet(function(){
       var r1=R.length;
       if(l.k==='moichat' && cP && cG){
         R.push([],[N('Bảng 2.1. Lượng môi chất lạnh nạp hàng năm')],[H('STT'),H('Loại môi chất lạnh'),H('Lượng môi chất nạp (kg)')]);
-        var loai=[]; ds.forEach(function(nn){ var k=nn.phanLoai.trim(); if(k && loai.indexOf(k)<0) loai.push(k); });
+        /* cong dung nhung dong ung dung gom vao mot loai moi chat (bo khoang trang hai dau, phan
+           biet hoa thuong, giu khoang trang giua): cong truc tiep cac o, khong dung SUMIF hay TRIM
+           vi SUMIF khong phan biet hoa thuong va coi * ? ~ la ky tu dai dien, TRIM gop khoang trang giua */
+        var loai=[]; ds.forEach(function(nn){ var k=nn.phanLoai.trim(); if(loai.indexOf(k)<0) loai.push(k); });
         loai.forEach(function(k,i){
-          var tong=0; ds.forEach(function(nn){ if(nn.phanLoai.trim()!==k) return; var so=laySo(nn.id,y,false); if(so && so.gioTri!=null) tong+=so.gioTri; });
-          R.push([C(i+1),C(k),F('SUMIF('+cP+r0+':'+cP+r1+','+chuoi(k)+','+cG+r0+':'+cG+r1+')',tong,'soTho')]);
+          var tong=null, o=[];
+          ds.forEach(function(nn,j){ if(nn.phanLoai.trim()!==k) return; var so=laySo(nn.id,y,false); if(so && so.gioTri!=null){ tong=(tong||0)+so.gioTri; o.push(cG+(r0+j)); } });
+          R.push([C(i+1),C(k||'(chưa ghi loại môi chất)'),o.length?F(o.join('+'),tong,'soTho'):C('')]);
         });
       }
       R.push([]);

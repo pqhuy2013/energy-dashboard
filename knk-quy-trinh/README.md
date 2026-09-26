@@ -25,9 +25,17 @@ python3 build.py
 
 Ngày dựng mặc định là ngày chạy lệnh, gán vào hằng số duy nhất `window.__QT_BUILD__`. Trang không dùng đồng hồ của người xem để hiện ngày chốt. Muốn dựng lại đúng một bản cũ thì đặt `QT_BUILD_DATE=YYYY-MM-DD`.
 
+`python3 build.py --kiem` dựng lại trong bộ nhớ với đúng ngày dựng ghi trong `index.html` rồi so từng byte, không ghi file. Khác nhau nghĩa là đã sửa `src/` hoặc `../knk/` mà chưa dựng lại.
+
 ## Kiểm thử
 
 Cần Node và gói `playwright` cài toàn cục kèm Chromium. Giai đoạn 5 cần thêm Python 3 có `python-docx`, `openpyxl`, `pymupdf`, và LibreOffice Writer, Calc (gói `libreoffice-writer-nogui`, `libreoffice-calc-nogui`), để mở file xuất và tính lại công thức.
+
+```
+bash tests/chay_tat_ca.sh
+```
+
+Lệnh trên kiểm đóng gói bằng `build.py --kiem` rồi chạy lần lượt mọi bộ. Chạy riêng từng bộ:
 
 ```
 python3 build.py
@@ -36,7 +44,15 @@ NODE_PATH=$(npm root -g) node tests/giai_doan_2.test.js
 NODE_PATH=$(npm root -g) node tests/giai_doan_3.test.js
 NODE_PATH=$(npm root -g) node tests/giai_doan_4.test.js
 NODE_PATH=$(npm root -g) node tests/giai_doan_5.test.js
+NODE_PATH=$(npm root -g) node tests/toan_luong.test.js
+NODE_PATH=$(npm root -g) node tests/hoi_quy_nhap.test.js
+NODE_PATH=$(npm root -g) node tests/hoi_quy_buoc.test.js
+NODE_PATH=$(npm root -g) node tests/hoi_quy_file.test.js
 ```
+
+`toan_luong.test.js` là bộ nghiệm thu Giai đoạn 6: một người dùng làm trọn một kỳ 2024–2025 từ hồ sơ trống, chỉ qua giao diện, qua đủ 9 màn hình; bốn phép kiểm chứng số học của kế hoạch; xuất và nạp lại file; chuyển VI sang EN rồi về VI trên từng màn hình; khổ 375 px ở hai ngôn ngữ; chặn mọi yêu cầu mạng ra ngoài; không lỗi console.
+
+Ba bộ `hoi_quy_*.test.js` giữ các lỗi tìm được trong đợt rà soát Giai đoạn 6 khỏi quay lại: `hoi_quy_nhap` (đọc số, ô ngày, nạp file sửa tay, lưu tạm), `hoi_quy_buoc` (từng bước), `hoi_quy_file` (file .docx, .xlsx). Mỗi mục trượt trên bản trước khi sửa và đạt trên bản hiện tại; đặt `QT_URL=file:///…/index.html` để chạy trên một bản khác.
 
 Kiểm thử chạy trên `index.html` đã đóng gói. Ảnh chụp màn hình lưu vào thư mục `QT_SHOTS`, mặc định là `<tmp>/qt-shots`.
 
@@ -91,16 +107,24 @@ Bước 8 dẫn Điều 23 Thông tư 38 và điểm e khoản 1 Điều 11 Ngh�
 - Tiêu đề và 14 đề mục chép nguyên văn `Mau_so_06_cau_truc.md` mục 3. Đề mục in đậm để dễ đọc; câu chữ giữ nguyên.
 - Tiêu đề điền cả hai năm của kỳ. Dưới III.2 là các bảng số liệu theo biểu Mục 1 Phụ lục II Thông tư 38, chỉ gồm cột của Thông tư; dưới III.3 là bảng tổng hợp theo biểu E.8, mỗi năm một bảng. Ghi chú “bảng là cách trình bày của ứng dụng” chỉ hiện trên trang, không vào file (quyết định ngày 26/9/2026).
 - Chỗ còn thiếu ghi `[Chưa nhập: …]` tô vàng. Nguồn thuộc loại Thông tư 38 không có công thức ghi rõ, không ra số, và tổng ghi `[chưa đầy đủ]`.
-- Thể thức theo Nghị định 30/2020/NĐ-CP: A4, Times New Roman 14, lề trên 20 mm, dưới 20 mm, trái 30 mm, phải 20 mm, số trang giữa lề trên từ trang 2. Chỉ số dưới như CO₂ ghi bằng định dạng chỉ số dưới của Word.
+- Thể thức theo Nghị định 30/2020/NĐ-CP: A4, Times New Roman 14, lề trên 20 mm, dưới 20 mm, trái 30 mm, phải 20 mm, số trang giữa lề trên từ trang 2. Chữ số chỉ số dưới (CO₂, CH₄) ghi bằng ký tự Unicode trong cùng một đoạn chữ: tách thành đoạn định dạng chỉ số dưới thì LibreOffice làm mất chữ số khi nó rơi đúng cuối dòng căn đều. Dưới mỗi bảng III.2 ghi thêm số liệu ứng dụng dùng để tính mà biểu của Thông tư không có cột (nhiệt trị, tổng TJ, tổng khối lượng hơi, CH₄ đem đốt), để lần lại được từ số liệu ra kết quả.
 
 **Bảng tính (.xlsx).** Tối đa chín trang tính: Thông tin; Tổng hợp (SUMIFS từ trang Bảng tính); Bảng tính, mỗi dòng một khí của một nguồn trong một năm, lượng khí = AD × EF × k và phát thải = lượng khí × GWP, với k là hệ số đổi đơn vị của bộ tính có kèm diễn giải; Biểu năm của từng năm (biểu Mục 1 đã điền, kể cả cột ứng dụng thêm và thông tin truy vết, cột TJ và bảng 2.1 là công thức); Hệ số; Kiểm soát chất lượng; Độ không chắc chắn (phương trình 3.1 và 3.2 bằng công thức); Tính toán lại, chỉ có khi Bước 7 có thay đổi. Ô công thức kèm giá trị ứng dụng đã tính, Excel tính lại khi mở file.
 
 Bộ ghi .xlsx phát triển từ `xlsx.js` của `qcvn04-2017/index.html`; bộ ghi .docx dùng chung lõi ZIP đó. Không dùng thư viện ngoài.
 
+## Bước 0, nhóm đối tượng và kỳ báo cáo
+
+- Tra danh mục gợi ý nhóm: có tên trong Quyết định 699/QĐ-BNNMT thì gợi ý B; ngành nhiệt điện, sắt thép, xi măng mà không có tên trong Quyết định 699 thì gợi ý “B hoặc A” và dẫn điểm c khoản 4 Điều 11 (sửa đổi bởi Nghị định 119/2025/NĐ-CP): điểm c áp dụng cho nhà máy nhiệt điện, cơ sở sản xuất sắt thép, xi măng thuộc danh mục, không nêu điều kiện có tên trong Quyết định 699, và các cơ sở này không thuộc điểm d (nhóm C). Chỗ này lệch với bảng A.2 tài liệu quy trình, vốn coi nhóm B chỉ gồm 110 cơ sở của Quyết định 699; ứng dụng theo câu chữ của Nghị định.
+- Cơ sở ứng với nhiều dòng Quyết định 699 thì liệt kê đủ các dòng; mã số thuế chỉ tự điền khi các dòng cùng một mã.
+- Kỳ báo cáo phải là hai năm liền kề (điểm e khoản 1 Điều 11), nếu không thì Bước 0 chưa xong. Kỳ lệch chu kỳ của nhóm (A từ 2024, B từ 2026, C từ 2028, hai năm một lần) thì hiện cảnh báo và mục 2 bảng kiểm trước khi nộp là chưa đạt.
+
 ## Lưu dữ liệu
 
 - File .json tải về là cách lưu chính.
-- `localStorage` chỉ để không mất số liệu khi lỡ đóng tab. Mọi thao tác đọc ghi đều bọc `try/catch`, ứng dụng chạy đủ chức năng khi bộ nhớ bị chặn.
+- `localStorage` chỉ để không mất số liệu khi lỡ đóng tab. Mọi thao tác đọc ghi đều bọc `try/catch`, ứng dụng chạy đủ chức năng khi bộ nhớ bị chặn. Ghi không được, ví dụ bộ nhớ đầy, thì báo ngay và chân trang không ghi thời điểm lưu. Phần sửa đang chờ 400 ms được ghi ngay khi đóng hoặc ẩn trang.
+- Nạp file: ứng dụng dựng màn hình trước rồi mới lưu tạm; file làm hỏng màn hình thì giữ nguyên hồ sơ đang mở và báo lỗi. Khi nạp, `chuanHoa` bỏ hoặc sửa phần tử hỏng và báo cùng thông báo đã nạp: nguồn thiếu mã hoặc sai loại bị bỏ, nguồn trùng mã được cấp mã mới, kỳ trùng năm hoặc đảo ngược bị bỏ; số viết dạng chuỗi được đọc như ô nhập, ngày không đúng dạng YYYY-MM-DD thành trống.
+- Ô số chấp nhận cả dạng lũy thừa như `3,86E-05`; nhập sai thì ô báo đỏ và giá trị để trống để được báo thiếu, không giữ phần đã gõ dở. Nhóm đầu bắt đầu bằng 0 không bao giờ là nhóm hàng nghìn: `0.681` là 0,681.
 - Khi trang nằm trong iframe, ví dụ nhúng vào WordPress, trang hiện dòng gợi ý và nút Mở toàn màn hình.
 
 ## Tham số địa chỉ

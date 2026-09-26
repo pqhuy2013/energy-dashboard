@@ -9,8 +9,8 @@ function veStrip(){
 }
 function veNavFoot(){
   var st=$('qt-store-state');
-  st.className=store.ok?'':'qt-bad';
-  st.textContent=store.ok ? t('storeOk')+(M.luuTamLuc?' '+fill(t('storeLast'),{t:gio(M.luuTamLuc)}):'') : t('storeBad');
+  st.className=(store.ok && !store.loi)?'':'qt-bad';
+  st.textContent=!store.ok ? t('storeBad') : store.loi ? t('storeFail') : t('storeOk')+(M.luuTamLuc?' '+fill(t('storeLast'),{t:gio(M.luuTamLuc)}):'');
   $('qt-build').textContent=fill(t('build'),{d:dmyv(BUILD)});
 }
 function veHome(){

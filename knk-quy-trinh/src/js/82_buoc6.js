@@ -60,8 +60,8 @@ function goiY6(k,kq){
   var ys=namKy();
   if(k==='a'){ var chua=[0,1,2,3,4,5].filter(function(n){ return !xong(n); }).map(function(n){ return (L==='vi'?'Bước ':'Step ')+n; }); return chua.length ? fill(t('b6gA'),{s:chua.join(', ')}) : t('b6gAok'); }
   if(k==='b'){
-    var dem={ qd2626:0, rieng:0, ipcc:0, muc2:0 }; S.heSo.forEach(function(h){ if(dem[h.bac]!=null && h.giaTri!=null) dem[h.bac]++; });
-    var kct=S.nguon.filter(function(n){ return !!LOAI_BY[n.loai].pp.canhBao; }).length;
+    var dem={ qd2626:0, rieng:0, ipcc:0, muc2:0 }; S.heSo.forEach(function(h){ if(dem[h.bac]!=null && (h.giaTri!=null || h.thamSo.cachTinh==='congThuc')) dem[h.bac]++; });
+    var kct=S.nguon.filter(function(n){ return !!LOAI_BY[n.loai].pp.canhBao || (n.loai==='phattan' && !ptCoCongThuc(n)); }).length;
     return fill(t('b6gB'),{ a:dem.qd2626, b:dem.rieng, c:dem.ipcc, d:dem.muc2, e:kct });
   }
   if(k==='c'){ var n=kq.dong.filter(function(d){ return d.loi && !d.khongCT; }).length; return n ? fill(t('b6gC'),{n:n}) : t('b6gCok'); }
@@ -96,7 +96,13 @@ VE[6]=function(sec){
   cb=theCard(sec,t('b6dlH'),t('b6dlHint')); cb.parentNode.id='b6-dinhluong';
   cb.appendChild(el('p','qt-note',t('b6dlP')));
   if(ys.length){
-    var dong=kq.dong.filter(function(d){ return d.y===ys[0] && !d.loi; });
+    /* dong cua ca hai nam, moi khoa nguon|diem|khi mot lan, giu thu tu nguon: nguon chi
+       phat thai o nam thu hai (moi dua vao, chi dot CH4 nam sau) van nhap duoc U */
+    var seen=Object.create(null), dong=[];
+    S.nguon.forEach(function(n){ kq.dong.forEach(function(d){
+      if(d.n!==n || d.loi || ys.indexOf(d.y)<0) return;
+      var k=n.id+'|'+d.muc+'|'+d.khi; if(seen[k]) return; seen[k]=1; dong.push(d);
+    }); });
     if(dong.length){
       var w=el('div','qt-tbw'), tb=el('table','qt-t'), hr=el('tr');
       [t('b4cN'),t('b4cD'),t('b4cK'),t('b6uA'),t('b6uE'),t('b6uK')].forEach(function(x){ hr.appendChild(el('th',null,x)); });

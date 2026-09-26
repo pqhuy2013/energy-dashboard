@@ -177,6 +177,8 @@ table.qt-t td.qt-lock{color:var(--ink)}
 table.qt-t td.qt-lock small{display:block;color:var(--ink3);font-size:11px;line-height:1.4;margin-top:2px}
 table.qt-t tr.qt-tr-note td{background:#fffaf5;font-size:12px;color:#7a3e12;line-height:1.5;padding:6px 8px}
 table.qt-t tr.qt-tr-note td.qt-okn{background:#f7fbf8;color:#14532d}
+table.qt-t td.qt-tong-lab,table.qt-a4t td.qt-tong-lab{text-align:right}
+.qt-tong-dt{display:none}
 table.qt-t tr.qt-tr-note input{min-width:80px;width:120px;display:inline-block;margin:0 6px}
 table.qt-t tr.qt-tr-note input.qt-wide{width:300px;max-width:100%}
 /* ============ tra cuu ============ */
@@ -252,6 +254,9 @@ table.qt-a4t td.qt-c{text-align:center}
 .qt-a4-ky b{display:block}
 .qt-a4-kyten{margin-top:72px}
 @media (max-width:760px){
+  table.qt-t td.qt-tong-lab,table.qt-a4t td.qt-tong-lab{text-align:left}
+  table.qt-t td.qt-tong-lab .qt-tong-dt,table.qt-a4t td.qt-tong-lab .qt-tong-dt{display:inline}
+  table.qt-t tr.qt-tr-note .qt-note-in{position:sticky;left:8px;max-width:calc(100vw - 96px)}
   .qt-a4{padding:18px 14px;font-size:14px}
   .qt-a4-dau{grid-template-columns:minmax(0,1fr)}
   .qt-a4-ky{width:auto}

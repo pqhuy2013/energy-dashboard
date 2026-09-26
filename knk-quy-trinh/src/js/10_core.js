@@ -22,6 +22,7 @@ var T = {
   build:['Bản dựng ngày %d','Build of %d'],
   storeOk:['Lưu tạm trong trình duyệt: đang bật.','Browser autosave: on.'],
   storeLast:['Lần cuối %t.','Last saved %t.'],
+  storeFail:['Lưu tạm trong trình duyệt không ghi được, có thể bộ nhớ đã đầy. Tải file .json về máy để không mất số liệu.','Browser autosave could not write, storage may be full. Download the .json file so no data is lost.'],
   storeBad:['Lưu tạm trong trình duyệt: không dùng được. Nhớ tải file .json về máy.','Browser autosave: unavailable. Remember to download the .json file.'],
   btnfull:['Mở toàn màn hình','Open full screen'],
   btnsave:['Tải file .json','Download .json'],
@@ -61,21 +62,24 @@ var T = {
          'The app currently serves facilities under the Ministry of Industry and Trade, following the 8-step procedure of Circular 38/2023/TT-BCT. Construction-sector facilities follow Circular 13/2024/TT-BXD with 10 steps and are not supported yet.'],
   nhomh:['Nhóm đối tượng','Obligation group'],
   nhomhint:['Khoản 4 Điều 11 Nghị định 06/2022/NĐ-CP, sửa đổi bởi Nghị định 119/2025/NĐ-CP','Article 11(4) of Decree 06/2022/ND-CP as amended by Decree 119/2025/ND-CP'],
-  nhomp:['Ba nhóm có kỳ số liệu đầu tiên, nơi nộp và mốc nộp khác nhau. Chọn nhóm của cơ sở. Tra danh mục Quyết định 42/2026/QĐ-TTg và Quyết định 699/QĐ-BNNMT để gợi ý nhóm sẽ có ở bản sau.',
-         'The three groups differ in first data year, recipient and deadline. Choose the facility’s group. A lookup in Decision 42/2026/QD-TTg and Decision 699/QD-BNNMT to suggest the group will come in a later version.'],
+  nhomp:['Ba nhóm có kỳ số liệu đầu tiên, nơi nộp và mốc nộp khác nhau. Chọn nhóm của cơ sở; có thể dùng ô tra danh mục Quyết định 42/2026/QĐ-TTg và Quyết định 699/QĐ-BNNMT ở trên để được gợi ý.',
+         'The three groups differ in first data year, recipient and deadline. Choose the facility’s group; the lookup in Decision 42/2026/QD-TTg and Decision 699/QD-BNNMT above can suggest one.'],
   nhomA:['Nhóm A','Group A'],
   nhomAd:['Cơ sở không được phân bổ hạn ngạch. Kỳ số liệu đầu tiên cho năm 2024 trở đi. Nộp Ủy ban nhân dân cấp tỉnh trước 31/3, kể từ năm 2025.',
           'Facilities without an emission allowance allocation. First data year 2024 onward. Submit to the provincial People’s Committee by 31 March, from 2025.'],
   nhomAc:['Điểm b khoản 4 Điều 11','Article 11(4)(b)'],
   nhomB:['Nhóm B','Group B'],
-  nhomBd:['Nhà máy nhiệt điện, cơ sở sản xuất sắt thép, xi măng được phân bổ hạn ngạch giai đoạn 2025 đến 2026, gồm 110 cơ sở theo Quyết định 699/QĐ-BNNMT. Kỳ số liệu đầu tiên cho năm 2026 trở đi. Báo cáo phải được thẩm định, nộp Bộ Nông nghiệp và Môi trường trước 01/12, kể từ năm 2027.',
-          'Thermal power, iron and steel, and cement facilities allocated allowances for 2025 to 2026, the 110 facilities in Decision 699/QD-BNNMT. First data year 2026 onward. The report must be verified and sent to the Ministry of Agriculture and Environment by 1 December, from 2027.'],
+  nhomBd:['Nhà máy nhiệt điện, cơ sở sản xuất sắt thép, cơ sở sản xuất xi măng thuộc danh mục cơ sở phải kiểm kê khí nhà kính do Thủ tướng Chính phủ ban hành; 110 cơ sở trong số này được phân bổ hạn ngạch giai đoạn 2025 đến 2026 theo Quyết định 699/QĐ-BNNMT. Kỳ số liệu đầu tiên cho năm 2026 trở đi. Báo cáo phải được thẩm định, nộp Bộ Nông nghiệp và Môi trường trước 01/12, kể từ năm 2027.',
+          'Thermal power plants, iron and steel producers and cement producers on the Prime Minister’s list of facilities that must inventory GHGs; 110 of them were allocated allowances for 2025 to 2026 in Decision 699/QD-BNNMT. First data year 2026 onward. The report must be verified and sent to the Ministry of Agriculture and Environment by 1 December, from 2027.'],
   nhomBc:['Điểm c khoản 4 và khoản 6a Điều 11','Article 11(4)(c) and 11(6a)'],
   nhomC:['Nhóm C','Group C'],
-  nhomCd:['Cơ sở được phân bổ hạn ngạch giai đoạn từ năm 2027. Kỳ số liệu đầu tiên cho năm 2028 trở đi. Báo cáo phải được thẩm định, nộp Bộ Nông nghiệp và Môi trường trước 01/12, kể từ năm 2027.',
-          'Facilities allocated allowances from the 2027 phase. First data year 2028 onward. The report must be verified and sent to the Ministry of Agriculture and Environment by 1 December, from 2027.'],
+  nhomCd:['Cơ sở không thuộc điểm c (nhiệt điện, sắt thép, xi măng) được phân bổ hạn ngạch giai đoạn từ năm 2027. Kỳ số liệu đầu tiên cho năm 2028 trở đi. Báo cáo phải được thẩm định, nộp Bộ Nông nghiệp và Môi trường trước 01/12, kể từ năm 2027.',
+          'Facilities not covered by point c (thermal power, steel, cement) that are allocated allowances from the 2027 phase. First data year 2028 onward. The report must be verified and sent to the Ministry of Agriculture and Environment by 1 December, from 2027.'],
   nhomCc:['Điểm d khoản 4 và khoản 6a Điều 11','Article 11(4)(d) and 11(6a)'],
   kyh:['Kỳ báo cáo','Reporting period'],
+  kyLienKe:['Kỳ báo cáo phải gồm hai năm liền kề (điểm e khoản 1 Điều 11)','The period must be two consecutive years (Article 11(1)(e))'],
+  wKyTruoc:['Nhóm %g có kỳ số liệu đầu tiên cho năm %d (%c); kỳ %a–%b nằm trước kỳ đó.','Group %g has its first data year in %d (%c); the period %a–%b comes before it.'],
+  wKyLech:['Nhóm %g báo cáo hai năm một lần từ năm %d (%c): kỳ %d–%e, %f–%h và tiếp theo; kỳ %a–%b lệch chu kỳ này.','Group %g reports every two years from %d (%c): %d–%e, %f–%h and so on; the period %a–%b is off this cycle.'],
   kyhint:['Điểm e khoản 1 Điều 11, bổ sung bởi Nghị định 119/2025/NĐ-CP','Article 11(1)(e), added by Decree 119/2025/ND-CP'],
   kylab:['Hai năm của kỳ số liệu','The two data years'],
   kyhelp:['Báo cáo định kỳ hai năm một lần gồm kết quả kiểm kê của hai năm liền kề năm nộp báo cáo.','The biennial report covers the two years immediately before the year of submission.'],
@@ -133,6 +137,11 @@ var T = {
   cfFullGo:['Mở luôn','Open anyway'],
   tSaved:['Đã tải file %f.','Downloaded %f.'],
   tLoaded:['Đã nạp file %f.','Loaded %f.'],
+  nKy:['Kỳ báo cáo trong file không phải hai năm tăng dần nên đã bỏ, chọn lại ở Bước 0.','The period in the file is not two increasing years and was cleared; choose it again in Step 0.'],
+  nBoNguon:['%n nguồn thiếu mã hoặc có loại nguồn không hợp lệ đã bị bỏ.','%n sources with no id or an invalid source type were dropped.'],
+  nSoMoHo:['%n giá trị số ghi dạng chữ đọc được theo hai cách (ví dụ 1.500 là 1500 hay 1,5) nên đã để trống, cần nhập lại.','%n numbers stored as text could be read two ways (e.g. 1.500 as 1500 or 1.5) and were left empty; enter them again.'],
+  nTrungId:['%n nguồn trùng mã đã được cấp mã mới, không kèm số liệu và hệ số.','%n sources with a duplicate id got a new id, without activity data or factors.'],
+  eHong:['Không mở được file %f: dữ liệu trong file không hợp lệ (%e). Hồ sơ đang mở được giữ nguyên.','Could not open %f: the data in the file is invalid (%e). The current record is unchanged.'],
   tNew:['Đã mở hồ sơ trống.','Opened an empty record.'],
   eJson:['Không đọc được file %f: nội dung không phải JSON hợp lệ.','Could not read %f: the content is not valid JSON.'],
   eShape:['File %f không phải dữ liệu của ứng dụng này: thiếu trường phienBan hoặc coSo.','%f is not a data file of this app: the phienBan or coSo field is missing.'],
@@ -190,7 +199,13 @@ function nod(s){ return (s||'').normalize('NFD').replace(DAU_TO_HOP,'').replace(
 function isObj(x){ return x!==null && typeof x==='object' && !Array.isArray(x); }
 function clone(x){ return JSON.parse(JSON.stringify(x)); }
 function p2(n){ return (n<10?'0':'')+n; }
-function dmyv(iso){ var p=iso.split('-'); return (+p[2])+'/'+(+p[1])+'/'+p[0]; }
+/* Ngay luu dang YYYY-MM-DD, nam 1900 den 2100, ngay co that tren lich */
+function ngayHopLe(s){
+  var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(typeof s==='string'?s:''); if(!m) return false;
+  var y=+m[1], mo=+m[2], d=+m[3];
+  return y>=1900 && y<=2100 && mo>=1 && mo<=12 && d>=1 && d<=new Date(Date.UTC(y,mo,0)).getUTCDate();
+}
+function dmyv(iso){ if(!ngayHopLe(iso)) return ''; var p=iso.split('-'); return (+p[2])+'/'+(+p[1])+'/'+p[0]; }
 function gio(iso){ if(!iso) return ''; var d=new Date(iso); if(isNaN(d)) return ''; return p2(d.getHours())+':'+p2(d.getMinutes())+' '+d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear(); }
 function fill(s,m){ return s.replace(/%(\w)/g,function(a,k){ return (k in m) ? m[k] : a; }); }
 function taoId(){ return 'n'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
@@ -203,13 +218,17 @@ function taoId(){ return 'n'+Date.now().toString(36)+Math.random().toString(36).
    Roi o nhap, so duoc viet lai theo ngon ngu dang chon de nguoi dung thay may da
    hieu the nao. */
 function nhomNghin(s,sep){
-  var p=s.split(sep); if(p.length<2 || !/^\d{1,3}$/.test(p[0])) return false;
+  /* nhom dau khong bat dau bang 0: "0.681" la so thap phan, khong phai 681 */
+  var p=s.split(sep); if(p.length<2 || !/^[1-9]\d{0,2}$/.test(p[0])) return false;
   for(var i=1;i<p.length;i++) if(!/^\d{3}$/.test(p[i])) return false;
   return true;
 }
 function docSo(raw){
   var s=String(raw==null?'':raw).replace(/\s/g,'');
   if(s==='') return { ok:true, v:null };
+  /* dang luy thua nhu Excel hien so nho: 3,86E-05 hoac 3.86E-05 */
+  var mu=/^(\d+)(?:[.,](\d+))?[eE]([+-]?\d{1,3})$/.exec(s);
+  if(mu){ var x=+(mu[1]+'.'+(mu[2]||'0')+'e'+mu[3]); return isFinite(x) ? { ok:true, v:x } : { ok:false }; }
   if(!/^[0-9.,]+$/.test(s) || !/[0-9]/.test(s)) return { ok:false };
   var d=s.indexOf('.')>=0, c=s.indexOf(',')>=0, n, nghin=(L==='vi')?'.':',';
   if(d && c){
@@ -286,9 +305,10 @@ var NANG_CAP = {};  /* NANG_CAP[n](o) tra ve doi tuong phienBan n+1 */
 function chuanHoa(o){
   while(o.phienBan<PHIEN_BAN){ o=NANG_CAP[o.phienBan](o); }
   o=ghep(o,khuon());
-  var y1=o.ky.namBatDau, y2=o.ky.namKetThuc;
-  function nam(y){ return (typeof y==='number' && y%1===0 && y>=1990 && y<=2100) ? y : null; }
-  o.ky.namBatDau=nam(y1); o.ky.namKetThuc=nam(y2);
+  NAP_GHI=[]; SO_MO_HO=0;
+  o.ky.namBatDau=namHoacNull(o.ky.namBatDau); o.ky.namKetThuc=namHoacNull(o.ky.namKetThuc);
+  /* ky phai la hai nam tang dan; trung nam hoac dao nguoc thi moi dong bi tinh hai lan */
+  if(o.ky.namBatDau && o.ky.namKetThuc && o.ky.namKetThuc<=o.ky.namBatDau){ o.ky.namBatDau=null; o.ky.namKetThuc=null; NAP_GHI.push(t('nKy')); }
   if(['A','B','C'].indexOf(o.coSo.nhom)<0) o.coSo.nhom='';
   if(o.gwp!=='AR4' && o.gwp!=='AR5') o.gwp=null;
   chuanHoaMang(o);
@@ -300,9 +320,51 @@ function chuanHoa(o){
 function chuoi(x){ return (typeof x==='string') ? x : (x==null ? '' : String(x)); }
 function soHoacNull(x){ return (typeof x==='number' && isFinite(x)) ? x : null; }
 function namHoacNull(x){ return (typeof x==='number' && x%1===0 && x>=1990 && x<=2100) ? x : null; }
+/* So trong file sua tay co the la chuoi: doc nhu o nhap, khong doc duoc thi de trong */
+/* File khong gan voi ngon ngu giao dien: chuoi phai doc ra cung mot so theo ca cach viet Viet
+   Nam lan tieng Anh ("0,0433", "1.000.000", "24000"); chuoi hai nghia nhu "1.500" (1500 hay 1,5)
+   thi de trong va dem vao thong bao nap file */
+var SO_MO_HO=0;
+function soTuFile(x){
+  if(typeof x==='number') return isFinite(x) ? x : null;
+  if(typeof x!=='string') return null;
+  var giu=L, a, b;
+  try{ L='vi'; a=docSo(x); L='en'; b=docSo(x); } finally { L=giu; }
+  if(a.ok && b.ok && a.v===b.v) return a.v;
+  if(a.ok || b.ok) SO_MO_HO++;
+  return null;
+}
+function ngayTuFile(x){ return ngayHopLe(x) ? x : ''; }
+/* Kieu cua truong chiTiet (so lieu) va thuocTinh (nguon) lay tu cau hinh 20_loai */
+var KIEU_CT=null, KIEU_TT=null;   /* dung lan dau khi can, vi LOAI nam o 20_loai.js nap sau */
+function kieuTruong(){
+  if(KIEU_CT) return;
+  KIEU_CT=Object.create(null); KIEU_TT=Object.create(null);
+  LOAI.forEach(function(l){
+    l.bang.cot.forEach(function(c){ if(c.s && /^ct\./.test(c.s)) KIEU_CT[c.s.slice(3)]=c.kieu; });
+    l.nf.forEach(function(f){ if(/^tt\./.test(f.f)) KIEU_TT[f.f.slice(3)]=f.kieu||'text'; });
+  });
+}
+function epKieu(obj,bang){
+  Object.keys(obj).forEach(function(k){
+    var kieu=bang[k]; if(!kieu) return;
+    if(kieu==='num') obj[k]=soTuFile(obj[k]);
+    else if(kieu==='date') obj[k]=ngayTuFile(obj[k]);
+    else obj[k]=chuoi(obj[k]);
+  });
+}
+/* ghi chu khi nap file: phan tu bi bo hoac doi, hien cung thong bao da nap */
+var NAP_GHI=[];
+/* Trang thai man hinh gan voi mot ho so (vd file ky truoc da nap o Buoc 7): cac buoc dang ky
+   ham xoa vao day, goi khi mo ho so khac hoac bat dau ky moi */
+var KHI_DOI_HO_SO=[];
+function doiHoSo(){ KHI_DOI_HO_SO.forEach(function(f){ f(); }); }
 function chuanHoaMang(o){
-  var loaiOk={}; LOAI.forEach(function(l){ loaiOk[l.k]=true; });
-  var ids={}, doiId={};
+  /* Object.create(null): ten loai hay id trung ten thuoc tinh cua Object (constructor,
+     __proto__...) khong duoc coi la hop le */
+  kieuTruong();
+  var loaiOk=Object.create(null); LOAI.forEach(function(l){ loaiOk[l.k]=true; });
+  var ids=Object.create(null), doiId=Object.create(null), soNguon=o.nguon.length, trung=0;
   /* id nam trong duong dan data-b dang a|b|c: id la hoac trung thi cap id moi va doi theo
      o so lieu, he so, de khong mat du lieu cua file sua tay */
   o.nguon.forEach(function(n){
@@ -310,41 +372,67 @@ function chuanHoaMang(o){
   });
   [o.soLieu,o.heSo].forEach(function(ds){ ds.forEach(function(r){ if(isObj(r) && doiId[r.nguonId]) r.nguonId=doiId[r.nguonId]; }); });
   o.nguon=o.nguon.filter(function(n){
-    if(!isObj(n) || typeof n.id!=='string' || !n.id || ids[n.id] || !loaiOk[n.loai]) return false;
+    if(!isObj(n) || typeof n.id!=='string' || !n.id || !loaiOk[n.loai]) return false;
+    /* id trung: nguon sau duoc cap id moi, khong kem so lieu, he so vi khong biet cua nguon nao */
+    if(ids[n.id]){ n.id=taoId(); trung++; }
     ids[n.id]=true;
     ['phanLoai','thietBi','viTri','ghiChu'].forEach(function(k){ n[k]=chuoi(n[k]); });
     if(!isObj(n.thuocTinh)) n.thuocTinh={};
+    epKieu(n.thuocTinh,KIEU_TT);
+    var cn=LOAI_BY[n.loai].nf.filter(function(f){ return f.kieu==='sel' && /^tt\./.test(f.f); });
+    cn.forEach(function(f){ var k=f.f.slice(3); if(k in n.thuocTinh && !f.opts.some(function(x){ return x[0]===n.thuocTinh[k]; })) n.thuocTinh[k]=''; });
     return true;
   });
+  if(soNguon>o.nguon.length) NAP_GHI.push(fill(t('nBoNguon'),{n:soNguon-o.nguon.length}));
+  if(trung) NAP_GHI.push(fill(t('nTrungId'),{n:trung}));
+  var coSL=Object.create(null), coHS=Object.create(null);
   o.soLieu=o.soLieu.filter(function(r){
-    if(!isObj(r) || !ids[r.nguonId] || namHoacNull(r.nam)===null) return false;
-    r.gioTri=soHoacNull(r.gioTri);
+    if(!isObj(r) || typeof r.nguonId!=='string' || !ids[r.nguonId] || namHoacNull(r.nam)===null) return false;
+    var kk=r.nguonId+'|'+r.nam; if(coSL[kk]) return false; coSL[kk]=true;
+    r.gioTri=soTuFile(r.gioTri);
     ['donVi','nguonSoLieu','chungTu','nguoiCungCap','cachUocTinh','ghiChu'].forEach(function(k){ r[k]=chuoi(r[k]); });
     r.laUocTinh=(r.laUocTinh===true);
     if(!isObj(r.chiTiet)) r.chiTiet={};
+    epKieu(r.chiTiet,KIEU_CT);
     return true;
   });
   o.heSo=o.heSo.filter(function(h){
-    if(!isObj(h) || !ids[h.nguonId] || ['CO2','CH4','N2O','GWP'].indexOf(h.khi)<0) return false;
+    if(!isObj(h) || typeof h.nguonId!=='string' || !ids[h.nguonId] || ['CO2','CH4','N2O','GWP'].indexOf(h.khi)<0) return false;
     h.nam=namHoacNull(h.nam);
-    h.giaTri=soHoacNull(h.giaTri);
+    var kh=h.nguonId+'|'+h.khi+'|'+h.nam; if(coHS[kh]) return false; coHS[kh]=true;
+    h.giaTri=soTuFile(h.giaTri);
     ['maHeSo','tenHeSo','donVi','nguonGoc'].forEach(function(k){ h[k]=chuoi(h[k]); });
     if(['rieng','qd2626','ipcc','muc2'].indexOf(h.bac)<0) h.bac='';
     if(!isObj(h.thamSo)) h.thamSo={};
+    ['cf','hieuSuat','efNhienLieu'].forEach(function(k){ if(k in h.thamSo) h.thamSo[k]=soTuFile(h.thamSo[k]); });
+    ['cachTinh','cfNguon','efNguon'].forEach(function(k){ if(k in h.thamSo) h.thamSo[k]=chuoi(h.thamSo[k]); });
+    if('cachTinh' in h.thamSo && ['','nhaCungCap','congThuc'].indexOf(h.thamSo.cachTinh)<0) h.thamSo.cachTinh='';
     return true;
   });
   o.loaiKhongCo=o.loaiKhongCo.filter(function(k){ return loaiOk[k]; });
   o.qc=o.qc.filter(isObj);
-  o.qc.forEach(function(q){ ['ma','noiDung','nguoiKiem','ngay','ketQua','loiPhatHien','cachXuLy'].forEach(function(k){ q[k]=chuoi(q[k]); }); });
+  o.qc.forEach(function(q){
+    ['ma','noiDung','nguoiKiem','ngay','ketQua','loiPhatHien','cachXuLy'].forEach(function(k){ q[k]=chuoi(q[k]); });
+    q.ngay=ngayTuFile(q.ngay);
+    if(['','dat','saiSot'].indexOf(q.ketQua)<0) q.ketQua='';
+  });
+  o.coSo.giayPhep.ngayCap=ngayTuFile(o.coSo.giayPhep.ngayCap);
   var kc=o.khongChacChan;
-  Object.keys(kc.dinhTinh).forEach(function(k){ kc.dinhTinh[k]=chuoi(kc.dinhTinh[k]); });
-  kc.bangU=kc.bangU.filter(function(u){ return isObj(u) && ids[u.nguonId] && typeof u.khi==='string'; });
-  kc.bangU.forEach(function(u){ u.muc=chuoi(u.muc); u.uAd=soHoacNull(u.uAd); u.uEf=soHoacNull(u.uEf); });
+  ['a','b','c','d','dd','e'].forEach(function(k){ kc.dinhTinh[k]=chuoi(kc.dinhTinh[k]); });
+  var coU=Object.create(null);
+  kc.bangU=kc.bangU.filter(function(u){
+    if(!isObj(u) || typeof u.nguonId!=='string' || !ids[u.nguonId] || typeof u.khi!=='string') return false;
+    var ku=u.nguonId+'|'+chuoi(u.muc)+'|'+u.khi; if(coU[ku]) return false; coU[ku]=true; return true;
+  });
+  kc.bangU.forEach(function(u){ u.muc=chuoi(u.muc); u.uAd=soTuFile(u.uAd); u.uEf=soTuFile(u.uEf); });
   var tl=o.tinhLai;
   if(['kyDau','khongDoi','coDoi'].indexOf(tl.tinhTrang)<0) tl.tinhTrang='';
   tl.truongHop=tl.truongHop.filter(function(x){ return ['a','b','c'].indexOf(x)>=0; });
   tl.kyTruoc.namBatDau=namHoacNull(tl.kyTruoc.namBatDau); tl.kyTruoc.namKetThuc=namHoacNull(tl.kyTruoc.namKetThuc);
-  ['ketQuaCu','ketQuaMoi'].forEach(function(k){ var m={}; Object.keys(tl[k]).forEach(function(y){ var v=soHoacNull(tl[k][y]); if(/^\d{4}$/.test(y) && v!=null) m[y]=v; }); tl[k]=m; });
+  if(tl.kyTruoc.namBatDau && tl.kyTruoc.namKetThuc && tl.kyTruoc.namKetThuc<=tl.kyTruoc.namBatDau){ tl.kyTruoc.namBatDau=null; tl.kyTruoc.namKetThuc=null; }
+  ['ketQuaCu','ketQuaMoi'].forEach(function(k){ var m={}; Object.keys(tl[k]).forEach(function(y){ var v=soTuFile(tl[k][y]); if(/^\d{4}$/.test(y) && v!=null) m[y]=v; }); tl[k]=m; });
+  tl.lyDo=chuoi(tl.lyDo); tl.giaiThich=chuoi(tl.giaiThich); tl.fileKyTruoc=chuoi(tl.fileKyTruoc);
+  if(SO_MO_HO) NAP_GHI.push(fill(t('nSoMoHo'),{n:SO_MO_HO}));
 }
 function coNoiDung(o){
   function bo(x){ var c=clone(x); delete c.taoBoi; delete c.ngayCapNhat; return JSON.stringify(c); }
@@ -361,12 +449,21 @@ var cur = 'dau';
 var saveTimer = null;
 
 function luuTam(){
+  saveTimer=null;
   if(!store.ok) return;
-  M.luuTamLuc = new Date().toISOString();
-  store.set(KEY, JSON.stringify(S));
-  store.set(KEY_META, JSON.stringify(M));
+  /* chi ghi thoi diem luu khi ho so ghi duoc; bo nho day thi bao, khong bao da luu */
+  var tg=new Date().toISOString();
+  if(store.set(KEY, JSON.stringify(S))){
+    M.luuTamLuc=tg; store.loi=false;
+    store.set(KEY_META, JSON.stringify(M));
+  } else {
+    if(!store.loi) toast(t('storeFail'),true);
+    store.loi=true;
+  }
   veNavFoot();
 }
+/* ghi ngay phan sua dang cho 400 ms, goi khi dong hoac an trang */
+function xaLuu(){ if(saveTimer){ clearTimeout(saveTimer); luuTam(); } }
 function luuMeta(){ if(store.ok) store.set(KEY_META, JSON.stringify(M)); }
 function daSua(){
   S.ngayCapNhat = new Date().toISOString();
@@ -399,7 +496,10 @@ function hoi(msg, acts){
 /* ---------- tai ve va nap file ---------- */
 /* Ten file tai ve: <tien to>_<ten co so>_<ky>_<ngay gio>.<duoi> */
 function tenFile(tienTo,duoi){
-  var slug=nod(S.coSo.ten).replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40)||'co-so';
+  var slug=nod(S.coSo.ten).replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+  /* ngan gon nhung khong cat giua mot tu */
+  if(slug.length>48){ slug=slug.slice(0,49); slug=slug.slice(0,slug.lastIndexOf('-')>20?slug.lastIndexOf('-'):48); }
+  slug=slug||'co-so';
   var d=new Date(), stamp=d.getFullYear()+p2(d.getMonth()+1)+p2(d.getDate())+'-'+p2(d.getHours())+p2(d.getMinutes());
   var ky=(S.ky.namBatDau&&S.ky.namKetThuc) ? '_'+S.ky.namBatDau+'-'+S.ky.namKetThuc : '';
   return (tienTo||'KNK')+'_'+slug+ky+'_'+stamp+'.'+(duoi||'json');
@@ -426,11 +526,20 @@ function docFile(file){
     if(!isObj(o) || typeof o.phienBan!=='number' || o.phienBan%1!==0 || o.phienBan<1 || !isObj(o.coSo)){ loi(fill(t('eShape'),{f:f})); return; }
     if(o.phienBan>PHIEN_BAN){ loi(fill(t('eNewer'),{f:f,v:o.phienBan})); return; }
     function napVao(){
-      S=chuanHoa(o);
-      M={ coThayDoi:false, luuTamLuc:null, taiVeLuc:null, napTuFile:f, napLuc:new Date().toISOString(), buocCuoi:0 };
-      luuTam(); SAVED=null;
-      veHet(); go('buoc-0');
-      toast(fill(t('tLoaded'),{f:f}));
+      /* dung man hinh truoc, luu tam sau: file lam hong man hinh thi khong bi luu tam,
+         khong lam hong trang o lan mo sau */
+      var cuS=S, cuM=M;
+      try{
+        S=chuanHoa(o);
+        M={ coThayDoi:false, luuTamLuc:null, taiVeLuc:null, napTuFile:f, napLuc:new Date().toISOString(), buocCuoi:0 };
+        doiHoSo(); veHet(); go('buoc-0');
+      }catch(e){
+        S=cuS; M=cuM; doiHoSo();
+        try{ veHet(); go('buoc-0'); }catch(e2){}
+        loi(fill(t('eHong'),{f:f,e:e && e.message || String(e)})); return;
+      }
+      SAVED=null; luuTam();
+      toast(fill(t('tLoaded'),{f:f})+(NAP_GHI.length?' '+NAP_GHI.join(' '):''));
     }
     if(coNoiDung(S) && M.coThayDoi){
       hoi(fill(t('cfLoad'),{f:f})+' '+t('cfDirty'), [
@@ -447,6 +556,7 @@ function kyMoi(){
   function lam(){
     S=macDinh();
     M={ coThayDoi:false, luuTamLuc:null, taiVeLuc:null, napTuFile:null, napLuc:null, buocCuoi:0 };
+    doiHoSo();
     SAVED=null; store.del(KEY); luuMeta();
     veHet(); go('buoc-0'); toast(t('tNew'));
   }

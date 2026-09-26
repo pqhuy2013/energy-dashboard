@@ -39,7 +39,17 @@ var ZIP=(function(){
 /* Thoat ky tu cho XML, bo ky tu dieu khien khong hop le trong XML 1.0 */
 var KY_TU_CAM=new RegExp('['+String.fromCharCode(0)+'-'+String.fromCharCode(8)+String.fromCharCode(11)+String.fromCharCode(12)+String.fromCharCode(14)+'-'+String.fromCharCode(31)+']','g');
 function xmlEsc(s){
-  return String(s==null?'':s).replace(KY_TU_CAM,'').replace(/[&<>"]/g,function(m){ return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[m]; });
+  s=String(s==null?'':s).replace(KY_TU_CAM,'');
+  /* XML 1.0 cung cam U+FFFE, U+FFFF va nua cap thay the dung le (dan tu chuong trinh khac) */
+  var out='';
+  for(var i=0;i<s.length;i++){
+    var c=s.charCodeAt(i);
+    if(c===0xFFFE || c===0xFFFF) continue;
+    if(c>=0xD800 && c<=0xDBFF){ var d=s.charCodeAt(i+1); if(d>=0xDC00 && d<=0xDFFF){ out+=s.charAt(i)+s.charAt(i+1); i++; } continue; }
+    if(c>=0xDC00 && c<=0xDFFF) continue;
+    out+=s.charAt(i);
+  }
+  return out.replace(/[&<>"]/g,function(m){ return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[m]; });
 }
 function taiBlob(blob,name){
   var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;

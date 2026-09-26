@@ -76,11 +76,14 @@ function oHs(n){
   if(c.theoNam) namKy().forEach(function(y){ out.push({ khi:c.khi[0], nam:y, req:true }); });
   else c.khi.forEach(function(k){ out.push({ khi:k, nam:null, req:!c.itNhat }); });
   if(n.loai==='phattan'){
-    out.forEach(function(o){ o.cf=true; });
+    /* Muc 2 chi co cong thuc cho khai thac than ham lo, lo thien: nguon khac khong bat buoc he so */
+    out.forEach(function(o){ o.cf=true; if(!ptCoCongThuc(n)) o.req=false; });
     if(n.thuocTinh.congNghe==='lothien') out.push({ khi:'CO2', nam:null, req:false, cf:true, lt:true });
   }
   return out;
 }
+/* Don vi mau cua o he so theo khi cua o: o CO2 cua mo lo thien (diem 5.5) khong lay don vi CH4 */
+function mauCua(c,khi){ return (c.mau && khi!=='CH4' && c.mau.indexOf('CH₄')>=0) ? c.mau.replace('CH₄',KHI_NHAN[khi]||khi) : (c.mau||''); }
 function khiNhan(o,n){ return o.khi==='GWP' ? fill(t('b3gwp'),{m:n.phanLoai.trim()||t('b3gwpMc')}) : (KHI_NHAN[o.khi]||o.khi); }
 function hsDu(h,o){
   if(h && h.thamSo.cachTinh==='congThuc') return h.thamSo.hieuSuat!=null && h.thamSo.efNhienLieu!=null && !rong(h.thamSo.efNguon);
@@ -91,7 +94,7 @@ function macDinhHs(h){
   var n=timNguon(h.nguonId); if(!n) return;
   var c=LOAI_BY[n.loai].hs;
   if(!h.bac && c.bac.length===1) h.bac=c.bac[0];
-  if(rong(h.donVi) && c.mau && h.khi!=='GWP' && h.thamSo.cachTinh!=='congThuc') h.donVi=c.mau;
+  if(rong(h.donVi) && c.mau && h.khi!=='GWP' && h.thamSo.cachTinh!=='congThuc') h.donVi=mauCua(c,h.khi);
   if(n.loai==='hoi' && h.thamSo.cachTinh==='congThuc' && rong(h.nguonGoc)) h.nguonGoc='Tính theo Điểm 4 Mục 2 Phụ lục II Thông tư 38/2023/TT-BCT, đã áp dụng đính chính tại Quyết định 334/QĐ-BCT ngày 06/02/2025';
   if(n.loai==='phattan' && h.khi==='CH4' && h.thamSo.cf==null){ h.thamSo.cf=0.67; h.thamSo.cfNguon='IPCC 2006, Tập 2, Chương 4: 0,67 kg/m³ ở 20 °C và 1 atm'; }
 }
@@ -139,7 +142,7 @@ function veHs(cb,l,n){
       var t1=el('td'); t1.appendChild(oNhap({ kieu:'num', w:110, lab:[khiNhan(o,n),khiNhan(o,n)] },bp+'giaTri',h?h.giaTri:null)); r.appendChild(t1);
       var t2=el('td');
       if(o.khi==='GWP') t2.appendChild(el('span','qt-ro',t('b3ktn')));
-      else t2.appendChild(oNhap({ kieu:'text', w:110, ph:[c.mau||'',c.mau||''] },bp+'donVi',h?h.donVi:''));
+      else t2.appendChild(oNhap({ kieu:'text', w:110, ph:[mauCua(c,o.khi),mauCua(c,o.khi)] },bp+'donVi',h?h.donVi:''));
       r.appendChild(t2);
       var t3=el('td'), ops=c.bac.map(function(b){ return [b,T['bac_'+b]]; });
       var sel=oNhap({ kieu:'sel', opts:ops, w:190 },bp+'bac',h?h.bac:(c.bac.length===1?c.bac[0]:''));
@@ -150,7 +153,8 @@ function veHs(cb,l,n){
         (c.luoi && n.phanLoai==='Điện lưới' && luoiNam(o.nam)) ? nut(fill(t('b3luoi'),{y:o.nam}),'luoi|'+key,'qt-pri') : null ]));
     }
     tbody.appendChild(r);
-    function ghiChu(txt,ok){ var rr=el('tr','qt-tr-note'), td=el('td',ok?'qt-okn':null,txt); td.colSpan=nc; rr.appendChild(td); tbody.appendChild(rr); return td; }
+    /* noi dung ghi chu nam trong mot khoi dinh ben trai: bang cuon ngang tren dien thoai van doc duoc */
+    function ghiChu(txt,ok){ var rr=el('tr','qt-tr-note'), td=el('td',ok?'qt-okn':null), inn=el('div','qt-note-in',txt); td.appendChild(inn); td.colSpan=nc; rr.appendChild(td); tbody.appendChild(rr); return inn; }
     if(h && h.giaTri!=null && o.khi!=='GWP' && !rong(h.donVi) && !hsQuyDoiDuoc(h.donVi)) ghiChu(t('b3kqd'));
     if(c.luoi && n.phanLoai==='Điện lưới' && !luoiNam(o.nam) && !hsKhoa(h)) ghiChu(fill(t('b3luoiThieu'),{y:o.nam}));
     if(o.cf){
@@ -257,7 +261,8 @@ function veKqHs(){
     rr.appendChild(el('td',null,maHs(r)));
     var tn=el('td',null,L==='vi'?r[5]:r[6]); tn.appendChild(el('small',null,' · '+(L==='vi'?r[8]:r[9]))); rr.appendChild(tn);
     rr.appendChild(el('td',null,r[7]));
-    rr.appendChild(el('td','qt-calc',r[10]));
+    /* gia tri in trong QD 2626 viet kieu Viet Nam; giao dien tieng Anh viet lai so da doc */
+    rr.appendChild(el('td','qt-calc',(L==='vi' || r[11]==null) ? r[10] : vietSo(r[11])));
     var dv=el('td',null,L==='vi'?r[12]:r[13]);
     var ci=tuSoDv(tuDv(r[12]));
     if(r[15]!=='hc' && r[11]!=null){
@@ -265,7 +270,7 @@ function veKqHs(){
       else if(ci.m3){ dv.appendChild(document.createTextNode(' ')); dv.appendChild(el('span','qt-chip',t('trM3'))); }
     }
     rr.appendChild(dv);
-    rr.appendChild(el('td',null,r[14]));
+    rr.appendChild(el('td',null,L==='vi' ? r[14] : String(r[14]).replace(/^Bậc (\d)/,'Tier $1').replace('Phương pháp Tăng-giảm','mass-balance (increase-decrease) method')));
     var ta=el('td','qt-acts');
     if(r[15]==='hc') ta.appendChild(el('small',null,t('trHc')));
     else if(r[11]==null) ta.appendChild(el('small',null,t('trNull')));
@@ -327,5 +332,5 @@ function veHoiCT(cb,n){
 TINH.efhoi=function(a){
   var n=timNguon(a[0]); if(!n) return '';
   var y=+a[1], ef=efHoi(n,y,laySo(n.id,y,false));
-  return fill(t('b3hNam'),{y:y})+(ef.loi ? ef.loi : 'EF_H,p = '+ef.ghi+' = '+vietSo(ef.v,4)+' tCO₂/tấn hơi');
+  return fill(t('b3hNam'),{y:y})+(ef.loi ? ef.loi : 'EF_H,p = '+dvHien(ef.ghi)+' = '+vietSo(ef.v,4)+' '+dvHien('tCO₂/tấn hơi'));
 };

@@ -11,6 +11,10 @@ dung chung mot nguon: danh sach tinh, bo; danh muc 2.441 co so (Quyet dinh
 Chay:  python3 build.py
 Ngay dung mac dinh la ngay hom nay; dat bien moi truong QT_BUILD_DATE=YYYY-MM-DD
 de dung lai dung mot ban cu.
+
+Kiem dong goi:  python3 build.py --kiem
+Dung lai trong bo nho voi dung ngay dung ghi trong index.html hien co, so tung byte;
+khac nhau nghia la index.html chua dung lai sau khi sua src/ hoac ../knk/. Khong ghi file.
 """
 import datetime
 import json
@@ -68,11 +72,8 @@ def thay_mot_lan(html, mark, noi_dung):
     return html.replace(mark, noi_dung)
 
 
-def main():
-    ngay = os.environ.get("QT_BUILD_DATE") or datetime.date.today().isoformat()
-    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", ngay):
-        sys.exit("QT_BUILD_DATE phai co dang YYYY-MM-DD")
-
+def dung(ngay):
+    """Tra ve noi dung index.html dung tu src/ voi ngay dung cho truoc."""
     data = du_lieu_ung_dung()
 
     thu_muc_js = os.path.join(SRC, "js")
@@ -98,7 +99,31 @@ def main():
     html = thay_mot_lan(html, "/*@@CSS@@*/", css)
     html = thay_mot_lan(html, "/*@@DATA@@*/", data_js)
     html = thay_mot_lan(html, "/*@@JS@@*/", js)
+    return html
 
+
+def kiem():
+    if not os.path.exists(OUT):
+        sys.exit("Chua co index.html")
+    cu = doc(OUT)
+    m = re.search(r'window\.__QT_BUILD__="(\d{4}-\d{2}-\d{2})"', cu)
+    if not m:
+        sys.exit("index.html khong co window.__QT_BUILD__")
+    moi = dung(m.group(1))
+    if moi != cu:
+        i = next((k for k in range(min(len(cu), len(moi))) if cu[k] != moi[k]), min(len(cu), len(moi)))
+        sys.exit("index.html KHAC ban dung tu src/ (ngay dung %s), lech tu ky tu %d: ...%s..."
+                 % (m.group(1), i, cu[max(0, i - 40):i + 40].replace("\n", " ")))
+    print("index.html khop ban dung tu src/, ngay dung %s, %d byte" % (m.group(1), len(cu.encode("utf-8"))))
+
+
+def main():
+    if "--kiem" in sys.argv[1:]:
+        return kiem()
+    ngay = os.environ.get("QT_BUILD_DATE") or datetime.date.today().isoformat()
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", ngay):
+        sys.exit("QT_BUILD_DATE phai co dang YYYY-MM-DD")
+    html = dung(ngay)
     with open(OUT, "w", encoding="utf-8", newline="\n") as f:
         f.write(html)
     print("Da dung %s, %d byte, ngay dung %s" % (os.path.relpath(OUT, HERE), len(html.encode("utf-8")), ngay))

@@ -91,12 +91,12 @@ var LOAI = [
     ten:['Môi chất lạnh','Refrigerants'],
     mo:['Phát thải KNK là các dung môi chất lạnh từ thiết bị và quá trình sản xuất, kinh doanh môi chất lạnh','Refrigerant emissions from equipment and from refrigerant production and trade'],
     pp:{ m2:'2' },
-    nf:[ { f:'thietBi', lab:['Thông tin thiết bị (Nhãn hiệu và kiểu máy)','Equipment (make and model)'], req:true, w:190 },
-         { f:'viTri', lab:['Vị trí lắp đặt','Installed at'], w:130 },
-         { f:'tt.ngayBatDau', lab:['Ngày bắt đầu sử dụng (lắp đặt)','Date put into use (installed)'], kieu:'date', w:150 },
-         { f:'phanLoai', lab:['Loại môi chất lạnh được sử dụng (R22, R410a, R134a,...)','Refrigerant used (R22, R410a, R134a,...)'], kieu:'list', list:['R22','R32','R134a','R404A','R407C','R410A','R507A'], req:true, w:160 },
-         { f:'tt.congSuatLanh', lab:['Công suất lạnh (BTU/giờ)','Cooling capacity (BTU/h)'], kieu:'num', w:120 },
-         { f:'tt.khoiLuongNapDay', lab:['Khối lượng môi chất lạnh khi nạp đầy (kg)','Full charge (kg)'], kieu:'num', w:130 } ],
+    nf:[ { f:'thietBi', lab:['Thông tin thiết bị (Nhãn hiệu và kiểu máy)','Equipment (make and model)'], req:true, w:150 },
+         { f:'viTri', lab:['Vị trí lắp đặt','Installed at'], w:110 },
+         { f:'tt.ngayBatDau', lab:['Ngày bắt đầu sử dụng (lắp đặt)','Date put into use (installed)'], kieu:'date', w:136 },
+         { f:'phanLoai', lab:['Loại môi chất lạnh được sử dụng (R22, R410a, R134a,...)','Refrigerant used (R22, R410a, R134a,...)'], kieu:'list', list:['R22','R32','R134a','R404A','R407C','R410A','R507A'], req:true, w:116 },
+         { f:'tt.congSuatLanh', lab:['Công suất lạnh (BTU/giờ)','Cooling capacity (BTU/h)'], kieu:'num', w:96 },
+         { f:'tt.khoiLuongNapDay', lab:['Khối lượng môi chất lạnh khi nạp đầy (kg)','Full charge (kg)'], kieu:'num', w:100 } ],
     bang:{ so:'2.2', ten:['Thông tin về các thiết bị lạnh sử dụng','Refrigeration equipment in use'],
       cot:[ { n:'thietBi', lab:['Thông tin thiết bị (Nhãn hiệu và kiểu máy)','Equipment (make and model)'] },
             { n:'viTri', lab:['Vị trí lắp đặt','Installed at'] },
@@ -161,7 +161,7 @@ var LOAI = [
       donVi:'tấn', ghiThem:['Hai cột cuối do ứng dụng thêm: Điểm 4 Mục 2 cần tổng lượng hơi theo tấn, còn bảng 4.2 ghi tấn/giờ. Nhập tổng lượng hơi, hoặc nhập số giờ cấp hơi để ứng dụng đổi ra tấn.','The last two columns are added by the app: Point 4 of Section 2 needs total steam in tonnes, while table 4.2 records tonnes per hour. Enter the total, or the hours of supply so the app can convert.'] },
     hs:{ khi:['CO2'], bac:['muc2'], mau:'tCO₂/tấn hơi' } }
 ];
-var LOAI_BY={}; LOAI.forEach(function(l){ LOAI_BY[l.k]=l; });
+var LOAI_BY=Object.create(null); LOAI.forEach(function(l){ LOAI_BY[l.k]=l; });
 function nguonTheoLoai(k){ return S.nguon.filter(function(n){ return n.loai===k; }); }
 function timNguon(id){ for(var i=0;i<S.nguon.length;i++) if(S.nguon[i].id===id) return S.nguon[i]; return null; }
 function nhanNguon(n){

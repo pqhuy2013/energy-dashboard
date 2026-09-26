@@ -131,9 +131,12 @@ function tinhHoi(n,y,so){                        /* Diem 4: TPT_H,p = AD_H,p × 
   var ef=efHoi(n,y,so); if(ef.loi) return [loiDong(n,y,'4','CO2',ef.loi)];
   return [{ n:n, y:y, muc:'4', khi:'CO2', ad:ad, adDv:'tấn', adGhi:adGhi, ef:ef.v, efDv:'tCO₂/tấn hơi', efGhi:ef.ghi, h:ef.h, k:1, kGhi:'', luong:ad*ef.v }];
 }
+/* Muc 2 chi co cong thuc cho khai thac than ham lo va lo thien */
+function ptCoCongThuc(n){ var cn=n.thuocTinh.congNghe; return /than/.test(nod(n.phanLoai)) && (cn==='hamlo' || cn==='lothien'); }
 function tinhPhatTan(n,y,so){                    /* Diem 5.1 den 5.5, chi cho khai thac than */
   var cn=n.thuocTinh.congNghe;
-  if(!/than/.test(nod(n.phanLoai)) || (cn!=='hamlo' && cn!=='lothien')) return [loiDong(n,y,'5','CH4',t('tkPtKhong'))];
+  /* khoang san khac hoac phat tan tu may moc: nhu qua trinh cong nghiep, khong co cong thuc */
+  if(!ptCoCongThuc(n)) return [{ n:n, y:y, muc:'5', khi:'', khongCT:true, loi:t('tkPtKhong') }];
   var hl=(cn==='hamlo'), mucCH4=hl?'5.1':'5.4', out=[];
   if(!so || so.gioTri==null) return [loiDong(n,y,mucCH4,'CH4',t('tkThieuAd'))];
   if(so.donVi!=='tấn') return [loiDong(n,y,mucCH4,'CH4',t('tkPtTan'))];
@@ -164,6 +167,14 @@ function tinhPhatTan(n,y,so){                    /* Diem 5.1 den 5.5, chi cho kh
   return out;
 }
 
+/* Tong cua mot nam co thieu khong: 'tt', 'gt' theo nhom nguon, mac dinh la ca tong.
+   Dung chung cho Buoc 4, 7, 8 va ban thao de cung mot tong mang cung mot nhan. */
+function chuaDu(o,k){ return k==='tt' ? o.thieuTT>0 : k==='gt' ? o.thieuGT>0 : (o.loi+o.chuaGwp+o.khongCT)>0; }
+/* Don vi do bo tinh ghi bang tieng Viet (file xuat giu tieng Viet); giao dien tieng Anh doi luc hien */
+function dvHien(s){
+  if(L==='vi' || !s) return s;
+  return String(s).replace(/tấn hơi/g,'t steam').replace(/tấn\/giờ/g,'t/h').replace(/giờ/g,'h').replace(/tấn/g,'t').replace(/lít/g,'L').replace(/\bđv\b/g,'unit');
+}
 /* Toan bo bang tinh cua ky. Tra ve { dong:[...], tong:{ nam: {...} } } */
 function tinhToan(){
   var ys=namKy(), dong=[];
@@ -181,13 +192,16 @@ function tinhToan(){
   });
   dong.forEach(function(d){
     if(d.loi) return;
+    /* luoi an toan: so khong hop le (NaN, vo cung) thanh dong loi co ly do, khong lan vao tong */
+    if(!isFinite(d.luong)){ d.loi=t('tkKhongHopLe'); return; }
     d.gwp = d.gwpRieng!=null ? d.gwpRieng : gwpCua(d.khi);
     d.tco2e = d.gwp==null ? null : d.luong*d.gwp;
   });
   var tong={};
   ys.forEach(function(y){
-    var o={ tong:0, tt:0, gt:0, khi:{ CO2:0, CH4:0, N2O:0, HFC:0 }, loai:{}, loi:0, khongCT:0, chuaGwp:0 };
+    var o={ tong:0, tt:0, gt:0, khi:{ CO2:0, CH4:0, N2O:0, HFC:0 }, loai:{}, loi:0, khongCT:0, chuaGwp:0, thieuTT:0, thieuGT:0 };
     dong.filter(function(d){ return d.y===y; }).forEach(function(d){
+      if(d.khongCT || d.loi || d.tco2e==null){ if(LOAI_BY[d.n.loai].gt) o.thieuGT++; else o.thieuTT++; }
       if(d.khongCT){ o.khongCT++; return; }
       if(d.loi){ o.loi++; return; }
       if(d.tco2e==null){ o.chuaGwp++; return; }

@@ -35,6 +35,7 @@ function thieuB0(){
   var m=[];
   if(!S.coSo.nhom) m.push(t('nhomh'));
   if(!(S.ky.namBatDau&&S.ky.namKetThuc)) m.push(t('kyh'));
+  else if(S.ky.namKetThuc!==S.ky.namBatDau+1) m.push(t('kyLienKe'));
   if(!S.coSo.ten.trim()) m.push(t('ften'));
   if(!S.coSo.diaChi.trim()) m.push(t('fdiachi'));
   return m;
@@ -49,6 +50,7 @@ function veB0(){
   } else tp.textContent=t('tpNone');
   var mst=S.coSo.maSoThue.trim();
   $('w-mst').textContent=(mst && !/^\d{10}(-\d{3})?$/.test(mst)) ? t('wmst') : '';
+  $('w-ky').textContent=canhBaoKy();
   var bo=S.coSo.boQuanLy;
   $('w-bo').textContent=(bo && bo!==BO_MAC_DINH) ? t('wbo') : '';
   var miss=thieuB0(), mb=$('qt-b0-miss');
@@ -95,7 +97,12 @@ Object.assign(T,{
   traGoiY:['Gợi ý: nhóm %g.','Suggestion: group %g.'],
   traB:['Cơ sở có tên trong Quyết định 699/QĐ-BNNMT ngày 27/2/2026, thuộc nhóm %n. Hạn ngạch năm 2025: %a, năm 2026: %b tấn CO₂ tương đương.','The facility is in Decision 699/QD-BNNMT of 27 Feb 2026, category %n. Quota 2025: %a, 2026: %b tCO₂e.'],
   traBRoi:['Cơ sở có tên trong Quyết định 699/QĐ-BNNMT nhưng không ghép được với dòng nào của danh mục Quyết định 42/2026/QĐ-TTg.','The facility is in Decision 699/QD-BNNMT but could not be matched to a row of Decision 42/2026/QD-TTg.'],
-  traANganh:['Ngành nghề ghi trong danh mục thuộc diện có thể được phân bổ hạn ngạch, nhưng cơ sở không có tên trong Quyết định 699/QĐ-BNNMT, nên hiện áp dụng nghĩa vụ nhóm A. Nếu cơ sở được phân bổ hạn ngạch từ giai đoạn 2027 thì thuộc nhóm C.','The listed activity is one that may receive a quota, but the facility is not in Decision 699/QD-BNNMT, so group A obligations currently apply. If the facility is allocated a quota from the 2027 phase, it belongs to group C.'],
+  traANganh:['Ngành nghề ghi trong danh mục là nhiệt điện, sắt thép hoặc xi măng. Điểm c khoản 4 Điều 11 áp dụng cho nhà máy nhiệt điện, cơ sở sản xuất sắt thép, cơ sở sản xuất xi măng thuộc danh mục do Thủ tướng Chính phủ ban hành, không nêu điều kiện phải có tên trong Quyết định 699/QĐ-BNNMT; cơ sở thuộc điểm c không thực hiện điểm b (nhóm A) và không thuộc điểm d (nhóm C). Cơ sở không có tên trong Quyết định 699/QĐ-BNNMT, nên cần xác định với bộ quản lý lĩnh vực mình có thuộc điểm c hay không: thuộc thì chọn nhóm B; không thuộc, ví dụ chỉ đúc hoặc gia công sản phẩm thép, thì chọn nhóm A.',
+              'The listed activity is thermal power, iron and steel, or cement. Article 11(4)(c) covers thermal power plants, iron and steel producers and cement producers on the Prime Minister’s list, with no condition of being in Decision 699/QD-BNNMT; such facilities do not follow point b (group A) and are not under point d (group C). This facility is not in Decision 699/QD-BNNMT, so it should confirm with its managing ministry whether point c applies: if so, choose group B; if not, for example if it only casts or processes steel products, choose group A.'],
+  traGoiY2:['Gợi ý: nhóm B hoặc nhóm A.','Suggestion: group B or group A.'],
+  traBNhieu:['Cơ sở ứng với %n dòng của Quyết định 699/QĐ-BNNMT ngày 27/2/2026, có thể là các pháp nhân khác nhau; đối chiếu tên và mã số thuế:','The facility matches %n rows of Decision 699/QD-BNNMT of 27 Feb 2026, possibly different legal entities; check the name and tax code:'],
+  traBDong:['%t, mã số thuế %m, nhóm %n: hạn ngạch năm 2025 %a, năm 2026 %b tấn CO₂ tương đương.','%t, tax code %m, category %n: quota 2025 %a, 2026 %b tCO₂e.'],
+  traMstNhieu:['Có nhiều mã số thuế khác nhau nên không tự điền mã số thuế; nhập tay mã của cơ sở.','Several different tax codes, so the tax code was not filled in; enter the facility’s own code.'],
   traA:['Cơ sở có tên trong danh mục Quyết định 42/2026/QĐ-TTg và không có tên trong Quyết định 699/QĐ-BNNMT.','The facility is in Decision 42/2026/QD-TTg and not in Decision 699/QD-BNNMT.'],
   traLuuY:['Đây là gợi ý dựa trên danh mục, không phải kết luận pháp lý. Cơ sở tự xác định nhóm của mình, bấm áp dụng xong vẫn sửa lại được.','This is a suggestion based on the lists, not a legal conclusion. The facility determines its own group and can change it after applying.'],
   traDien:['Điền thông tin từ danh mục','Fill in from the list'],
@@ -118,9 +125,22 @@ function dungTra(){
   DATA.hqRoi.forEach(function(j){ var x=DATA.hq[j]; TRA.push({ cs:null, hq:[j], s:nod(x[2]+' '+x[3]+' '+x[4]) }); });
   return TRA;
 }
+/* B: co ten trong QD 699. BA: nganh nhiet dien, sat thep, xi mang nhung khong co ten trong
+   QD 699, diem c khoan 4 Dieu 11 co the ap dung, co so tu xac dinh. A: con lai. */
 function nhomGoiY(it){
   if(it.hq.length) return 'B';
+  if(it.cs!=null && DATA.cs[it.cs][7]) return 'BA';
   return 'A';
+}
+/* Ky so lieu dau tien cua tung nhom, diem b, c, d khoan 4 Dieu 11 sua doi boi Nghi dinh 119 */
+var NAM_DAU={ A:2024, B:2026, C:2028 };
+function canhBaoKy(){
+  var a=S.ky.namBatDau, b=S.ky.namKetThuc, g=S.coSo.nhom, d=NAM_DAU[g];
+  if(!a || !b || b!==a+1 || !d) return '';
+  var c=t('nhom'+g+'c'); c=c.charAt(0).toLocaleLowerCase()+c.slice(1);
+  if(a<d) return fill(t('wKyTruoc'),{g:g,d:d,c:c,a:a,b:b});
+  if((a-d)%2) return fill(t('wKyLech'),{g:g,d:d,e:d+1,f:d+2,h:d+3,c:c,a:a,b:b});
+  return '';
 }
 function veTra(){
   var host=$('qt-tra'); if(!host) return;
@@ -178,17 +198,23 @@ function veCt(){
   } else { var x0=DATA.hq[it.hq[0]]; dong(t('ften'),x0[2]); dong(t('fdiachi'),x0[3]); }
   it.hq.forEach(function(j){ dong(t('fmst'), DATA.hq[j][4]); });
   ct.appendChild(kv);
-  var p=el('p'); p.appendChild(el('b',null,fill(t('traGoiY'),{g:g}))); p.appendChild(document.createTextNode(' '));
-  var ly;
+  var p=el('p'); p.appendChild(el('b',null,g==='BA'?t('traGoiY2'):fill(t('traGoiY'),{g:g}))); p.appendChild(document.createTextNode(' '));
+  var ly, ul=null;
+  function nhomHq(x){ return DATA.hqNhom[x[0]]?lv(DATA.hqNhom[x[0]]):''; }
   if(it.hq.length && it.cs==null) ly=t('traBRoi');
-  else if(it.hq.length){ var x=DATA.hq[it.hq[0]]; ly=fill(t('traB'),{ n:DATA.hqNhom[x[0]]?lv(DATA.hqNhom[x[0]]):'', a:vietSo(x[5]), b:vietSo(x[6]) }); }
+  else if(it.hq.length===1){ var x=DATA.hq[it.hq[0]]; ly=fill(t('traB'),{ n:nhomHq(x), a:vietSo(x[5]), b:vietSo(x[6]) }); }
+  else if(it.hq.length){
+    ly=fill(t('traBNhieu'),{n:it.hq.length}); ul=el('ul','qt-missing');
+    it.hq.forEach(function(j){ var x=DATA.hq[j]; ul.appendChild(el('li',null,fill(t('traBDong'),{ t:x[2], m:x[4], n:nhomHq(x), a:vietSo(x[5]), b:vietSo(x[6]) }))); });
+  }
   else if(DATA.cs[it.cs][7]) ly=t('traANganh');
   else ly=t('traA');
   p.appendChild(document.createTextNode(ly)); ct.appendChild(p);
+  if(ul) ct.appendChild(ul);
   ct.appendChild(el('p','qt-note',t('traLuuY')));
   var acts=el('div','qt-acts');
   acts.appendChild(nut(t('traDien'),'traDien',''));
-  acts.appendChild(nut(fill(t('traNhom'),{g:g}),'traNhom|'+g,'qt-pri'));
+  (g==='BA'?['B','A']:[g]).forEach(function(x){ acts.appendChild(nut(fill(t('traNhom'),{g:x}),'traNhom|'+x,'qt-pri')); });
   ct.appendChild(acts);
 }
 ACT.traChon=function(p){ traChon=+p[0]; veKq(); };
@@ -204,8 +230,10 @@ ACT.traDien=function(){
     dat('phuLuc',String(r[0])); dat('stt',String(r[2]));
     if(!c.linhVuc.trim()) dat('linhVuc',DATA.nganh[r[5]]||'');
   } else { var x=DATA.hq[it.hq[0]]; dat('ten',x[2]); dat('diaChi',x[3]); }
-  if(it.hq.length && !c.maSoThue.trim()) dat('maSoThue',DATA.hq[it.hq[0]][4]);
+  /* nhieu dong QD 699 co the la cac phap nhan khac nhau: chi dien ma so thue khi chi co mot ma */
+  var ms=[]; it.hq.forEach(function(j){ var m=DATA.hq[j][4]; if(ms.indexOf(m)<0) ms.push(m); });
+  if(ms.length===1 && !c.maSoThue.trim()) dat('maSoThue',ms[0]);
   dienForm(); if(n) daSua();
-  toast(fill(t('traDaDien'),{n:n}));
+  toast(fill(t('traDaDien'),{n:n})+(ms.length>1?' '+t('traMstNhieu'):''));
 };
 ACT.traNhom=function(p){ S.coSo.nhom=p[0]; dienForm(); daSua(); toast(fill(t('traDaNhom'),{g:p[0]})); };

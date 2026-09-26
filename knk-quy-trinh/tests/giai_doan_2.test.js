@@ -100,7 +100,8 @@ function boThoiGian(o) { const c = JSON.parse(JSON.stringify(o)); delete c.ngayC
     await page.fill('#tra-q', tenNganh);
     await page.click('#tra-kq button:first-child');
     const ct = await txt(page, '#tra-ct');
-    ok(ct.includes('Gợi ý: nhóm A') && ct.includes('nhóm C'), 'ngành hạn ngạch nhưng không có trong QĐ 699 thì gợi ý nhóm A, nhắc khả năng nhóm C: ' + tenNganh);
+    ok(ct.includes('Gợi ý: nhóm B hoặc nhóm A') && ct.includes('Điểm c khoản 4 Điều 11') && (await page.$$('#tra-ct [data-act^="traNhom|"]')).length === 2,
+      'ngành nhiệt điện, sắt thép, xi măng không có trong QĐ 699: dẫn điểm c, gợi ý nhóm B hoặc A, có hai nút: ' + tenNganh);
     await page.fill('#tra-q', 'khong co co so nay xyz');
     ok((await txt(page, '#tra-kq')).includes('Không tìm thấy'), 'tên không có trong danh mục thì báo không tìm thấy');
     await page.selectOption('#f-ky', '2023-2024');
