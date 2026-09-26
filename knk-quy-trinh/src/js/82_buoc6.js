@@ -45,6 +45,8 @@ function layU(id,muc,khi,tao){
 function uDong(u){ return (u && u.uAd!=null && u.uEf!=null) ? Math.sqrt(u.uAd*u.uAd+u.uEf*u.uEf) : null; }
 /* Phuong trinh 3.2: U = sqrt(Σ(U_i·x_i)²) / |Σx_i|, tren cac dong co du U */
 function uTong(kq,y){
+  /* o [data-calc] cua man hinh cu co the con giu nam da ra khoi ky (vua mo ky moi, vua doi ky) */
+  if(!kq.tong[y]) return null;
   var tong=kq.tong[y].tong, s2=0, sx=0;
   kq.dong.forEach(function(d){
     if(d.y!==y || d.loi || d.tco2e==null) return;

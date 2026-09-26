@@ -9,9 +9,10 @@
 | `index.html` | Bản đóng gói tự chứa, là file đăng lên GitHub Pages. **Không sửa tay**, sửa trong `src/` rồi dựng lại |
 | `src/index.src.html` | Khung trang, có 3 dấu `/*@@CSS@@*/`, `/*@@DATA@@*/`, `/*@@JS@@*/` |
 | `src/app.css` | Giao diện, tiền tố class `qt-` |
-| `src/js/*.js` | Mã ứng dụng, ghép theo thứ tự tên file vào một hàm tự gọi. `10_core` mô hình dữ liệu, lưu và nạp, điều hướng; `12_nhap` ô nhập gắn với dữ liệu; `15_khung` dòng nhắc, ngôn ngữ; `20_loai` 8 loại nguồn và cột bảng theo Thông tư 38; `30_buoc0` đến `60_buoc3` từng bước; `70_tinh` bộ tính theo Mục 2 Phụ lục II; `75_buoc4` đến `84_buoc7` Bước 4 đến Bước 7; `90_init` khởi động |
+| `src/js/*.js` | Mã ứng dụng, ghép theo thứ tự tên file vào một hàm tự gọi. `10_core` mô hình dữ liệu, lưu và nạp, điều hướng; `12_nhap` ô nhập gắn với dữ liệu; `15_khung` dòng nhắc, ngôn ngữ; `20_loai` 8 loại nguồn và cột bảng theo Thông tư 38; `30_buoc0` đến `60_buoc3` từng bước; `70_tinh` bộ tính theo Mục 2 Phụ lục II; `75_buoc4` đến `84_buoc7` Bước 4 đến Bước 7; `85_zip` lõi ZIP, `86_xlsx` bộ ghi .xlsx, `87_docx` bộ ghi .docx; `88_mau06` bản thảo Mẫu số 06, `88_bangtinh` bảng tính .xlsx, `89_buoc8` Bước 8; `90_init` khởi động |
 | `build.py` | Ghép `src/` thành `index.html`, gán ngày dựng, lấy dữ liệu từ `../knk/index.html` |
 | `tests/giai_doan_*.test.js` | Kiểm thử nghiệm thu từng giai đoạn bằng Playwright |
+| `tests/kiem_file.py` | Đọc file .docx, .xlsx do ứng dụng xuất, cho LibreOffice mở và tính lại công thức, dùng trong kiểm thử Giai đoạn 5 |
 | `Mau_so_06_cau_truc.md` | Cấu trúc Mẫu số 06 Phụ lục II Nghị định 06/2022/NĐ-CP, kết quả Giai đoạn 0 |
 | `QD334_BCT_dinh_chinh.md` | Nội dung đính chính của Quyết định 334/QĐ-BCT |
 | `TT38_Phu_luc_II.md` | Phụ lục II Thông tư 38/2023/TT-BCT, số liệu hoạt động và phương pháp tính |
@@ -26,7 +27,7 @@ Ngày dựng mặc định là ngày chạy lệnh, gán vào hằng số duy nh
 
 ## Kiểm thử
 
-Cần Node và gói `playwright` cài toàn cục kèm Chromium.
+Cần Node và gói `playwright` cài toàn cục kèm Chromium. Giai đoạn 5 cần thêm Python 3 có `python-docx`, `openpyxl`, `pymupdf`, và LibreOffice Writer, Calc (gói `libreoffice-writer-nogui`, `libreoffice-calc-nogui`), để mở file xuất và tính lại công thức.
 
 ```
 python3 build.py
@@ -34,6 +35,7 @@ NODE_PATH=$(npm root -g) node tests/giai_doan_1.test.js
 NODE_PATH=$(npm root -g) node tests/giai_doan_2.test.js
 NODE_PATH=$(npm root -g) node tests/giai_doan_3.test.js
 NODE_PATH=$(npm root -g) node tests/giai_doan_4.test.js
+NODE_PATH=$(npm root -g) node tests/giai_doan_5.test.js
 ```
 
 Kiểm thử chạy trên `index.html` đã đóng gói. Ảnh chụp màn hình lưu vào thư mục `QT_SHOTS`, mặc định là `<tmp>/qt-shots`.
@@ -70,6 +72,8 @@ Khi đổi cấu trúc dữ liệu: tăng `PHIEN_BAN` trong `src/js/10_core.js` 
 
 Các chỗ không khớp đơn vị của Thông tư xử lý theo `TT38_Phu_luc_II.md` mục 4: hiệu suất nồi hơi và hiệu suất đốt CH₄ nhập theo % rồi chia 100; khối lượng riêng dùng kg/m³. GWP của CO₂ luôn là 1; CH₄ và N₂O theo bộ AR4 hoặc AR5 chọn ở Bước 4.
 
+Nguồn cố định ghi theo TJ, GJ hoặc MJ thì đổi thẳng ra TJ, đơn vị khác nhân hệ số nhiệt trị; cột “Tổng tiêu thụ (TJ)” ở Bước 2 dùng chung cách đổi này. Mỗi dòng kết quả mang hệ số đổi đơn vị k, sao cho lượng khí (tấn) = AD × EF × k, hoặc AD × k ở điểm 2.1, 5.2, 5.3; bảng tính .xlsx dùng đúng k này trong công thức.
+
 Dòng nào không tính đúng được thì ghi lý do, không ra số: thiếu số liệu, hệ số hiệu chỉnh, hệ số theo khối lượng các-bon hoặc ni-tơ, theo % hoặc theo năng lượng, đơn vị mẫu số không khớp công thức, thiếu khối lượng riêng.
 
 ## Bước 5 đến Bước 7
@@ -77,6 +81,21 @@ Dòng nào không tính đúng được thì ghi lý do, không ra số: thiếu
 - Bước 5 dẫn Điều 20. Ứng dụng chưa đối chiếu được nguyên văn tiểu mục 6.1.2 TCVN ISO 14064-1:2011, nên 4 nội dung tối thiểu lấy theo tài liệu quy trình và trang nói rõ điều đó. Phần kiểm tra tự động (chứng từ, lỗi đơn vị, tính liên tục giữa hai năm, đối chiếu kỳ trước, số liệu ước tính) chỉ là gợi ý, không thay biên bản. Người kiểm tra trùng người cung cấp số liệu thì hiện cảnh báo.
 - Bước 6 hiện 6 nội dung nguyên văn khoản 1 Điều 11, kèm gợi ý rút từ số liệu đã nhập. Phần định lượng theo Phương pháp 1, Chương 3 Quyển 1 Hướng dẫn IPCC 2006: phương trình 3.1 cho từng dòng, phương trình 3.2 cho tổng mỗi năm, kèm tỷ lệ phát thải có đủ số liệu. Phần này không bắt buộc nhập đủ.
 - Bước 7 dẫn khoản 1 Điều 22. Nạp file .json kỳ trước thì ứng dụng tính tổng kỳ đó hai lần, theo bộ GWP của chính file và theo bộ đang chọn, bằng cùng bộ tính của Bước 4. Nếu thay đổi là phạm vi, nguồn hoặc hệ số thì người dùng sửa file kỳ trước theo cách tính mới rồi nạp lại.
+
+## Bước 8, xuất file
+
+Bước 8 dẫn Điều 23 Thông tư 38 và điểm e khoản 1 Điều 11 Nghị định 06 (bổ sung tại Nghị định 119/2025/NĐ-CP), hiện tình trạng từng bước, kết quả từng năm, bảng kiểm trước khi nộp (Phần F tài liệu quy trình, ứng dụng tự kiểm những mục kiểm được) và bản xem trước. File xuất luôn viết bằng tiếng Việt, kể cả khi giao diện đang ở tiếng Anh.
+
+**Bản thảo Mẫu số 06 (.docx).** Nội dung dựng một lần thành danh sách khối (`mau06()` trong `88_mau06.js`), rồi vẽ ra hai nơi: file .docx và bản xem trước trên trang, nên hai bản luôn giống nhau.
+
+- Tiêu đề và 14 đề mục chép nguyên văn `Mau_so_06_cau_truc.md` mục 3. Đề mục in đậm để dễ đọc; câu chữ giữ nguyên.
+- Tiêu đề điền cả hai năm của kỳ. Dưới III.2 là các bảng số liệu theo biểu Mục 1 Phụ lục II Thông tư 38, chỉ gồm cột của Thông tư; dưới III.3 là bảng tổng hợp theo biểu E.8, mỗi năm một bảng. Ghi chú “bảng là cách trình bày của ứng dụng” chỉ hiện trên trang, không vào file (quyết định ngày 26/9/2026).
+- Chỗ còn thiếu ghi `[Chưa nhập: …]` tô vàng. Nguồn thuộc loại Thông tư 38 không có công thức ghi rõ, không ra số, và tổng ghi `[chưa đầy đủ]`.
+- Thể thức theo Nghị định 30/2020/NĐ-CP: A4, Times New Roman 14, lề trên 20 mm, dưới 20 mm, trái 30 mm, phải 20 mm, số trang giữa lề trên từ trang 2. Chỉ số dưới như CO₂ ghi bằng định dạng chỉ số dưới của Word.
+
+**Bảng tính (.xlsx).** Tối đa chín trang tính: Thông tin; Tổng hợp (SUMIFS từ trang Bảng tính); Bảng tính, mỗi dòng một khí của một nguồn trong một năm, lượng khí = AD × EF × k và phát thải = lượng khí × GWP, với k là hệ số đổi đơn vị của bộ tính có kèm diễn giải; Biểu năm của từng năm (biểu Mục 1 đã điền, kể cả cột ứng dụng thêm và thông tin truy vết, cột TJ và bảng 2.1 là công thức); Hệ số; Kiểm soát chất lượng; Độ không chắc chắn (phương trình 3.1 và 3.2 bằng công thức); Tính toán lại, chỉ có khi Bước 7 có thay đổi. Ô công thức kèm giá trị ứng dụng đã tính, Excel tính lại khi mở file.
+
+Bộ ghi .xlsx phát triển từ `xlsx.js` của `qcvn04-2017/index.html`; bộ ghi .docx dùng chung lõi ZIP đó. Không dùng thư viện ngoài.
 
 ## Lưu dữ liệu
 

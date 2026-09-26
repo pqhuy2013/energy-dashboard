@@ -35,6 +35,9 @@ function tuDv(dv){ return chuanDv(dv).split('/')[0]; }
 function hsQuyDoiDuoc(donVi){ return !tuSoDv(tuDv(donVi)).khong; }
 
 var MUC={ codinh:'1', didong:'1', moichat:'2.1', dien:'3', hoi:'4' };
+/* Moi dong ket qua co k: he so doi don vi de luong khi (tan) = AD × EF × k, hoac AD × k khi
+   cong thuc khong co EF (2.1, 5.2, 5.3). Bang tinh .xlsx dung dung k nay trong cong thuc. */
+function ghiK(f,tu){ return f===1 ? '' : fill(t('tkDoiDv'),{a:chuanDv(tu),k:vietSo(f)}); }
 function loiDong(n,y,muc,khi,loi){ return { n:n, y:y, muc:muc, khi:khi, loi:loi }; }
 
 /* He so da gan cho nguon n, khi k, nam y (dien theo nam) */
@@ -57,15 +60,25 @@ function doiHs(h,khi,mau){
 /* GWP cua CO2 bang 1 theo dinh nghia o moi bao cao danh gia, khong phu thuoc bo da chon */
 function gwpCua(khi){ if(khi==='CO2') return 1; var g=S.gwp && DATA.gwp[S.gwp]; return (g && g[khi]!=null) ? g[khi] : null; }
 
+/* Nang luong tieu thu theo TJ cua mot dong so lieu dot nhien lieu. Nguon co dinh ghi
+   san theo TJ, GJ, MJ thi doi thang; don vi khac nhan he so nhiet tri (TJ/don vi).
+   Dung chung cho cot "Tong tieu thu (TJ)" o Buoc 2 va cho diem 1 Muc 2. */
+var HE_TJ={ tj:1, gj:0.001, mj:0.000001 };
+function tjCua(n,so){
+  if(!so || so.gioTri==null) return null;
+  var dv=so.donVi||'', he=HE_TJ[dv.toLowerCase()], nt=so.chiTiet.nhietTri;
+  if(n.loai==='codinh' && he!=null) return { v:so.gioTri*he, ghi:he===1?'':vietSo(so.gioTri)+' '+dv };
+  if(nt!=null) return { v:so.gioTri*nt, ghi:vietSo(so.gioTri)+' '+(dv||'')+' × '+vietSo(nt)+' TJ/'+(dv||'đv') };
+  return null;
+}
+
 /* ---- tung diem cua Muc 2 ---- */
 function tinhDot(n,y,so){                      /* Diem 1: TPT_F = Σ(AD_F × EF_F,i × GWP_i)/1000 */
   var out=[], ad=null, ly=null, adGhi='', dv=(so && so.donVi)||'';
   if(!so || so.gioTri==null) ly=t('tkThieuAd');
   else {
-    var heTJ={ tj:1, gj:0.001, mj:0.000001 }[dv.toLowerCase()], nt=so.chiTiet.nhietTri;
-    if(n.loai==='codinh' && heTJ!=null){ ad=so.gioTri*heTJ; if(heTJ!==1) adGhi=vietSo(so.gioTri)+' '+dv; }
-    else if(nt!=null){ ad=so.gioTri*nt; adGhi=vietSo(so.gioTri)+' '+(dv||'')+' × '+vietSo(nt)+' TJ/'+(dv||'đv'); }
-    else ly=t('tkThieuNt');
+    var tj=tjCua(n,so);
+    if(tj){ ad=tj.v; adGhi=tj.ghi; } else ly=t('tkThieuNt');
   }
   ['CO2','CH4','N2O'].forEach(function(k){
     if(ly){ out.push(loiDong(n,y,'1',k,ly)); return; }
@@ -74,7 +87,7 @@ function tinhDot(n,y,so){                      /* Diem 1: TPT_F = Σ(AD_F × EF_
     var d=doiHs(h,k,function(m){ return m==='tj'; });
     if(d.loi){ out.push(loiDong(n,y,'1',k,d.loi)); return; }
     if(d.m3){ out.push(loiDong(n,y,'1',k,t('tkM3Sai'))); return; }
-    out.push({ n:n, y:y, muc:'1', khi:k, ad:ad, adDv:'TJ', adGhi:adGhi, ef:h.giaTri, efDv:h.donVi, h:h, luong:ad*h.giaTri*d.f });
+    out.push({ n:n, y:y, muc:'1', khi:k, ad:ad, adDv:'TJ', adGhi:adGhi, ef:h.giaTri, efDv:h.donVi, h:h, k:d.f, kGhi:ghiK(d.f,tuDv(h.donVi)), luong:ad*h.giaTri*d.f });
   });
   return out;
 }
@@ -82,14 +95,14 @@ function tinhMoiChat(n,y,so){                   /* Diem 2.1: TPT_mcl = Σ(AD_j �
   if(!so || so.gioTri==null) return [loiDong(n,y,'2.1','HFC',t('tkThieuAd'))];
   var h=hsCua(n,'GWP',y);
   if(!h || h.giaTri==null) return [loiDong(n,y,'2.1','HFC',t('tkThieuGwp'))];
-  return [{ n:n, y:y, muc:'2.1', khi:'HFC', ad:so.gioTri, adDv:'kg', ef:null, h:h, luong:so.gioTri/1000, gwpRieng:h.giaTri }];
+  return [{ n:n, y:y, muc:'2.1', khi:'HFC', ad:so.gioTri, adDv:'kg', ef:null, h:h, k:0.001, kGhi:ghiK(0.001,'kg'), luong:so.gioTri/1000, gwpRieng:h.giaTri }];
 }
 function tinhDien(n,y,so){                      /* Diem 3: TPT_D = AD_n × EF_n */
   if(!so || so.gioTri==null) return [loiDong(n,y,'3','CO2',t('tkThieuAd'))];
   var h=hsCua(n,'CO2',y), e=kiemHs(h); if(e) return [loiDong(n,y,'3','CO2',e)];
   var d=doiHs(h,'CO2',function(m){ return m==='mwh'; }); if(d.loi) return [loiDong(n,y,'3','CO2',d.loi)];
   if(d.m3) return [loiDong(n,y,'3','CO2',t('tkM3Sai'))];
-  return [{ n:n, y:y, muc:'3', khi:'CO2', ad:so.gioTri, adDv:'MWh', ef:h.giaTri, efDv:h.donVi, h:h, luong:so.gioTri*h.giaTri*d.f }];
+  return [{ n:n, y:y, muc:'3', khi:'CO2', ad:so.gioTri, adDv:'MWh', ef:h.giaTri, efDv:h.donVi, h:h, k:d.f, kGhi:ghiK(d.f,tuDv(h.donVi)), luong:so.gioTri*h.giaTri*d.f }];
 }
 /* EF_H,p cua hoi nam y: do don vi cap hoi cung cap, hoac tinh theo cong thuc Diem 4 sau
    dinh chinh QD 334: EF = Enthalpy / eta × EF_nhien lieu / 10^9, eta la phan so. */
@@ -116,7 +129,7 @@ function tinhHoi(n,y,so){                        /* Diem 4: TPT_H,p = AD_H,p × 
   }
   if(ad==null) return [loiDong(n,y,'4','CO2',t('tkThieuAd'))];
   var ef=efHoi(n,y,so); if(ef.loi) return [loiDong(n,y,'4','CO2',ef.loi)];
-  return [{ n:n, y:y, muc:'4', khi:'CO2', ad:ad, adDv:'tấn', adGhi:adGhi, ef:ef.v, efDv:'tCO₂/tấn hơi', efGhi:ef.ghi, h:ef.h, luong:ad*ef.v }];
+  return [{ n:n, y:y, muc:'4', khi:'CO2', ad:ad, adDv:'tấn', adGhi:adGhi, ef:ef.v, efDv:'tCO₂/tấn hơi', efGhi:ef.ghi, h:ef.h, k:1, kGhi:'', luong:ad*ef.v }];
 }
 function tinhPhatTan(n,y,so){                    /* Diem 5.1 den 5.5, chi cho khai thac than */
   var cn=n.thuocTinh.congNghe;
@@ -130,9 +143,9 @@ function tinhPhatTan(n,y,so){                    /* Diem 5.1 den 5.5, chi cho kh
     var e=kiemHs(h); if(e){ out.push(loiDong(n,y,muc,khi,e)); return; }
     var d=doiHs(h,khi,function(m){ return /^(t|tấn|tan)$/.test(m); });
     if(d.loi){ out.push(loiDong(n,y,muc,khi,d.loi)); return; }
-    if(!d.m3){ out.push({ n:n, y:y, muc:muc, khi:khi, ad:so.gioTri, adDv:'tấn', ef:h.giaTri, efDv:h.donVi, h:h, luong:so.gioTri*h.giaTri*d.f }); return; }
+    if(!d.m3){ out.push({ n:n, y:y, muc:muc, khi:khi, ad:so.gioTri, adDv:'tấn', ef:h.giaTri, efDv:h.donVi, h:h, k:d.f, kGhi:ghiK(d.f,tuDv(h.donVi)), luong:so.gioTri*h.giaTri*d.f }); return; }
     var cf=h.thamSo.cf; if(cf==null){ out.push(loiDong(n,y,muc,khi,t('tkCf'))); return; }
-    out.push({ n:n, y:y, muc:muc, khi:khi, ad:so.gioTri, adDv:'tấn', ef:h.giaTri, efDv:h.donVi, h:h, cf:cf, luong:so.gioTri*h.giaTri*cf/1000 });
+    out.push({ n:n, y:y, muc:muc, khi:khi, ad:so.gioTri, adDv:'tấn', ef:h.giaTri, efDv:h.donVi, h:h, cf:cf, k:cf/1000, kGhi:fill(t('tkKcf'),{c:vietSo(cf)}), luong:so.gioTri*h.giaTri*cf/1000 });
   }
   mot('CH4',mucCH4,true);
   if(!hl) mot('CO2','5.5',false);
@@ -144,8 +157,8 @@ function tinhPhatTan(n,y,so){                    /* Diem 5.1 den 5.5, chi cho kh
     else if(ce==null || ce<0 || ce>100) out.push(loiDong(n,y,'5.2','CO2',t('tkCe')));
     else {
       var kg=ab*cf;
-      out.push({ n:n, y:y, muc:'5.2', khi:'CO2', ad:ab, adDv:'m³ CH₄', cf:cf, ce:ce, luong:kg*(ce/100)*(44/16)/1000 });
-      out.push({ n:n, y:y, muc:'5.3', khi:'CH4', ad:ab, adDv:'m³ CH₄', cf:cf, ce:ce, luong:kg*(1-ce/100)/1000 });
+      out.push({ n:n, y:y, muc:'5.2', khi:'CO2', ad:ab, adDv:'m³ CH₄', ef:null, cf:cf, ce:ce, k:cf*(ce/100)*(44/16)/1000, kGhi:fill(t('tkK52'),{c:vietSo(cf),e:vietSo(ce)}), luong:kg*(ce/100)*(44/16)/1000 });
+      out.push({ n:n, y:y, muc:'5.3', khi:'CH4', ad:ab, adDv:'m³ CH₄', ef:null, cf:cf, ce:ce, k:cf*(1-ce/100)/1000, kGhi:fill(t('tkK53'),{c:vietSo(cf),e:vietSo(ce)}), luong:kg*(1-ce/100)/1000 });
     }
   }
   return out;

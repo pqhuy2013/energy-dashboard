@@ -147,10 +147,8 @@ function veBang21(cb,ds,y){
 }
 /* o tinh san, chi hien, khong luu vao file */
 TINH.tj=function(a){
-  var n=timNguon(a[0]), so=laySo(a[0],+a[1],false); if(!n || !so || so.gioTri==null) return '';
-  if(so.donVi==='TJ') return vietSo(so.gioTri,6);
-  var nt=so.chiTiet.nhietTri; if(nt==null) return '';
-  return vietSo(so.gioTri*nt,6);
+  var n=timNguon(a[0]), tj=n && tjCua(n,laySo(a[0],+a[1],false));
+  return tj ? vietSo(tj.v,6) : '';
 };
 TINH.mc21=function(a){
   var k=decodeURIComponent(a[0]), y=+a[1], tong=null;
@@ -167,7 +165,7 @@ function thieuSo(n,y){
   l.bang.cot.forEach(function(c){
     if(!c.s || !c.req) return;
     var v=getP(so,duongDan(c.s));
-    if(c.req==='nhietTri'){ if(so.donVi!=='TJ' && v==null) m.push(lv(c.lab)); return; }
+    if(c.req==='nhietTri'){ if(HE_TJ[(so.donVi||'').toLowerCase()]==null && v==null) m.push(lv(c.lab)); return; }
     if(c.req==='hoi'){ if(v==null && !(so.chiTiet.khoiLuongGio!=null && so.chiTiet.soGio!=null)) m.push(lv(c.lab)); return; }
     if(rong(v)) m.push(lv(c.lab));
     if(c.donVi && rong(so.donVi)) m.push(lv(c.lab));

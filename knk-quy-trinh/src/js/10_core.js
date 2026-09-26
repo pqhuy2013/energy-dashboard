@@ -397,20 +397,18 @@ function hoi(msg, acts){
 }
 
 /* ---------- tai ve va nap file ---------- */
-function tenFile(){
+/* Ten file tai ve: <tien to>_<ten co so>_<ky>_<ngay gio>.<duoi> */
+function tenFile(tienTo,duoi){
   var slug=nod(S.coSo.ten).replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40)||'co-so';
   var d=new Date(), stamp=d.getFullYear()+p2(d.getMonth()+1)+p2(d.getDate())+'-'+p2(d.getHours())+p2(d.getMinutes());
   var ky=(S.ky.namBatDau&&S.ky.namKetThuc) ? '_'+S.ky.namBatDau+'-'+S.ky.namKetThuc : '';
-  return 'KNK_'+slug+ky+'_'+stamp+'.json';
+  return (tienTo||'KNK')+'_'+slug+ky+'_'+stamp+'.'+(duoi||'json');
 }
 function taiVe(){
   S.taoBoi={ ungDung:'knk-quy-trinh', banDung:BUILD };
   if(!S.ngayCapNhat) S.ngayCapNhat=new Date().toISOString();
   var name=tenFile();
-  var blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
-  var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
-  document.body.appendChild(a); a.click();
-  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },1500);
+  taiBlob(new Blob([JSON.stringify(S,null,2)],{type:'application/json'}),name);
   M.coThayDoi=false; M.taiVeLuc=new Date().toISOString();
   luuTam(); luuMeta(); veStrip();
   toast(fill(t('tSaved'),{f:name}));

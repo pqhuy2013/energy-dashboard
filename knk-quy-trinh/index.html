@@ -228,6 +228,41 @@ table.qt-t tr.qt-tr-note input.qt-wide{width:300px;max-width:100%}
   .qt-kv{grid-template-columns:1fr}
   .qt-kv dt{margin-top:4px}
 }
+/* Buoc 8: xuat file, ban xem truoc Mau so 06 */
+.qt-xuat{padding:10px 0;border-bottom:1px solid var(--line)}
+.qt-xuat:last-child{border-bottom:0}
+.qt-xuat .qt-note{margin:6px 0 0}
+small.qt-fghi{display:block;color:var(--ink3);font-size:11.5px;line-height:1.45;margin-top:3px;white-space:normal}
+.qt-a4{background:#fff;border:1px solid var(--line2);box-shadow:0 1px 4px rgba(0,0,0,.06);padding:40px 48px;font-family:"Times New Roman",Times,serif;font-size:15px;line-height:1.5;color:#111;max-width:820px;margin:0 auto}
+.qt-a4-mau{text-align:right;font-weight:700}
+.qt-a4-dau{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,5fr);gap:14px;text-align:center;margin-top:6px}
+.qt-a4-dau b{display:block;font-size:14px;line-height:1.35}
+.qt-a4-ke{display:block;width:36%;margin:5px auto 0;border-top:1px solid #111}
+.qt-a4-ke2{width:58%}
+.qt-a4-td{text-align:center;margin:24px 0 16px}
+.qt-a4-td b{display:block}
+.qt-a4-td .qt-a4-ke{width:18%}
+.qt-a4-muc,.qt-a4-muc2{font-weight:700;margin:12px 0 4px;text-indent:1cm}
+.qt-a4-p{margin:3px 0;text-indent:1cm;text-align:justify}
+.qt-a4-cap2{text-indent:2cm}
+.qt-a4-nho{font-style:italic;font-size:13.5px;margin:2px 0 8px;text-indent:1cm}
+.qt-a4-cap{text-align:center;font-weight:700;margin:14px 0 6px;font-size:14px}
+.qt-a4 .qt-tbw{border:0;border-radius:0}
+table.qt-a4t{border-collapse:collapse;width:100%;font-size:12.5px;line-height:1.35}
+table.qt-a4t th,table.qt-a4t td{border:1px solid #333;padding:3px 5px;vertical-align:top}
+table.qt-a4t th{background:#f2f2f2;text-align:center;font-weight:700}
+table.qt-a4t td.qt-r{text-align:right}
+table.qt-a4t td.qt-c{text-align:center}
+.qt-a4-o{background:#fff08a}
+.qt-a4-web{font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:12.5px;line-height:1.5;background:#eef4ff;border-left:3px solid var(--c1);padding:6px 10px;margin:8px 0;color:#23458f}
+.qt-a4-ky{margin:28px 0 0 auto;width:48%;text-align:center}
+.qt-a4-ky b{display:block}
+.qt-a4-kyten{margin-top:72px}
+@media (max-width:760px){
+  .qt-a4{padding:18px 14px;font-size:14px}
+  .qt-a4-dau{grid-template-columns:minmax(0,1fr)}
+  .qt-a4-ky{width:auto}
+}
 @media print{ .qt-nav,.qt-acts,.qt-lang,.qt-strip,.qt-frame{display:none} .qt-app{display:block} }
 </style>
 </head>
@@ -797,20 +832,18 @@ function hoi(msg, acts){
 }
 
 /* ---------- tai ve va nap file ---------- */
-function tenFile(){
+/* Ten file tai ve: <tien to>_<ten co so>_<ky>_<ngay gio>.<duoi> */
+function tenFile(tienTo,duoi){
   var slug=nod(S.coSo.ten).replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40)||'co-so';
   var d=new Date(), stamp=d.getFullYear()+p2(d.getMonth()+1)+p2(d.getDate())+'-'+p2(d.getHours())+p2(d.getMinutes());
   var ky=(S.ky.namBatDau&&S.ky.namKetThuc) ? '_'+S.ky.namBatDau+'-'+S.ky.namKetThuc : '';
-  return 'KNK_'+slug+ky+'_'+stamp+'.json';
+  return (tienTo||'KNK')+'_'+slug+ky+'_'+stamp+'.'+(duoi||'json');
 }
 function taiVe(){
   S.taoBoi={ ungDung:'knk-quy-trinh', banDung:BUILD };
   if(!S.ngayCapNhat) S.ngayCapNhat=new Date().toISOString();
   var name=tenFile();
-  var blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
-  var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
-  document.body.appendChild(a); a.click();
-  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },1500);
+  taiBlob(new Blob([JSON.stringify(S,null,2)],{type:'application/json'}),name);
   M.coThayDoi=false; M.taiVeLuc=new Date().toISOString();
   luuTam(); luuMeta(); veStrip();
   toast(fill(t('tSaved'),{f:name}));
@@ -1848,10 +1881,8 @@ function veBang21(cb,ds,y){
 }
 /* o tinh san, chi hien, khong luu vao file */
 TINH.tj=function(a){
-  var n=timNguon(a[0]), so=laySo(a[0],+a[1],false); if(!n || !so || so.gioTri==null) return '';
-  if(so.donVi==='TJ') return vietSo(so.gioTri,6);
-  var nt=so.chiTiet.nhietTri; if(nt==null) return '';
-  return vietSo(so.gioTri*nt,6);
+  var n=timNguon(a[0]), tj=n && tjCua(n,laySo(a[0],+a[1],false));
+  return tj ? vietSo(tj.v,6) : '';
 };
 TINH.mc21=function(a){
   var k=decodeURIComponent(a[0]), y=+a[1], tong=null;
@@ -1868,7 +1899,7 @@ function thieuSo(n,y){
   l.bang.cot.forEach(function(c){
     if(!c.s || !c.req) return;
     var v=getP(so,duongDan(c.s));
-    if(c.req==='nhietTri'){ if(so.donVi!=='TJ' && v==null) m.push(lv(c.lab)); return; }
+    if(c.req==='nhietTri'){ if(HE_TJ[(so.donVi||'').toLowerCase()]==null && v==null) m.push(lv(c.lab)); return; }
     if(c.req==='hoi'){ if(v==null && !(so.chiTiet.khoiLuongGio!=null && so.chiTiet.soGio!=null)) m.push(lv(c.lab)); return; }
     if(rong(v)) m.push(lv(c.lab));
     if(c.donVi && rong(so.donVi)) m.push(lv(c.lab));
@@ -2264,6 +2295,9 @@ function tuDv(dv){ return chuanDv(dv).split('/')[0]; }
 function hsQuyDoiDuoc(donVi){ return !tuSoDv(tuDv(donVi)).khong; }
 
 var MUC={ codinh:'1', didong:'1', moichat:'2.1', dien:'3', hoi:'4' };
+/* Moi dong ket qua co k: he so doi don vi de luong khi (tan) = AD × EF × k, hoac AD × k khi
+   cong thuc khong co EF (2.1, 5.2, 5.3). Bang tinh .xlsx dung dung k nay trong cong thuc. */
+function ghiK(f,tu){ return f===1 ? '' : fill(t('tkDoiDv'),{a:chuanDv(tu),k:vietSo(f)}); }
 function loiDong(n,y,muc,khi,loi){ return { n:n, y:y, muc:muc, khi:khi, loi:loi }; }
 
 /* He so da gan cho nguon n, khi k, nam y (dien theo nam) */
@@ -2286,15 +2320,25 @@ function doiHs(h,khi,mau){
 /* GWP cua CO2 bang 1 theo dinh nghia o moi bao cao danh gia, khong phu thuoc bo da chon */
 function gwpCua(khi){ if(khi==='CO2') return 1; var g=S.gwp && DATA.gwp[S.gwp]; return (g && g[khi]!=null) ? g[khi] : null; }
 
+/* Nang luong tieu thu theo TJ cua mot dong so lieu dot nhien lieu. Nguon co dinh ghi
+   san theo TJ, GJ, MJ thi doi thang; don vi khac nhan he so nhiet tri (TJ/don vi).
+   Dung chung cho cot "Tong tieu thu (TJ)" o Buoc 2 va cho diem 1 Muc 2. */
+var HE_TJ={ tj:1, gj:0.001, mj:0.000001 };
+function tjCua(n,so){
+  if(!so || so.gioTri==null) return null;
+  var dv=so.donVi||'', he=HE_TJ[dv.toLowerCase()], nt=so.chiTiet.nhietTri;
+  if(n.loai==='codinh' && he!=null) return { v:so.gioTri*he, ghi:he===1?'':vietSo(so.gioTri)+' '+dv };
+  if(nt!=null) return { v:so.gioTri*nt, ghi:vietSo(so.gioTri)+' '+(dv||'')+' × '+vietSo(nt)+' TJ/'+(dv||'đv') };
+  return null;
+}
+
 /* ---- tung diem cua Muc 2 ---- */
 function tinhDot(n,y,so){                      /* Diem 1: TPT_F = Σ(AD_F × EF_F,i × GWP_i)/1000 */
   var out=[], ad=null, ly=null, adGhi='', dv=(so && so.donVi)||'';
   if(!so || so.gioTri==null) ly=t('tkThieuAd');
   else {
-    var heTJ={ tj:1, gj:0.001, mj:0.000001 }[dv.toLowerCase()], nt=so.chiTiet.nhietTri;
-    if(n.loai==='codinh' && heTJ!=null){ ad=so.gioTri*heTJ; if(heTJ!==1) adGhi=vietSo(so.gioTri)+' '+dv; }
-    else if(nt!=null){ ad=so.gioTri*nt; adGhi=vietSo(so.gioTri)+' '+(dv||'')+' × '+vietSo(nt)+' TJ/'+(dv||'đv'); }
-    else ly=t('tkThieuNt');
+    var tj=tjCua(n,so);
+    if(tj){ ad=tj.v; adGhi=tj.ghi; } else ly=t('tkThieuNt');
   }
   ['CO2','CH4','N2O'].forEach(function(k){
     if(ly){ out.push(loiDong(n,y,'1',k,ly)); return; }
@@ -2303,7 +2347,7 @@ function tinhDot(n,y,so){                      /* Diem 1: TPT_F = Σ(AD_F × EF_
     var d=doiHs(h,k,function(m){ return m==='tj'; });
     if(d.loi){ out.push(loiDong(n,y,'1',k,d.loi)); return; }
     if(d.m3){ out.push(loiDong(n,y,'1',k,t('tkM3Sai'))); return; }
-    out.push({ n:n, y:y, muc:'1', khi:k, ad:ad, adDv:'TJ', adGhi:adGhi, ef:h.giaTri, efDv:h.donVi, h:h, luong:ad*h.giaTri*d.f });
+    out.push({ n:n, y:y, muc:'1', khi:k, ad:ad, adDv:'TJ', adGhi:adGhi, ef:h.giaTri, efDv:h.donVi, h:h, k:d.f, kGhi:ghiK(d.f,tuDv(h.donVi)), luong:ad*h.giaTri*d.f });
   });
   return out;
 }
@@ -2311,14 +2355,14 @@ function tinhMoiChat(n,y,so){                   /* Diem 2.1: TPT_mcl = Σ(AD_j �
   if(!so || so.gioTri==null) return [loiDong(n,y,'2.1','HFC',t('tkThieuAd'))];
   var h=hsCua(n,'GWP',y);
   if(!h || h.giaTri==null) return [loiDong(n,y,'2.1','HFC',t('tkThieuGwp'))];
-  return [{ n:n, y:y, muc:'2.1', khi:'HFC', ad:so.gioTri, adDv:'kg', ef:null, h:h, luong:so.gioTri/1000, gwpRieng:h.giaTri }];
+  return [{ n:n, y:y, muc:'2.1', khi:'HFC', ad:so.gioTri, adDv:'kg', ef:null, h:h, k:0.001, kGhi:ghiK(0.001,'kg'), luong:so.gioTri/1000, gwpRieng:h.giaTri }];
 }
 function tinhDien(n,y,so){                      /* Diem 3: TPT_D = AD_n × EF_n */
   if(!so || so.gioTri==null) return [loiDong(n,y,'3','CO2',t('tkThieuAd'))];
   var h=hsCua(n,'CO2',y), e=kiemHs(h); if(e) return [loiDong(n,y,'3','CO2',e)];
   var d=doiHs(h,'CO2',function(m){ return m==='mwh'; }); if(d.loi) return [loiDong(n,y,'3','CO2',d.loi)];
   if(d.m3) return [loiDong(n,y,'3','CO2',t('tkM3Sai'))];
-  return [{ n:n, y:y, muc:'3', khi:'CO2', ad:so.gioTri, adDv:'MWh', ef:h.giaTri, efDv:h.donVi, h:h, luong:so.gioTri*h.giaTri*d.f }];
+  return [{ n:n, y:y, muc:'3', khi:'CO2', ad:so.gioTri, adDv:'MWh', ef:h.giaTri, efDv:h.donVi, h:h, k:d.f, kGhi:ghiK(d.f,tuDv(h.donVi)), luong:so.gioTri*h.giaTri*d.f }];
 }
 /* EF_H,p cua hoi nam y: do don vi cap hoi cung cap, hoac tinh theo cong thuc Diem 4 sau
    dinh chinh QD 334: EF = Enthalpy / eta × EF_nhien lieu / 10^9, eta la phan so. */
@@ -2345,7 +2389,7 @@ function tinhHoi(n,y,so){                        /* Diem 4: TPT_H,p = AD_H,p × 
   }
   if(ad==null) return [loiDong(n,y,'4','CO2',t('tkThieuAd'))];
   var ef=efHoi(n,y,so); if(ef.loi) return [loiDong(n,y,'4','CO2',ef.loi)];
-  return [{ n:n, y:y, muc:'4', khi:'CO2', ad:ad, adDv:'tấn', adGhi:adGhi, ef:ef.v, efDv:'tCO₂/tấn hơi', efGhi:ef.ghi, h:ef.h, luong:ad*ef.v }];
+  return [{ n:n, y:y, muc:'4', khi:'CO2', ad:ad, adDv:'tấn', adGhi:adGhi, ef:ef.v, efDv:'tCO₂/tấn hơi', efGhi:ef.ghi, h:ef.h, k:1, kGhi:'', luong:ad*ef.v }];
 }
 function tinhPhatTan(n,y,so){                    /* Diem 5.1 den 5.5, chi cho khai thac than */
   var cn=n.thuocTinh.congNghe;
@@ -2359,9 +2403,9 @@ function tinhPhatTan(n,y,so){                    /* Diem 5.1 den 5.5, chi cho kh
     var e=kiemHs(h); if(e){ out.push(loiDong(n,y,muc,khi,e)); return; }
     var d=doiHs(h,khi,function(m){ return /^(t|tấn|tan)$/.test(m); });
     if(d.loi){ out.push(loiDong(n,y,muc,khi,d.loi)); return; }
-    if(!d.m3){ out.push({ n:n, y:y, muc:muc, khi:khi, ad:so.gioTri, adDv:'tấn', ef:h.giaTri, efDv:h.donVi, h:h, luong:so.gioTri*h.giaTri*d.f }); return; }
+    if(!d.m3){ out.push({ n:n, y:y, muc:muc, khi:khi, ad:so.gioTri, adDv:'tấn', ef:h.giaTri, efDv:h.donVi, h:h, k:d.f, kGhi:ghiK(d.f,tuDv(h.donVi)), luong:so.gioTri*h.giaTri*d.f }); return; }
     var cf=h.thamSo.cf; if(cf==null){ out.push(loiDong(n,y,muc,khi,t('tkCf'))); return; }
-    out.push({ n:n, y:y, muc:muc, khi:khi, ad:so.gioTri, adDv:'tấn', ef:h.giaTri, efDv:h.donVi, h:h, cf:cf, luong:so.gioTri*h.giaTri*cf/1000 });
+    out.push({ n:n, y:y, muc:muc, khi:khi, ad:so.gioTri, adDv:'tấn', ef:h.giaTri, efDv:h.donVi, h:h, cf:cf, k:cf/1000, kGhi:fill(t('tkKcf'),{c:vietSo(cf)}), luong:so.gioTri*h.giaTri*cf/1000 });
   }
   mot('CH4',mucCH4,true);
   if(!hl) mot('CO2','5.5',false);
@@ -2373,8 +2417,8 @@ function tinhPhatTan(n,y,so){                    /* Diem 5.1 den 5.5, chi cho kh
     else if(ce==null || ce<0 || ce>100) out.push(loiDong(n,y,'5.2','CO2',t('tkCe')));
     else {
       var kg=ab*cf;
-      out.push({ n:n, y:y, muc:'5.2', khi:'CO2', ad:ab, adDv:'m³ CH₄', cf:cf, ce:ce, luong:kg*(ce/100)*(44/16)/1000 });
-      out.push({ n:n, y:y, muc:'5.3', khi:'CH4', ad:ab, adDv:'m³ CH₄', cf:cf, ce:ce, luong:kg*(1-ce/100)/1000 });
+      out.push({ n:n, y:y, muc:'5.2', khi:'CO2', ad:ab, adDv:'m³ CH₄', ef:null, cf:cf, ce:ce, k:cf*(ce/100)*(44/16)/1000, kGhi:fill(t('tkK52'),{c:vietSo(cf),e:vietSo(ce)}), luong:kg*(ce/100)*(44/16)/1000 });
+      out.push({ n:n, y:y, muc:'5.3', khi:'CH4', ad:ab, adDv:'m³ CH₄', ef:null, cf:cf, ce:ce, k:cf*(1-ce/100)/1000, kGhi:fill(t('tkK53'),{c:vietSo(cf),e:vietSo(ce)}), luong:kg*(1-ce/100)/1000 });
     }
   }
   return out;
@@ -2438,6 +2482,10 @@ Object.assign(T,{
   tkPtKhong:['Không tự tính: Mục 2 chỉ có công thức cho khai thác than hầm lò và lộ thiên','Not computed: Section 2 only has formulas for underground and surface coal mining'],
   tkPtTan:['Sản lượng phải tính theo tấn than, vì hệ số tính trên một tấn than','Output must be in tonnes of coal, since the factor is per tonne'],
   tkCf:['Thiếu khối lượng riêng để đổi m³ khí ra tấn (Bước 3)','Density missing to convert m³ of gas to tonnes (Step 3)'],
+  tkDoiDv:['%a → tấn: × %k','%a → tonnes: × %k'],
+  tkKcf:['× khối lượng riêng %c kg/m³ ÷ 1000','× density %c kg/m³ ÷ 1000'],
+  tkK52:['× %c kg/m³ × %e % × 44/16 ÷ 1000','× %c kg/m³ × %e % × 44/16 ÷ 1000'],
+  tkK53:['× %c kg/m³ × (1 − %e %) ÷ 1000','× %c kg/m³ × (1 − %e %) ÷ 1000'],
   tkCe:['Thiếu hiệu suất đốt CH₄, hoặc hiệu suất không nằm trong khoảng 0 đến 100 %','CH₄ combustion efficiency missing or outside 0 to 100 %'],
   b4gwpH:['Bộ GWP','GWP set'],
   b4gwpHint:['Tiềm năng nóng lên toàn cầu, điểm a và điểm c khoản 1 Điều 11 Nghị định 06/2022/NĐ-CP','Global warming potentials, Article 11(1)(a) and (c) of Decree 06/2022/ND-CP'],
@@ -2836,6 +2884,8 @@ function layU(id,muc,khi,tao){
 function uDong(u){ return (u && u.uAd!=null && u.uEf!=null) ? Math.sqrt(u.uAd*u.uAd+u.uEf*u.uEf) : null; }
 /* Phuong trinh 3.2: U = sqrt(Σ(U_i·x_i)²) / |Σx_i|, tren cac dong co du U */
 function uTong(kq,y){
+  /* o [data-calc] cua man hinh cu co the con giu nam da ra khoi ky (vua mo ky moi, vua doi ky) */
+  if(!kq.tong[y]) return null;
   var tong=kq.tong[y].tong, s2=0, sx=0;
   kq.dong.forEach(function(d){
     if(d.y!==y || d.loi || d.tco2e==null) return;
@@ -3080,6 +3130,1174 @@ THIEU[7]=function(){
   if(rong(tl.giaiThich)) m.push(t('b7mGt'));
   return m;
 };
+
+/* ---- 85_zip.js ---- */
+/* ---------- Loi ZIP cho .xlsx va .docx ----------
+   Lay tu bo ghi xlsx.js trong qcvn04-2017/index.html: ZIP luu thang (method 0), CRC32,
+   ten file UTF-8. .xlsx va .docx deu la file ZIP chua cac phan XML.
+   files: [{ n:'duong/dan.xml', s:'noi dung chuoi' }] */
+var ZIP=(function(){
+  var TBL=(function(){ var tb=new Uint32Array(256),c,n,k;
+    for(n=0;n<256;n++){ c=n; for(k=0;k<8;k++) c=c&1?0xEDB88320^(c>>>1):c>>>1; tb[n]=c>>>0; } return tb; })();
+  function crc32(u8){ var c=0xFFFFFFFF,i; for(i=0;i<u8.length;i++) c=TBL[(c^u8[i])&0xFF]^(c>>>8); return (c^0xFFFFFFFF)>>>0; }
+  var enc=new TextEncoder();
+  function dosTime(d){ return ((d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()/2))&0xFFFF; }
+  function dosDate(d){ return (((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate())&0xFFFF; }
+  function nen(files,mime){
+    var d=new Date(), tm=dosTime(d), dt=dosDate(d);
+    var parts=[], central=[], off=0;
+    files.forEach(function(f){
+      var data=enc.encode(f.s), crc=crc32(data), n=enc.encode(f.n);
+      var h=new Uint8Array(30+n.length), v=new DataView(h.buffer);
+      v.setUint32(0,0x04034b50,true); v.setUint16(4,20,true); v.setUint16(6,0x0800,true);
+      v.setUint16(8,0,true); v.setUint16(10,tm,true); v.setUint16(12,dt,true);
+      v.setUint32(14,crc,true); v.setUint32(18,data.length,true); v.setUint32(22,data.length,true);
+      v.setUint16(26,n.length,true); v.setUint16(28,0,true); h.set(n,30);
+      parts.push(h,data);
+      var c=new Uint8Array(46+n.length), cv=new DataView(c.buffer);
+      cv.setUint32(0,0x02014b50,true); cv.setUint16(4,20,true); cv.setUint16(6,20,true);
+      cv.setUint16(8,0x0800,true); cv.setUint16(10,0,true); cv.setUint16(12,tm,true); cv.setUint16(14,dt,true);
+      cv.setUint32(16,crc,true); cv.setUint32(20,data.length,true); cv.setUint32(24,data.length,true);
+      cv.setUint16(28,n.length,true); cv.setUint32(42,off,true); c.set(n,46);
+      central.push(c);
+      off+=h.length+data.length;
+    });
+    var cLen=central.reduce(function(a,b){ return a+b.length; },0);
+    var e=new Uint8Array(22), ev=new DataView(e.buffer);
+    ev.setUint32(0,0x06054b50,true); ev.setUint16(8,files.length,true); ev.setUint16(10,files.length,true);
+    ev.setUint32(12,cLen,true); ev.setUint32(16,off,true);
+    return new Blob(parts.concat(central,[e]),{ type:mime });
+  }
+  return { nen:nen };
+})();
+/* Thoat ky tu cho XML, bo ky tu dieu khien khong hop le trong XML 1.0 */
+var KY_TU_CAM=new RegExp('['+String.fromCharCode(0)+'-'+String.fromCharCode(8)+String.fromCharCode(11)+String.fromCharCode(12)+String.fromCharCode(14)+'-'+String.fromCharCode(31)+']','g');
+function xmlEsc(s){
+  return String(s==null?'':s).replace(KY_TU_CAM,'').replace(/[&<>"]/g,function(m){ return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[m]; });
+}
+function taiBlob(blob,name){
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },1500);
+}
+
+/* ---- 86_xlsx.js ---- */
+/* ---------- Bo ghi .xlsx nhieu trang tinh ----------
+   Phat trien tu xlsx.js cua qcvn04-2017/index.html (ban do chi co mot trang tinh, o chu):
+   them nhieu trang tinh, o so, o cong thuc kem gia tri tinh san, dinh dang so, co dinh
+   dong tieu de. Excel tinh lai toan bo cong thuc khi mo file (fullCalcOnLoad).
+
+   Trang tinh: { ten, rong:[do rong cot], dong:[[o,...],...], gop:['A1:C1',...], coDinh:so dong }
+   O: chuoi | so | null | { v, f:'cong thuc khong co dau =', s:'kieu' }
+   Kieu: thuong, dau (tieu de cot), tieuDe, o (chu co khung), so, soDam, oDam, ghi, soTho, pt, nhan */
+var XL=(function(){
+  var KIEU={ thuong:0, dau:1, tieuDe:2, o:3, so:4, soDam:5, oDam:6, ghi:7, soTho:8, pt:9, nhan:10 };
+  function cot(i){ var s=''; i++; while(i>0){ var m=(i-1)%26; s=String.fromCharCode(65+m)+s; i=(i-m-1)/26; } return s; }
+  function oXml(ref,c){
+    if(c==null || c==='') return '';
+    if(typeof c!=='object') c={ v:c };
+    var s=KIEU[c.s!=null?c.s:(typeof c.v==='number'||c.f?'soTho':'thuong')]||0, a='<c r="'+ref+'" s="'+s+'"';
+    if(c.f){
+      var v=(typeof c.v==='number' && isFinite(c.v)) ? '<v>'+c.v+'</v>' : '';
+      return a+'><f>'+xmlEsc(c.f)+'</f>'+v+'</c>';
+    }
+    if(typeof c.v==='number') return isFinite(c.v) ? a+'><v>'+c.v+'</v></c>' : '';
+    if(c.v==null || c.v==='') return a+'/>';
+    return a+' t="inlineStr"><is><t xml:space="preserve">'+xmlEsc(c.v)+'</t></is></c>';
+  }
+  function trang(sh){
+    var rows=sh.dong.map(function(r,i){
+      return '<row r="'+(i+1)+'">'+r.map(function(c,j){ return oXml(cot(j)+(i+1),c); }).join('')+'</row>';
+    }).join('');
+    var cols=(sh.rong||[]).map(function(w,i){ return '<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+w+'" customWidth="1"/>'; }).join('');
+    var view=sh.coDinh ? '<sheetViews><sheetView workbookViewId="0"><pane ySplit="'+sh.coDinh+'" topLeftCell="A'+(sh.coDinh+1)+'" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>'
+                       : '<sheetViews><sheetView workbookViewId="0"/></sheetViews>';
+    var mg=(sh.gop&&sh.gop.length) ? '<mergeCells count="'+sh.gop.length+'">'+sh.gop.map(function(m){ return '<mergeCell ref="'+m+'"/>'; }).join('')+'</mergeCells>' : '';
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+      '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'+
+      '<sheetPr><pageSetUpPr fitToPage="1"/></sheetPr>'+view+
+      (cols?'<cols>'+cols+'</cols>':'')+'<sheetData>'+rows+'</sheetData>'+mg+
+      '<pageMargins left="0.5" right="0.5" top="0.6" bottom="0.6" header="0.3" footer="0.3"/>'+
+      '<pageSetup paperSize="9" orientation="landscape" fitToWidth="1" fitToHeight="0"/></worksheet>';
+  }
+  var BIEN='<border><left style="thin"><color rgb="FF808080"/></left><right style="thin"><color rgb="FF808080"/></right><top style="thin"><color rgb="FF808080"/></top><bottom style="thin"><color rgb="FF808080"/></bottom><diagonal/></border>';
+  function xf(numFmt,font,fill,border,align){
+    return '<xf numFmtId="'+numFmt+'" fontId="'+font+'" fillId="'+fill+'" borderId="'+border+'" xfId="0"'+
+      (numFmt?' applyNumberFormat="1"':'')+(font?' applyFont="1"':'')+(fill?' applyFill="1"':'')+(border?' applyBorder="1"':'')+
+      ' applyAlignment="1"><alignment '+align+'/></xf>';
+  }
+  var STYLES='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+    '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'+
+    '<numFmts count="2"><numFmt numFmtId="164" formatCode="#,##0.000"/><numFmt numFmtId="165" formatCode="#,##0.00"/></numFmts>'+
+    '<fonts count="5"><font><sz val="11"/><name val="Calibri"/></font>'+
+    '<font><b/><sz val="11"/><name val="Calibri"/></font>'+
+    '<font><b/><sz val="13"/><name val="Calibri"/></font>'+
+    '<font><i/><sz val="10"/><color rgb="FF555555"/><name val="Calibri"/></font>'+
+    '<font><b/><sz val="11"/><name val="Calibri"/></font></fonts>'+
+    '<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>'+
+    '<fill><patternFill patternType="solid"><fgColor rgb="FFEAF1F7"/><bgColor indexed="64"/></patternFill></fill></fills>'+
+    '<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border>'+BIEN+'</borders>'+
+    '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'+
+    '<cellXfs count="11">'+
+    xf(0,0,0,0,'wrapText="1" vertical="top"')+
+    xf(0,1,2,1,'wrapText="1" vertical="center" horizontal="center"')+
+    xf(0,2,0,0,'vertical="top"')+
+    xf(0,0,0,1,'wrapText="1" vertical="top"')+
+    xf(164,0,0,1,'vertical="top"')+
+    xf(164,1,0,1,'vertical="top"')+
+    xf(0,1,0,1,'wrapText="1" vertical="top"')+
+    xf(0,3,0,0,'wrapText="1" vertical="top"')+
+    xf(0,0,0,1,'vertical="top"')+
+    xf(165,0,0,1,'vertical="top"')+
+    xf(0,4,0,0,'vertical="top"')+
+    '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles><\/styleSheet>';
+  /* Ten trang tinh: toi da 31 ky tu, khong co [ ] : * ? / \ */
+  function tenTrang(s){ return String(s).replace(/[\[\]:*?\/\\]/g,' ').slice(0,31); }
+  function tao(sheets,tieuDe){
+    var ns='xmlns="http://schemas.openxmlformats.org/package/2006/relationships"';
+    var ct='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'+
+      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>'+
+      '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'+
+      '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'+
+      sheets.map(function(s,i){ return '<Override PartName="/xl/worksheets/sheet'+(i+1)+'.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'; }).join('')+
+      '<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>'+
+      '<Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/></Types>';
+    var rels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships '+ns+'>'+
+      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>'+
+      '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>'+
+      '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/></Relationships>';
+    var wb='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'+
+      '<bookViews><workbookView xWindow="0" yWindow="0" windowWidth="16000" windowHeight="9000"/></bookViews><sheets>'+
+      sheets.map(function(s,i){ return '<sheet name="'+xmlEsc(tenTrang(s.ten))+'" sheetId="'+(i+1)+'" r:id="rId'+(i+1)+'"/>'; }).join('')+
+      '</sheets><calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>';
+    var wbr='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships '+ns+'>'+
+      sheets.map(function(s,i){ return '<Relationship Id="rId'+(i+1)+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet'+(i+1)+'.xml"/>'; }).join('')+
+      '<Relationship Id="rId'+(sheets.length+1)+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>';
+    var files=[
+      { n:'[Content_Types].xml', s:ct }, { n:'_rels/.rels', s:rels },
+      { n:'docProps/core.xml', s:propCore(tieuDe) }, { n:'docProps/app.xml', s:propApp('knk-quy-trinh') },
+      { n:'xl/workbook.xml', s:wb }, { n:'xl/_rels/workbook.xml.rels', s:wbr }, { n:'xl/styles.xml', s:STYLES }
+    ];
+    sheets.forEach(function(s,i){ files.push({ n:'xl/worksheets/sheet'+(i+1)+'.xml', s:trang(s) }); });
+    return ZIP.nen(files,'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  }
+  return { tao:tao, cot:cot, tenTrang:tenTrang };
+})();
+/* Thuoc tinh tai lieu, dung chung cho .xlsx va .docx */
+function propCore(tieuDe){
+  var now=new Date().toISOString().replace(/\.\d+Z$/,'Z');
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+    '<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'+
+    '<dc:title>'+xmlEsc(tieuDe)+'</dc:title><dc:creator>knk-quy-trinh</dc:creator>'+
+    '<dcterms:created xsi:type="dcterms:W3CDTF">'+now+'</dcterms:created><dcterms:modified xsi:type="dcterms:W3CDTF">'+now+'</dcterms:modified></cp:coreProperties>';
+}
+function propApp(app){
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes"><Application>'+xmlEsc(app)+'</Application></Properties>';
+}
+
+/* ---- 87_docx.js ---- */
+/* ---------- Bo ghi .docx ----------
+   Dung loi ZIP cua 85_zip.js. Chi co nhung gi ban thao Mau so 06 can: doan van, bang co
+   gop o ngang (gridSpan) va doc (vMerge), dau trang co so trang tu trang 2, kho A4.
+   Trinh bay theo the thuc van ban hanh chinh cua Nghi dinh 30/2020/ND-CP: Times New
+   Roman 14, le tren 20 mm, duoi 20 mm, trai 30 mm, phai 20 mm, so trang giua le tren.
+
+   Thu tu phan tu trong pPr, rPr, tcPr, tblPr, sectPr theo luoc do ECMA-376, vi Word bao
+   loi khi sai thu tu du LibreOffice van mo duoc.
+
+   Run: { x, b, i, u, hl (to vang), sub, sup, co (co chu pt) }. Chu so duoi ₀-₉ trong x
+   duoc doi ra chu so thuong dat o vi tri chi so duoi, vi phong Times New Roman khong
+   chac co cac ky tu nay. */
+var DX=(function(){
+  var W='xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';
+  var RONG=9071;   /* be rong vung chu: 11906 - 1701 - 1134 */
+  var SO_DUOI='₀₁₂₃₄₅₆₇₈₉';
+  function rPr(r){
+    var s='';
+    if(r.b) s+='<w:b/><w:bCs/>';
+    if(r.i) s+='<w:i/><w:iCs/>';
+    if(r.co) s+='<w:sz w:val="'+Math.round(r.co*2)+'"/><w:szCs w:val="'+Math.round(r.co*2)+'"/>';
+    if(r.hl) s+='<w:highlight w:val="yellow"/>';
+    if(r.u) s+='<w:u w:val="single"/>';
+    if(r.sub) s+='<w:vertAlign w:val="subscript"/>';
+    else if(r.sup) s+='<w:vertAlign w:val="superscript"/>';
+    return s ? '<w:rPr>'+s+'</w:rPr>' : '';
+  }
+  function mot(r){ return '<w:r>'+rPr(r)+'<w:t xml:space="preserve">'+xmlEsc(r.x)+'</w:t></w:r>'; }
+  function run(r){
+    var x=String(r.x==null?'':r.x); if(!x) return '';
+    if(r.sub || r.sup) return mot(r);
+    var out='', buf='';
+    for(var i=0;i<x.length;i++){
+      var k=SO_DUOI.indexOf(x[i]);
+      if(k<0){ buf+=x[i]; continue; }
+      if(buf){ out+=mot(gan(r,{ x:buf })); buf=''; }
+      out+=mot(gan(r,{ x:String(k), sub:true }));
+    }
+    if(buf) out+=mot(gan(r,{ x:buf }));
+    return out;
+  }
+  function gan(a,b){ var o={}, k; for(k in a) o[k]=a[k]; for(k in b) o[k]=b[k]; return o; }
+  /* o: can ('left','center','right','both'), thut (thut dong dau, twip), trai, phai, treo (thut treo),
+        truoc, sau (twip), dong (khoang cach dong, 240 = don), giu (keepNext), vien (duong ke duoi),
+        co, b (ap cho moi run khong tu dat) */
+  function p(runs,o){
+    o=o||{};
+    var pp='';
+    if(o.giu) pp+='<w:keepNext/>';
+    if(o.vien) pp+='<w:pBdr><w:bottom w:val="single" w:sz="6" w:space="1" w:color="000000"/></w:pBdr>';
+    pp+='<w:spacing w:before="'+(o.truoc==null?60:o.truoc)+'" w:after="'+(o.sau==null?60:o.sau)+'" w:line="'+(o.dong||276)+'" w:lineRule="auto"/>';
+    if(o.thut || o.trai || o.phai || o.treo){
+      pp+='<w:ind w:left="'+(o.trai||0)+'" w:right="'+(o.phai||0)+'"'+(o.treo?' w:hanging="'+o.treo+'"':(o.thut?' w:firstLine="'+o.thut+'"':''))+'/>';
+    }
+    pp+='<w:jc w:val="'+(o.can||'both')+'"/>';
+    if(o.coDau) pp+='<w:rPr><w:sz w:val="'+(o.coDau*2)+'"/><w:szCs w:val="'+(o.coDau*2)+'"/></w:rPr>';
+    var body=(runs||[]).map(function(r){
+      if(typeof r==='string') r={ x:r };
+      var q=gan(r,{}); if(o.co && !q.co) q.co=o.co; if(o.b && q.b==null) q.b=true; if(o.i && q.i==null) q.i=true;
+      return run(q);
+    }).join('');
+    return '<w:p><w:pPr>'+pp+'</w:pPr>'+body+'</w:p>';
+  }
+  var VIEN_CO='<w:tblBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:left w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:right w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:insideV w:val="single" w:sz="4" w:space="0" w:color="000000"/></w:tblBorders>';
+  var VIEN_KHONG='<w:tblBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/><w:insideH w:val="nil"/><w:insideV w:val="nil"/></w:tblBorders>';
+  /* spec: { rong:[twip], hang:[{ dau:bool, o:[cell] }], vien:bool, co:pt }
+     cell: { r:[run] | x, doan:[[runs,o]...], b, can, gop, rs, nen, doc:'center' } */
+  function bang(spec){
+    var rong=spec.rong, co=spec.co||12, cho=[], choGop=[];
+    function tcPr(w,gop,vm,nen,doc){
+      return '<w:tcPr><w:tcW w:w="'+w+'" w:type="dxa"/>'+(gop>1?'<w:gridSpan w:val="'+gop+'"/>':'')+
+        (vm?'<w:vMerge'+(vm==='dau'?' w:val="restart"':'')+'/>':'')+
+        (nen?'<w:shd w:val="clear" w:color="auto" w:fill="'+nen+'"/>':'')+
+        '<w:vAlign w:val="'+(doc||'top')+'"/></w:tcPr>';
+    }
+    function rongGop(c0,n){ var s=0; for(var i=c0;i<c0+n;i++) s+=rong[i]||0; return s; }
+    function noi(c0){ var g=choGop[c0]; cho[c0]--; return '<w:tc>'+tcPr(rongGop(c0,g),g,'tiep')+p([],{ truoc:20, sau:20, dong:240, co:co })+'</w:tc>'; }
+    var hang=spec.hang.map(function(h){
+      var out='', c=0;
+      h.o.forEach(function(cell){
+        while(cho[c]>0){ var g0=choGop[c]; out+=noi(c); c+=g0; }
+        var g=cell.gop||1, w=rongGop(c,g);
+        var runs=cell.r || [{ x:cell.x==null?'':String(cell.x) }];
+        var doan=cell.doan || [[runs,{}]];
+        var ps=doan.map(function(d){
+          return p(d[0],gan({ truoc:20, sau:20, dong:240, co:co, can:cell.can||'left', b:cell.b||h.dau, coDau:co },d[1]||{}));
+        }).join('');
+        out+='<w:tc>'+tcPr(w,g,cell.rs>1?'dau':null,cell.nen||(h.dau?'F2F2F2':null),cell.doc||(h.dau?'center':null))+ps+'</w:tc>';
+        if(cell.rs>1){ cho[c]=cell.rs-1; choGop[c]=g; }
+        c+=g;
+      });
+      while(c<rong.length){ if(cho[c]>0){ var g1=choGop[c]; out+=noi(c); c+=g1; } else c++; }
+      return '<w:tr><w:trPr><w:cantSplit/>'+(h.dau?'<w:tblHeader/>':'')+'</w:trPr>'+out+'</w:tr>';
+    }).join('');
+    var tong=rong.reduce(function(a,b){ return a+b; },0);
+    return '<w:tbl><w:tblPr><w:tblW w:w="'+tong+'" w:type="dxa"/>'+(spec.giua?'<w:jc w:val="center"/>':'')+
+      (spec.vien===false?VIEN_KHONG:VIEN_CO)+'<w:tblLayout w:type="fixed"/>'+
+      '<w:tblCellMar><w:left w:w="70" w:type="dxa"/><w:right w:w="70" w:type="dxa"/></w:tblCellMar></w:tblPr>'+
+      '<w:tblGrid>'+rong.map(function(x){ return '<w:gridCol w:w="'+x+'"/>'; }).join('')+'</w:tblGrid>'+hang+'</w:tbl>';
+  }
+  /* Chia be rong vung chu theo ty le */
+  function chia(tyLe,tong){
+    tong=tong||RONG; var s=tyLe.reduce(function(a,b){ return a+b; },0), out=[], con=tong;
+    tyLe.forEach(function(x,i){ var w=(i===tyLe.length-1)?con:Math.round(tong*x/s); out.push(w); con-=w; });
+    return out;
+  }
+  var STYLES='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles '+W+'>'+
+    '<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>'+
+    '<w:sz w:val="28"/><w:szCs w:val="28"/><w:lang w:val="vi-VN" w:eastAsia="en-US" w:bidi="ar-SA"/></w:rPr></w:rPrDefault>'+
+    '<w:pPrDefault><w:pPr><w:spacing w:after="0" w:line="240" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>'+
+    '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style>'+
+    '<w:style w:type="character" w:default="1" w:styleId="DefaultParagraphFont"><w:name w:val="Default Paragraph Font"/><w:uiPriority w:val="1"/><w:semiHidden/></w:style>'+
+    '<w:style w:type="table" w:default="1" w:styleId="TableNormal"><w:name w:val="Normal Table"/><w:semiHidden/><w:tblPr><w:tblInd w:w="0" w:type="dxa"/><w:tblCellMar><w:top w:w="0" w:type="dxa"/><w:left w:w="108" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:right w:w="108" w:type="dxa"/></w:tblCellMar></w:tblPr></w:style>'+
+    '<w:style w:type="numbering" w:default="1" w:styleId="NoList"><w:name w:val="No List"/><w:semiHidden/></w:style>'+
+    '</w:styles>';
+  var SETTINGS='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:settings '+W+'><w:zoom w:percent="100"/><w:defaultTabStop w:val="720"/><w:characterSpacingControl w:val="doNotCompress"/>'+
+    '<w:compat><w:compatSetting w:name="compatibilityMode" w:uri="http://schemas.microsoft.com/office/word" w:val="15"/></w:compat></w:settings>';
+  var HEADER='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:hdr '+W+'><w:p><w:pPr><w:jc w:val="center"/></w:pPr>'+
+    '<w:r><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:instrText xml:space="preserve"> PAGE </w:instrText></w:r><w:r><w:fldChar w:fldCharType="separate"/></w:r>'+
+    '<w:r><w:t>2</w:t></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p></w:hdr>';
+  function tao(body,tieuDe){
+    var ns='xmlns="http://schemas.openxmlformats.org/package/2006/relationships"';
+    var doc='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document '+W+'><w:body>'+body+
+      '<w:sectPr><w:headerReference w:type="default" r:id="rId3"/><w:pgSz w:w="11906" w:h="16838"/>'+
+      '<w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1701" w:header="567" w:footer="567" w:gutter="0"/>'+
+      '<w:cols w:space="708"/><w:titlePg/><w:docGrid w:linePitch="381"/></w:sectPr></w:body></w:document>';
+    var files=[
+      { n:'[Content_Types].xml', s:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'+
+        '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>'+
+        '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>'+
+        '<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>'+
+        '<Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/>'+
+        '<Override PartName="/word/header1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/>'+
+        '<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>'+
+        '<Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/></Types>' },
+      { n:'_rels/.rels', s:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships '+ns+'>'+
+        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>'+
+        '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>'+
+        '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/></Relationships>' },
+      { n:'docProps/core.xml', s:propCore(tieuDe) }, { n:'docProps/app.xml', s:propApp('knk-quy-trinh') },
+      { n:'word/_rels/document.xml.rels', s:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships '+ns+'>'+
+        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'+
+        '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/>'+
+        '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header1.xml"/></Relationships>' },
+      { n:'word/document.xml', s:doc }, { n:'word/styles.xml', s:STYLES }, { n:'word/settings.xml', s:SETTINGS }, { n:'word/header1.xml', s:HEADER }
+    ];
+    return ZIP.nen(files,'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+  }
+  return { p:p, bang:bang, chia:chia, tao:tao, RONG:RONG };
+})();
+
+/* ---- 88_bangtinh.js ---- */
+/* ---------- Bang tinh .xlsx ----------
+   Cac trang tinh:
+   - Thông tin: co so, ky, bo GWP.
+   - Tổng hợp: ket qua theo nam, theo khi, theo loai nguon, tinh bang SUMIFS tu trang Bảng tính.
+   - Bảng tính: bang tinh trung gian, moi dong mot khi cua mot nguon trong mot nam:
+     luong khi (tan) = AD × EF × k (AD × k khi cong thuc khong co EF), phat thai = luong khi × GWP.
+     k la he so doi don vi cua bo tinh (70_tinh.js), ghi kem dien giai.
+   - Biểu năm y: bieu Muc 1 Phu luc II Thong tu 38 da dien, kem cot ung dung them va cot truy vet.
+   - Hệ số, Kiểm soát chất lượng, Độ không chắc chắn (phuong trinh 3.1 va 3.2 bang cong thuc),
+     Tính toán lại.
+   Moi o cong thuc kem gia tri ung dung da tinh; Excel tinh lai khi mo file. */
+function bangTinhXlsx(){ return voiTiengViet(function(){
+  var kq=tinhToan(), ys=namKy(), BT='Bảng tính', qBT="'"+BT+"'!", sheets=[];
+  function C(v,s){ return { v:v, s:s||(typeof v==='number'?'soTho':'o') }; }
+  function F(f,v,s){ return { f:f, v:v, s:s||'so' }; }
+  function H(x){ return { v:x, s:'dau' }; }
+  function N(x){ return { v:x, s:'nhan' }; }
+  function G(x){ return { v:x, s:'ghi' }; }
+  function chuoi(s){ return '"'+String(s).replace(/"/g,'""')+'"'; }
+  var cs=S.coSo;
+
+  /* ---- Bảng tính ---- */
+  var bt=[['STT','Năm','Nguồn phát thải','Loại nguồn (Điều 16)','Phạm vi','Điểm Mục 2','Khí','Số liệu hoạt động (AD)','Đơn vị AD',
+           'Hệ số phát thải (EF)','Đơn vị EF','Hệ số đổi đơn vị (k)','Diễn giải k','Lượng khí (tấn) = AD × EF × k','GWP',
+           'Phát thải (tấn CO₂tđ) = lượng khí × GWP','Trạng thái','Ghi chú'].map(H)];
+  var hangBT=[];
+  ys.forEach(function(y){
+    kq.dong.filter(function(d){ return d.y===y; }).forEach(function(d){
+      var r=bt.length+1, l=LOAI_BY[d.n.loai];
+      var row=[C(r-1),C(y),C(nhanNguon(d.n)),C(lv(l.ten)),C(l.gt?'Gián tiếp':'Trực tiếp'),C(d.muc||''),C(d.khi?(KHI_NHAN[d.khi]||d.khi):'')];
+      if(d.loi){
+        for(var i=0;i<9;i++) row.push(C(''));
+        row.push(C(d.khongCT?'Không có công thức':'Chưa tính được'),C(d.loi));
+      } else {
+        var ghi=[];
+        if(d.adGhi) ghi.push('AD = '+d.adGhi);
+        if(d.efGhi) ghi.push('EF = '+d.efGhi);
+        if(d.muc==='2.1') ghi.push('GWP của môi chất '+d.n.phanLoai.trim()+' nhập ở Bước 3');
+        if(d.h && d.h.maHeSo && /^QĐ2626:/.test(d.h.maHeSo)) ghi.push('Mã '+d.h.maHeSo.replace(':',' '));
+        if(d.h && !rong(d.h.nguonGoc)) ghi.push('Nguồn gốc hệ số: '+d.h.nguonGoc.trim());
+        row.push(C(d.ad),C(d.adDv),d.ef!=null?C(d.ef):C(''),C(d.efDv||''),C(d.k),C(d.kGhi||''),
+                 F(d.ef!=null?'H'+r+'*J'+r+'*L'+r:'H'+r+'*L'+r,d.luong,'soTho'),
+                 d.gwp!=null?C(d.gwp):C(''),
+                 d.gwp!=null?F('N'+r+'*O'+r,d.tco2e,'so'):C(''),
+                 C(d.gwp!=null?'Đã tính':'Chưa chọn bộ GWP'),C(ghi.join('. ')));
+      }
+      bt.push(row); hangBT.push({ d:d, r:r });
+    });
+  });
+  var n=bt.length;
+  function tongIf(dk,v){ return n>1 ? F('SUMIFS('+qBT+'$P$2:$P$'+n+dk+')',v) : C(v||0,'so'); }
+  function demIf(dk,v){ return n>1 ? F('COUNTIFS('+qBT+'$B$2:$B$'+n+dk+')',v,'soTho') : C(v||0,'soTho'); }
+
+  /* ---- Thông tin ---- */
+  var tt=[[{ v:'Bảng tính kiểm kê khí nhà kính cấp cơ sở', s:'tieuDe' }],
+    [G('Lập bằng ứng dụng knk-quy-trinh, bản dựng ngày '+dmyv(BUILD)+'. Ngày xuất file: '+dmyv(new Date().toISOString().slice(0,10))+'. Các ô tính toán là công thức, Excel tính lại khi mở file.')],[],
+    [N('Tên cơ sở'),C(cs.ten)],[N('Địa chỉ'),C(cs.diaChi)],[N('Mã số thuế'),C(cs.maSoThue)],
+    [N('Kỳ báo cáo'),C(ys.length?'Năm '+ys[0]+' và năm '+ys[1]:'')],[N('Bộ GWP'),C(S.gwp||'Chưa chọn')]];
+  if(S.gwp) ['CO2','CH4','N2O'].forEach(function(k){ tt.push([N('GWP '+KHI_NHAN[k]),C(k==='CO2'?1:DATA.gwp[S.gwp][k])]); });
+  tt.push([],[N('Các trang tính')]);
+  [['Tổng hợp','kết quả theo năm, tính bằng công thức SUMIFS từ trang Bảng tính'],
+   ['Bảng tính','mỗi dòng là một khí của một nguồn trong một năm; lượng khí = AD × EF × k, phát thải = lượng khí × GWP; k là hệ số đổi đơn vị, có diễn giải'],
+   ['Biểu năm …','các biểu Mục 1 Phụ lục II Thông tư 38/2023/TT-BCT đã điền, kèm cột ứng dụng thêm và thông tin truy vết số liệu'],
+   ['Hệ số','hệ số phát thải đã gán, bậc theo Điều 18 và nguồn gốc'],
+   ['Kiểm soát chất lượng','biên bản Bước 5'],
+   ['Độ không chắc chắn','phương trình 3.1 và 3.2, Chương 3 Quyển 1 Hướng dẫn IPCC 2006'],
+   ['Tính toán lại','kết quả kỳ trước theo Điều 22 Thông tư 38/2023/TT-BCT, nếu có']].forEach(function(x){ tt.push([C(x[0]),C(x[1])]); });
+  tt.push([],[G('Ứng dụng là công cụ hỗ trợ tính toán, không thay thế trách nhiệm của cơ sở. Người dùng tự chịu trách nhiệm kiểm tra kết quả. Văn bản có hiệu lực pháp lý là bản gốc của các nghị định, thông tư.')]);
+  sheets.push({ ten:'Thông tin', rong:[26,90], dong:tt });
+
+  /* ---- Tổng hợp ---- */
+  var th=[[H('Chỉ tiêu (tấn CO₂ tương đương)')].concat(ys.map(function(y){ return H('Năm '+y); }))];
+  function dongTH(nhan,f,dam){ th.push([dam?{ v:nhan, s:'oDam' }:C(nhan)].concat(ys.map(function(y,i){ return f(y,kq.tong[y],XL.cot(i+1)); }))); return th.length; }
+  var rTT=dongTH('Phát thải trực tiếp',function(y,o){ return tongIf(','+qBT+'$B$2:$B$'+n+','+y+','+qBT+'$E$2:$E$'+n+',"Trực tiếp"',o.tt); });
+  var rGT=dongTH('Phát thải gián tiếp',function(y,o){ return tongIf(','+qBT+'$B$2:$B$'+n+','+y+','+qBT+'$E$2:$E$'+n+',"Gián tiếp"',o.gt); });
+  dongTH('Tổng phát thải',function(y,o,c){ return F(c+rTT+'+'+c+rGT,o.tong,'soDam'); },true);
+  th.push([N('Theo khí')]);
+  ['CO2','CH4','N2O','HFC'].forEach(function(k){
+    if(!ys.some(function(y){ return kq.dong.some(function(d){ return d.y===y && d.khi===k && !d.loi; }); })) return;
+    dongTH(KHI_NHAN[k],function(y,o){ return tongIf(','+qBT+'$B$2:$B$'+n+','+y+','+qBT+'$G$2:$G$'+n+','+chuoi(KHI_NHAN[k]),o.khi[k]||0); });
+  });
+  th.push([N('Theo loại nguồn')]);
+  LOAI.forEach(function(l){
+    /* nhu Buoc 4: chi loai co ket qua; loai khong co cong thuc nam o dong dem ben duoi */
+    if(!ys.some(function(y){ return kq.tong[y].loai[l.k]!=null; })) return;
+    dongTH(lv(l.ten),function(y,o){ return tongIf(','+qBT+'$B$2:$B$'+n+','+y+','+qBT+'$D$2:$D$'+n+','+chuoi(lv(l.ten)),o.loai[l.k]||0); });
+  });
+  th.push([N('Dòng chưa gồm trong tổng')]);
+  dongTH('Số dòng chưa tính được',function(y,o){ return demIf(','+y+','+qBT+'$Q$2:$Q$'+n+',"Chưa tính được"',o.loi); });
+  dongTH('Số dòng chưa chọn bộ GWP',function(y,o){ return demIf(','+y+','+qBT+'$Q$2:$Q$'+n+',"Chưa chọn bộ GWP"',o.chuaGwp); });
+  dongTH('Số nguồn không có công thức trong Thông tư 38',function(y,o){ return demIf(','+y+','+qBT+'$Q$2:$Q$'+n+',"Không có công thức"',o.khongCT); });
+  th.push([],[G('Tổng phát thải chỉ gồm các dòng đã tính của trang Bảng tính. Bộ GWP: '+(S.gwp||'chưa chọn')+'.')]);
+  sheets.push({ ten:'Tổng hợp', rong:[44].concat(ys.map(function(){ return 18; })), dong:th, coDinh:1 });
+  sheets.push({ ten:BT, rong:[6,7,34,22,11,9,9,16,10,14,14,12,26,18,8,18,16,50], dong:bt, coDinh:1 });
+
+  /* ---- Biểu năm y ---- */
+  ys.forEach(function(y){
+    var R=[[{ v:'Biểu số liệu hoạt động năm '+y+', theo Mục 1 Phụ lục II Thông tư 38/2023/TT-BCT', s:'tieuDe' }],
+      [G('Cột ghi "(ứng dụng thêm)" không có trong biểu của Thông tư. Năm cột cuối là thông tin truy vết số liệu theo Điều 17 Thông tư.')],[]], maxc=1;
+    LOAI.forEach(function(l){
+      var ds=nguonTheoLoai(l.k); if(!ds.length) return;
+      var b=l.bang, map=[], hdr=[H('STT')];
+      R.push([N((b.so?'Bảng '+b.so+'. ':'')+lv(b.ten))]);
+      b.cot.forEach(function(c){
+        hdr.push(H(lv(c.lab)+(c.tt38===false?' (ứng dụng thêm)':''))); map.push({ c:c });
+        if(c.donVi){ hdr.push(H('Đơn vị')); map.push({ c:c, dv:true }); }
+      });
+      ['Nguồn số liệu','Số hiệu chứng từ','Người cung cấp','Số liệu ước tính','Cách ước tính'].forEach(function(x){ hdr.push(H(x)); });
+      R.push(hdr); maxc=Math.max(maxc,hdr.length);
+      function cotCua(f){ for(var j=0;j<map.length;j++){ var m=map[j]; if(f(m)) return XL.cot(j+1); } return null; }
+      var cG=cotCua(function(m){ return m.c.s==='gioTri' && !m.dv; }), cU=cotCua(function(m){ return m.c.s==='donVi' || m.dv; }),
+          cN=cotCua(function(m){ return m.c.s==='ct.nhietTri'; }), cP=cotCua(function(m){ return m.c.n==='phanLoai'; });
+      var r0=R.length+1;
+      ds.forEach(function(nn,i){
+        var so=laySo(nn.id,y,false)||{ gioTri:null, donVi:b.donVi||'', chiTiet:{}, nguonSoLieu:'', chungTu:'', nguoiCungCap:'', laUocTinh:false, cachUocTinh:'' };
+        var r=R.length+1, row=[C(i+1)];
+        map.forEach(function(m){
+          var c=m.c;
+          if(m.dv){ row.push(C(so.donVi||'')); return; }
+          if(c.n){ var raw=getP(nn,duongDan(c.n)); row.push(c.so && typeof raw==='number' ? C(raw) : C(giaTriNguon(nn,c))); return; }
+          if(c.calc==='tj'){
+            var tj=tjCua(nn,so), f=null;
+            if(tj && cG && cN) f=(l.k==='codinh' && cU) ? 'IF('+cU+r+'="TJ",'+cG+r+',IF('+cU+r+'="GJ",'+cG+r+'/1000,IF('+cU+r+'="MJ",'+cG+r+'/1000000,'+cG+r+'*'+cN+r+')))' : cG+r+'*'+cN+r;
+            row.push(f ? F(f,tj.v,'soTho') : C('')); return;
+          }
+          var v=getP(so,duongDan(c.s));
+          if(c.kieu==='num') row.push(v==null?C(''):C(v));
+          else if(c.kieu==='date') row.push(C(v?dmyv(v):''));
+          else row.push(C(v==null?'':String(v)));
+        });
+        row.push(C(so.nguonSoLieu||''),C(so.chungTu||''),C(so.nguoiCungCap||''),C(so.laUocTinh?'Có':'Không'),C(so.cachUocTinh||''));
+        R.push(row);
+      });
+      var r1=R.length;
+      if(l.k==='moichat' && cP && cG){
+        R.push([],[N('Bảng 2.1. Lượng môi chất lạnh nạp hàng năm')],[H('STT'),H('Loại môi chất lạnh'),H('Lượng môi chất nạp (kg)')]);
+        var loai=[]; ds.forEach(function(nn){ var k=nn.phanLoai.trim(); if(k && loai.indexOf(k)<0) loai.push(k); });
+        loai.forEach(function(k,i){
+          var tong=0; ds.forEach(function(nn){ if(nn.phanLoai.trim()!==k) return; var so=laySo(nn.id,y,false); if(so && so.gioTri!=null) tong+=so.gioTri; });
+          R.push([C(i+1),C(k),F('SUMIF('+cP+r0+':'+cP+r1+','+chuoi(k)+','+cG+r0+':'+cG+r1+')',tong,'soTho')]);
+        });
+      }
+      R.push([]);
+    });
+    var rong=[6]; for(var i=1;i<maxc;i++) rong.push(18);
+    sheets.push({ ten:'Biểu năm '+y, rong:rong, dong:R });
+  });
+
+  /* ---- Hệ số ---- */
+  var hs=[['Nguồn phát thải','Khí','Năm','Mã hệ số','Tên hệ số','Giá trị','Đơn vị','Bậc theo Điều 18','Nguồn gốc','Tham số'].map(H)];
+  S.nguon.forEach(function(nn){
+    var l=LOAI_BY[nn.loai];
+    (l.hs.khi||[]).forEach(function(k){
+      (l.hs.theoNam?ys:[null]).forEach(function(y){
+        var h=layHs(nn.id,k,y,false); if(!h) return;
+        var ts=Object.keys(h.thamSo||{}).filter(function(x){ return h.thamSo[x]!=null && h.thamSo[x]!==''; }).map(function(x){ return x+' = '+(typeof h.thamSo[x]==='number'?vietSo(h.thamSo[x]):h.thamSo[x]); }).join('; ');
+        hs.push([C(nhanNguon(nn)),C(k==='GWP'?'GWP '+nn.phanLoai.trim():(KHI_NHAN[k]||k)),y==null?C(''):C(y),C(h.maHeSo||''),C(h.tenHeSo||''),
+                 h.giaTri==null?C(''):C(h.giaTri),C(h.donVi||''),C(T['bac_'+h.bac]?T['bac_'+h.bac][0]:''),C(h.nguonGoc||''),C(ts)]);
+      });
+    });
+  });
+  sheets.push({ ten:'Hệ số', rong:[34,12,7,18,34,12,16,34,40,30], dong:hs, coDinh:1 });
+
+  /* ---- Kiểm soát chất lượng ---- */
+  var qc=[['STT','Nội dung kiểm soát','Người kiểm tra','Ngày','Kết quả','Sai sót phát hiện','Cách xử lý'].map(H)];
+  S.qc.forEach(function(q,i){ qc.push([C(i+1),C(q.noiDung),C(q.nguoiKiem),C(q.ngay?dmyv(q.ngay):''),C(q.ketQua==='dat'?'Đạt':q.ketQua==='saiSot'?'Có sai sót':''),C(q.loiPhatHien),C(q.cachXuLy)]); });
+  sheets.push({ ten:'Kiểm soát chất lượng', rong:[6,40,20,12,12,36,36], dong:qc, coDinh:1 });
+
+  /* ---- Độ không chắc chắn ---- */
+  var uk=[['Năm','Nguồn phát thải','Điểm Mục 2','Khí','Phát thải (tấn CO₂tđ)','U số liệu (%)','U hệ số (%)','U kết hợp (%), phương trình 3.1','U × phát thải'].map(H)];
+  ys.forEach(function(y){
+    var a=uk.length+1;
+    hangBT.forEach(function(o){
+      var d=o.d; if(d.y!==y || d.loi || d.tco2e==null) return;
+      var r=uk.length+1, u=layU(d.n.id,d.muc,d.khi,false), ud=uDong(u);
+      uk.push([C(y),C(nhanNguon(d.n)),C(d.muc),C(KHI_NHAN[d.khi]||d.khi),F(qBT+'P'+o.r,d.tco2e),
+               u&&u.uAd!=null?C(u.uAd,'pt'):C(''),u&&u.uEf!=null?C(u.uEf,'pt'):C(''),
+               F('IF(AND(ISNUMBER(F'+r+'),ISNUMBER(G'+r+')),SQRT(F'+r+'^2+G'+r+'^2),"")',ud,'pt'),
+               F('IF(ISNUMBER(H'+r+'),H'+r+'*E'+r+',"")',ud==null?null:ud*d.tco2e,'so')]);
+    });
+    var b=uk.length; if(b<a) return;
+    var ut=uTong(kq,y), co='SUMPRODUCT(--ISNUMBER(H'+a+':H'+b+'),E'+a+':E'+b+')';
+    uk.push([C(y),{ v:'Độ không chắc chắn của tổng phát thải (%), phương trình 3.2', s:'oDam' },C(''),C(''),C(''),C(''),C(''),
+             F('IF('+co+'=0,"",SQRT(SUMSQ(I'+a+':I'+b+'))/'+co+')',ut?ut.u:null,'pt'),C('')]);
+    uk.push([C(y),C('Tỷ lệ phát thải có đủ số liệu độ không chắc chắn (%)'),C(''),C(''),C(''),C(''),C(''),
+             F('IF(SUM(E'+a+':E'+b+')=0,"",'+co+'/SUM(E'+a+':E'+b+')*100)',ut?ut.phu:null,'pt'),C('')]);
+  });
+  uk.push([],[G('Phương pháp 1, Chương 3 Quyển 1 Hướng dẫn IPCC 2006: U kết hợp = căn bậc hai của tổng bình phương (phương trình 3.1); U tổng = căn bậc hai của tổng bình phương (U × phát thải), chia cho tổng phát thải của các dòng có đủ U (phương trình 3.2). Giả định các sai số độc lập với nhau.')]);
+  sheets.push({ ten:'Độ không chắc chắn', rong:[7,34,10,10,16,12,12,18,16], dong:uk, coDinh:1 });
+
+  /* ---- Tính toán lại ---- */
+  var tl=S.tinhLai;
+  if(tl.tinhTrang==='coDoi'){
+    var kt=[[{ v:'Tính toán lại kết quả kỳ trước, Điều 22 Thông tư 38/2023/TT-BCT', s:'tieuDe' }],
+      [N('Trường hợp'),C(tl.truongHop.map(function(k){ return boCuoi(T['b7_'+k][0]); }).join('; '))],
+      [N('Mô tả thay đổi'),C(tl.lyDo)],[N('File kỳ trước'),C(tl.fileKyTruoc||'')],[],
+      ['Năm','Kết quả đã báo cáo (tấn CO₂tđ)','Kết quả tính lại (tấn CO₂tđ)','Chênh lệch (tấn CO₂tđ)','Chênh lệch (%)'].map(H)];
+    var ky=tl.kyTruoc;
+    [ky.namBatDau,ky.namKetThuc].forEach(function(y){
+      if(y==null) return;
+      var r=kt.length+1, cu=tl.ketQuaCu[y], moi=tl.ketQuaMoi[y];
+      kt.push([C(y),cu==null?C(''):C(cu,'so'),moi==null?C(''):C(moi,'so'),
+               F('IF(AND(ISNUMBER(B'+r+'),ISNUMBER(C'+r+')),C'+r+'-B'+r+',"")',(cu!=null&&moi!=null)?moi-cu:null),
+               F('IF(AND(ISNUMBER(B'+r+'),ISNUMBER(C'+r+'),B'+r+'<>0),(C'+r+'-B'+r+')/B'+r+'*100,"")',(cu&&moi!=null)?(moi-cu)/cu*100:null,'pt')]);
+    });
+    kt.push([],[N('Giải thích'),C(tl.giaiThich)]);
+    sheets.push({ ten:'Tính toán lại', rong:[18,24,24,22,16], dong:kt });
+  }
+  return sheets;
+}); }
+function xuatXlsx(){
+  var sheets=bangTinhXlsx(), ten=S.coSo.ten||'co so';
+  var blob=XL.tao(sheets,'Bảng tính kiểm kê khí nhà kính, '+ten);
+  var name=tenFile('KNK_BangTinh','xlsx');
+  taiBlob(blob,name); toast(fill(t('b8tXlsx'),{f:name}));
+}
+
+/* ---- 88_mau06.js ---- */
+/* ---------- Ban thao Mau so 06 ----------
+   Dung mot mo hinh noi dung (danh sach khoi) tu ho so va ket qua tinh, roi ve ra hai noi:
+   file .docx de nop (87_docx.js) va ban xem truoc o Buoc 8. Cau chu tieu de va de muc chep
+   nguyen van Mau so 06 Phu luc II Nghi dinh 06/2022/ND-CP (Mau_so_06_cau_truc.md muc 3).
+   Ban thao luon viet bang tieng Viet. Cho nao con thieu thi ghi [Chưa nhập: ...] to vang.
+
+   Theo quyet dinh ngay 26/9/2026 (Mau_so_06_cau_truc.md muc 5): tieu de dien ca hai nam
+   cua ky; duoi III.2 chen bang so lieu theo cac bieu Muc 1 Phu luc II Thong tu 38, duoi
+   III.3 chen bang tong hop theo bieu E.8, moi nam mot bang; ghi chu "bang la cach trinh
+   bay cua ung dung" chi hien tren trang (khoi 'web'), khong vao file .docx.
+
+   Khoi: { k:'mau' } | { k:'dau', ten } | { k:'tieuDe', r:[run] }
+         { k:'muc', x } de muc La Ma | { k:'muc2', x } de muc so | { k:'p', r:[run] }
+         { k:'gach', r:[run] } | { k:'nho', r:[run] } ghi chu duoi bang
+         { k:'bang', tieu, cot:[{ x, w, can }], dong:[[o]] } | { k:'web', x } | { k:'ky', ten }
+   O bang: { x | r:[run], can, gop, rs, b } */
+var M06={
+  mau:'Mẫu số 06',
+  cho1:'TÊN CƠ SỞ PHẢI THỰC HIỆN', cho2:'KIỂM KÊ KHÍ NHÀ KÍNH',
+  qh1:'CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM', qh2:'Độc lập - Tự do - Hạnh phúc',
+  bc:'BÁO CÁO', td:'Kết quả kiểm kê khí nhà kính cho năm',
+  I:'I. Thông tin của cơ sở phải thực hiện kiểm kê khí nhà kính',
+  I1:'1. Tên cơ sở, địa chỉ, giấy phép kinh doanh …',
+  I2:'2. Thông tin về người đại diện của cơ sở trước pháp luật.',
+  I3:'3. Thông tin về lĩnh vực hoạt động kinh doanh, sản xuất.',
+  II:'II. Thông tin về hoạt động sản xuất kinh doanh và số liệu hoạt động của cơ sở',
+  II1:'1. Ranh giới và phạm vi hoạt động của cơ sở.',
+  II2:'2. Cơ sở hạ tầng, công nghệ và hoạt động của cơ sở phải thực hiện kiểm kê khí nhà kính.',
+  II3:'3. Các nguồn phát thải, bể hấp thụ khí nhà kính trong phạm vi hoạt động của cơ sở.',
+  II4:'4. Hệ thống thông tin, dữ liệu về phát thải khí nhà kính của cơ sở, xác định nguyên nhân các hạn chế trong kiểm kê khí nhà kính của cơ sở.',
+  III:'III. Kết quả thực hiện kiểm kê phát thải khí nhà kính',
+  III1:'1. Mô tả phương pháp kiểm kê phát thải khí nhà kính (phương pháp thu thập số liệu, hệ số phát thải).',
+  III2:'2. Số liệu hoạt động liên quan đến phát thải khí nhà kính của cơ sở.',
+  III3:'3. Kết quả kiểm kê khí nhà kính của cơ sở.',
+  III4:'4. Độ tin cậy, tính đầy đủ, độ không chắc chắn của thông tin, số liệu về phát thải khí nhà kính và kết quả kiểm kê khí nhà kính của cơ sở.',
+  ky:'ĐẠI DIỆN CỦA CƠ SỞ'
+};
+/* Cong thuc ghi vao muc III.1, _{...} la chi so duoi */
+var M06_CT={
+  '1':'Đốt nhiên liệu, điểm 1: TPT_{F} = Σ_{i} (AD_{F} × EF_{F,i} × GWP_{i}) / 1000, trong đó AD_{F} tính theo TJ, EF_{F,i} tính theo kg/TJ.',
+  '2':'Môi chất lạnh, điểm 2.1: TPT_{mcl} = Σ_{j} (AD_{j} × GWP_{j}) / 1000, trong đó AD_{j} là lượng môi chất lạnh nạp bổ sung trong năm, tính theo kg.',
+  '3':'Điện mua ngoài, điểm 3: TPT_{Đ} = AD_{n} × EF_{n}, trong đó AD_{n} tính theo MWh, EF_{n} tính theo tấn CO₂/MWh.',
+  '4':'Hơi mua ngoài, điểm 4: TPT_{H,p} = AD_{H,p} × EF_{H,p}, trong đó AD_{H,p} tính theo tấn hơi.',
+  '4ct':'Hệ số phát thải của hơi tự tính theo công thức điểm 4, đã áp dụng đính chính tại Quyết định 334/QĐ-BCT: EF_{H,p} = Entanpi_{H,p} / η_{lò} × EF_{nhiên liệu} / 10⁹, hiệu suất lò hơi dùng dạng phân số.',
+  '5':'Khai thác than, điểm 5: E_{CH4} = PQ × EF × CF / 1000 (điểm 5.1 hầm lò, 5.4 lộ thiên); E_{CO2} = PQ × EF_{CO2} × CF_{CO2} / 1000 (điểm 5.5); khối lượng riêng CF tính theo kg/m³.',
+  '5dot':'CH₄ thu gom đem đốt: E_{CO2(CH4)} = AB × CF × CE × 44/16 / 1000 (điểm 5.2) và E_{CH4,kc} = AB × CF × (1 − CE) / 1000 (điểm 5.3), hiệu suất đốt CE dùng dạng phân số. Lượng CH₄ thu gom đem đốt không trừ khỏi phát thải CH₄ tại điểm 5.1, theo đúng Mục 2 Phụ lục II Thông tư 38/2023/TT-BCT.'
+};
+var BAC_M06={
+  rieng:'Hệ số riêng được cơ quan có thẩm quyền chấp thuận, khoản 1 Điều 18',
+  qd2626:'Danh mục hệ số phát thải ban hành kèm theo Quyết định 2626/QĐ-BTNMT, khoản 2 Điều 18',
+  ipcc:'Hướng dẫn của IPCC, khoản 3 Điều 18',
+  muc2:'Theo Mục 2 Phụ lục II Thông tư 38/2023/TT-BCT'
+};
+var GWP_TEN={ AR4:'Báo cáo đánh giá lần thứ tư (AR4) của IPCC', AR5:'Báo cáo đánh giá lần thứ năm (AR5) của IPCC' };
+
+function voiTiengViet(fn){ var cu=L; L='vi'; try{ return fn(); } finally{ L=cu; } }
+function R(x,o){ var r={ x:x==null?'':String(x) }; if(o) for(var k in o) r[k]=o[k]; return r; }
+function Rt(nhan){ return { x:nhan?'[Chưa nhập: '+nhan+']':'[Chưa nhập]', hl:true }; }
+function Rv(v,nhan){ return rong(v) ? Rt(nhan) : R(String(v).trim()); }
+function Rct(s){
+  var out=[], re=/_\{([^}]*)\}/g, i=0, m;
+  while((m=re.exec(s))){ if(m.index>i) out.push(R(s.slice(i,m.index))); out.push(R(m[1],{ sub:true })); i=re.lastIndex; }
+  if(i<s.length) out.push(R(s.slice(i)));
+  return out;
+}
+function doanVan(s,nhan){
+  if(rong(s)) return nhan ? [{ k:'p', r:[Rt(nhan)] }] : [];
+  return String(s).split(/\n+/).map(function(x){ return x.trim(); }).filter(Boolean).map(function(x){ return { k:'p', r:[R(x)] }; });
+}
+/* Luong khi (tan): so lon giu 3 chu so thap phan, so nho giu 6 de khong mat CH4, N2O */
+function soLuong(v){ return v==null ? '' : vietSo(v,Math.abs(v)>=1?3:6); }
+function soVi(v,d){ return v==null ? '' : vietSo(v,d==null?3:d); }
+function moTaNguon(n){ var s=[n.phanLoai,n.thietBi,n.viTri].filter(function(x){ return x && String(x).trim(); }).join(', '); return s || nhanNguon(n); }
+function boCuoi(s){ return String(s).replace(/[;.”\s]+$/,''); }
+function chuD16(l){ return l.d16.slice(1); }
+
+function mau06(){ return voiTiengViet(function(){
+  var kq=tinhToan(), ys=namKy(), B=[], cs=S.coSo;
+  function muc(x){ B.push({ k:'muc', x:x }); }
+  function muc2(x){ B.push({ k:'muc2', x:x }); }
+  function gach(r){ B.push({ k:'gach', r:r }); }
+  function p(r){ B.push({ k:'p', r:r }); }
+
+  B.push({ k:'mau' });
+  B.push({ k:'dau', ten:rong(cs.ten)?null:cs.ten.trim().toLocaleUpperCase('vi') });
+  B.push({ k:'tieuDe', r:ys.length ? [R(M06.td+' '+ys[0]+' và năm '+ys[1])] : [R(M06.td+' '),Rt('kỳ báo cáo')] });
+
+  /* ---- I ---- */
+  muc(M06.I);
+  muc2(M06.I1);
+  gach([R('Tên cơ sở: '),Rv(cs.ten,'tên cơ sở')]);
+  var dc=[R('Địa chỉ: '),Rv(cs.diaChi,'địa chỉ')];
+  if(!rong(cs.tinh) && !rong(cs.diaChi) && nod(cs.diaChi).indexOf(nod(cs.tinh).replace(/^(tinh|thanh pho) /,''))<0) dc.push(R(', '+cs.tinh));
+  gach(dc);
+  gach([R('Mã số thuế: '),Rv(cs.maSoThue,'mã số thuế')]);
+  var gp=cs.giayPhep;
+  gach([R('Giấy phép kinh doanh: số '),Rv(gp.so,'số giấy phép'),R(', ngày cấp '),rong(gp.ngayCap)?Rt('ngày cấp'):R(dmyv(gp.ngayCap)),R(', nơi cấp '),Rv(gp.noiCap,'nơi cấp')]);
+  if(!rong(cs.phuLuc) || !rong(cs.stt)) gach([R('Số thứ tự trong danh mục tại Quyết định 42/2026/QĐ-TTg: Phụ lục '),Rv(cs.phuLuc,'phụ lục'),R(', số thứ tự '),Rv(cs.stt,'số thứ tự')]);
+  if(!rong(cs.boQuanLy)) gach([R('Bộ quản lý lĩnh vực: Bộ '+cs.boQuanLy.trim())]);
+  muc2(M06.I2);
+  gach([R('Họ và tên: '),Rv(cs.daiDien.hoTen,'họ và tên người đại diện')]);
+  gach([R('Chức vụ: '),Rv(cs.daiDien.chucVu,'chức vụ')]);
+  muc2(M06.I3);
+  B=B.concat(doanVan(cs.linhVuc,'mô tả lĩnh vực hoạt động kinh doanh, sản xuất'));
+
+  /* ---- II ---- */
+  muc(M06.II);
+  muc2(M06.II1);
+  B=B.concat(doanVan(S.moTa.ranhGioi,'ranh giới và phạm vi hoạt động'));
+  muc2(M06.II2);
+  B=B.concat(doanVan(S.moTa.haTang,'cơ sở hạ tầng, công nghệ và hoạt động'));
+  muc2(M06.II3);
+  [[false,'Nguồn phát thải trực tiếp, theo khoản 1 Điều 16 Thông tư 38/2023/TT-BCT:'],[true,'Nguồn phát thải gián tiếp, theo khoản 2 Điều 16 Thông tư 38/2023/TT-BCT:']].forEach(function(g){
+    p([R(g[1])]);
+    LOAI.filter(function(l){ return l.gt===g[0]; }).forEach(function(l){
+      var ds=nguonTheoLoai(l.k), r=[R(chuD16(l)+') '+lv(l.ten)+': ')];
+      if(ds.length) r.push(R(ds.length+' nguồn, gồm '+ds.map(moTaNguon).join('; ')+'.'));
+      else if(S.loaiKhongCo.indexOf(l.k)>=0) r.push(R('không có.'));
+      else r.push(Rt('có hay không có loại nguồn này'));
+      p(r);
+    });
+  });
+  var bh=S.beHapThu;
+  p([R('Bể hấp thụ khí nhà kính: ')].concat(bh.coHayKhong===false ? [R('không có.')] : bh.coHayKhong===true ? [R('có. '),Rv(bh.moTa,'mô tả bể hấp thụ')] : [Rt('có hay không có bể hấp thụ')]));
+  muc2(M06.II4);
+  B=B.concat(doanVan(S.moTa.heThongDuLieu,'hệ thống thông tin, dữ liệu và nguyên nhân các hạn chế'));
+  var dsSo=[]; S.nguon.forEach(function(n){ ys.forEach(function(y){ var so=laySo(n.id,y,false); if(so) dsSo.push(so); }); });
+  if(dsSo.length){
+    var coCt=dsSo.filter(function(so){ return !rong(so.chungTu); }).length, uoc=dsSo.filter(function(so){ return so.laUocTinh; }).length;
+    p([R('Số liệu hoạt động của kỳ báo cáo gồm '+dsSo.length+' dòng, trong đó '+coCt+' dòng có ghi số hiệu chứng từ'+(uoc?' và '+uoc+' dòng là số liệu ước tính.':'; không có số liệu ước tính.'))]);
+  }
+
+  /* ---- III ---- */
+  muc(M06.III);
+  muc2(M06.III1);
+  var co={}; S.nguon.forEach(function(n){ co[n.loai]=1; });
+  p([R('Phát thải khí nhà kính của cơ sở được tính theo Điều 19 và Mục 2 Phụ lục II Thông tư 38/2023/TT-BCT: lượng phát thải của từng khí nhà kính bằng số liệu hoạt động nhân với hệ số phát thải; tổng lượng phát thải quy đổi ra tấn CO₂ tương đương theo tiềm năng nóng lên toàn cầu (GWP) của từng khí. Công thức áp dụng cho các nguồn của cơ sở:')]);
+  if(co.codinh || co.didong) gach(Rct(M06_CT['1']));
+  if(co.moichat) gach(Rct(M06_CT['2']));
+  if(co.dien) gach(Rct(M06_CT['3']));
+  if(co.hoi){
+    gach(Rct(M06_CT['4']));
+    if(S.heSo.some(function(h){ var n=timNguon(h.nguonId); return n && n.loai==='hoi' && h.thamSo.cachTinh==='congThuc'; })) gach(Rct(M06_CT['4ct']));
+  }
+  if(co.phattan){
+    gach(Rct(M06_CT['5']));
+    if(nguonTheoLoai('phattan').some(function(n){ return ys.some(function(y){ var so=laySo(n.id,y,false); return so && so.chiTiet.ch4Dot>0; }); })) gach(Rct(M06_CT['5dot']));
+  }
+  LOAI.filter(function(l){ return l.pp.canhBao && co[l.k]; }).forEach(function(l){
+    gach([R(lv(l.ten)+': '),Rt('phương pháp tính, Thông tư 38/2023/TT-BCT không có công thức cho loại nguồn này')]);
+  });
+  if(S.gwp){
+    var g=DATA.gwp[S.gwp];
+    var gr=[R('Tiềm năng nóng lên toàn cầu theo '+GWP_TEN[S.gwp]+': CO₂ = 1; CH₄ = '+vietSo(g.CH4)+'; N₂O = '+vietSo(g.N2O)+'.')];
+    var mc=[]; nguonTheoLoai('moichat').forEach(function(n){ var h=layHs(n.id,'GWP',null,false); if(h && h.giaTri!=null){ var s=n.phanLoai.trim()+' = '+vietSo(h.giaTri); if(mc.indexOf(s)<0) mc.push(s); } });
+    if(mc.length) gr.push(R(' GWP của môi chất lạnh: '+mc.join('; ')+'.'));
+    p(gr);
+  } else p([R('Tiềm năng nóng lên toàn cầu: '),Rt('bộ GWP')]);
+  var nsl=[]; S.soLieu.forEach(function(so){ if(ys.indexOf(so.nam)>=0 && !rong(so.nguonSoLieu) && nsl.indexOf(so.nguonSoLieu.trim())<0) nsl.push(so.nguonSoLieu.trim()); });
+  p([R('Phương pháp thu thập số liệu: số liệu hoạt động thu thập theo các biểu Mục 1 Phụ lục II Thông tư 38/2023/TT-BCT, riêng cho từng năm của kỳ báo cáo'+(nsl.length?'; nguồn số liệu gồm: '+nsl.join('; ').toLocaleLowerCase('vi')+'.':'.'))]);
+  p([R('Hệ số phát thải lựa chọn theo thứ tự ưu tiên tại Điều 18 Thông tư 38/2023/TT-BCT:')]);
+  var theoBac={};
+  S.nguon.forEach(function(n){
+    var l=LOAI_BY[n.loai];
+    (l.hs.khi||[]).forEach(function(k){
+      (l.hs.theoNam?ys:[null]).forEach(function(y){
+        var h=layHs(n.id,k,y,false); if(!h || (h.giaTri==null && h.thamSo.cachTinh!=='congThuc')) return;
+        var bac=h.bac||'khac'; (theoBac[bac]=theoBac[bac]||[]).push({ n:n, h:h, y:y });
+      });
+    });
+  });
+  var coHs=false;
+  ['rieng','qd2626','ipcc','muc2','khac'].forEach(function(bac){
+    var ds=theoBac[bac]; if(!ds) return; coHs=true;
+    gach([R((BAC_M06[bac]||'Chưa ghi bậc hệ số')+':')]);
+    ds.forEach(function(o){
+      var kh=o.h.khi==='GWP' ? 'GWP '+o.n.phanLoai.trim() : (KHI_NHAN[o.h.khi]||o.h.khi);
+      var ts=o.h.thamSo, r;
+      if(ts.cachTinh==='congThuc'){
+        r=[R('+ '+moTaNguon(o.n)+', '+kh+': tự tính theo công thức điểm 4, hiệu suất lò hơi '+vietSo(ts.hieuSuat)+' %, hệ số CO₂ của nhiên liệu lò hơi '+vietSo(ts.efNhienLieu)+' kg CO₂/TJ; nguồn gốc hệ số nhiên liệu: '),Rv(ts.efNguon,'nguồn gốc')];
+      } else {
+        r=[R('+ '+moTaNguon(o.n)+', '+kh+(o.y?', năm '+o.y:'')+': '+vietSo(o.h.giaTri)+(o.h.donVi?' '+o.h.donVi:''))];
+        if(ts.cf!=null) r.push(R(', khối lượng riêng '+vietSo(ts.cf)+' kg/m³'));
+        if(!rong(o.h.maHeSo) && /^QĐ2626:/.test(o.h.maHeSo)) r.push(R(', mã '+o.h.maHeSo.replace(/^QĐ2626:/,'')));
+        r.push(R('; nguồn gốc: ')); r.push(Rv(o.h.nguonGoc,'nguồn gốc hệ số'));
+      }
+      B.push({ k:'gach', r:r, cap:2 });
+    });
+  });
+  if(!coHs) gach([Rt('hệ số phát thải, Bước 3')]);
+  B=B.concat(doanVan(S.moTa.phuongPhap));
+
+  muc2(M06.III2);
+  B.push({ k:'web', x:t('b8webBang') });
+  if(!ys.length) p([Rt('kỳ báo cáo')]);
+  else if(!S.nguon.length) p([Rt('nguồn phát thải, Bước 1')]);
+  ys.forEach(function(y){
+    B.push({ k:'p', r:[R('Năm '+y,{ b:true, i:true })] });
+    LOAI.forEach(function(l){
+      var ds=nguonTheoLoai(l.k); if(!ds.length) return;
+      if(l.k==='moichat') B.push(bang21(ds,y));
+      B.push(bangSoLieu(l,ds,y));
+      var uoc=ds.filter(function(n){ var so=laySo(n.id,y,false); return so && so.laUocTinh; });
+      if(uoc.length) B.push({ k:'nho', r:[R('Số liệu ước tính: '+uoc.map(function(n){ var so=laySo(n.id,y,false); return moTaNguon(n)+(rong(so.cachUocTinh)?'':', '+so.cachUocTinh.trim()); }).join('; ')+'.')] });
+    });
+  });
+
+  muc2(M06.III3);
+  B.push({ k:'web', x:t('b8webBang') });
+  if(!ys.length) p([Rt('kỳ báo cáo')]);
+  ys.forEach(function(y){
+    var o=kq.tong[y];
+    var r=[R('Năm '+y+': tổng lượng phát thải khí nhà kính của cơ sở là '+soVi(o.tong)+' tấn CO₂ tương đương, trong đó phát thải trực tiếp '+soVi(o.tt)+' tấn CO₂ tương đương, phát thải gián tiếp '+soVi(o.gt)+' tấn CO₂ tương đương.')];
+    if(o.loi || o.chuaGwp) r.push(R(' '),{ x:'[Chưa đầy đủ: '+(o.loi+o.chuaGwp)+' dòng chưa tính được, xem bảng dưới]', hl:true });
+    if(o.khongCT) r.push(R(' '),{ x:'[Chưa gồm phát thải của '+o.khongCT+' nguồn thuộc loại Thông tư 38/2023/TT-BCT không có công thức]', hl:true });
+    p(r);
+  });
+  ys.forEach(function(y){ B.push(bangKetQua(kq,y)); });
+  if(ys.length) p(S.gwp ? [R('Bộ GWP sử dụng: '+S.gwp+' (CO₂ = 1; CH₄ = '+vietSo(DATA.gwp[S.gwp].CH4)+'; N₂O = '+vietSo(DATA.gwp[S.gwp].N2O)+').')] : [R('Bộ GWP sử dụng: '),Rt('bộ GWP')]);
+  tinhLaiM06(B);
+
+  muc2(M06.III4);
+  if(S.qc.length){
+    p([R('Kiểm soát chất lượng: ',{ i:true }),R('cơ sở thực hiện kiểm soát chất lượng theo Điều 20 Thông tư 38/2023/TT-BCT với các nội dung sau:')]);
+    S.qc.forEach(function(q){
+      var r=[Rv(q.noiDung,'nội dung kiểm soát'),R(': '),Rv(q.nguoiKiem,'người kiểm tra'),R(' kiểm tra ngày '),rong(q.ngay)?Rt('ngày'):R(dmyv(q.ngay)),R('; kết quả: ')];
+      if(q.ketQua==='dat') r.push(R('đạt.'));
+      else if(q.ketQua==='saiSot'){ r.push(R('có sai sót. Sai sót phát hiện: ')); r.push(Rv(q.loiPhatHien,'sai sót')); r.push(R('. Cách xử lý: ')); r.push(Rv(q.cachXuLy,'cách xử lý')); r.push(R('.')); }
+      else r.push(Rt('kết quả'));
+      gach(r);
+    });
+  } else p([R('Kiểm soát chất lượng: ',{ i:true }),Rt('biên bản kiểm soát chất lượng, Bước 5')]);
+  p([R('Đánh giá độ không chắc chắn: ',{ i:true }),R('theo Điều 21 và khoản 1 Điều 11 Thông tư 38/2023/TT-BCT:')]);
+  KHIA_CANH.forEach(function(k){
+    p([R(boCuoi(T['b6_'+k][0])+': '),Rv(S.khongChacChan.dinhTinh[k],'nhận xét')]);
+  });
+  var uys=ys.map(function(y){ return { y:y, u:uTong(kq,y) }; }).filter(function(o){ return o.u; });
+  if(uys.length){
+    p([R('Định lượng độ không chắc chắn: ',{ i:true }),R('theo Phương pháp 1, Chương 3, Quyển 1 Hướng dẫn IPCC 2006, phương trình 3.1 cho từng nguồn và phương trình 3.2 cho tổng, giả định các sai số độc lập với nhau.')]);
+    uys.forEach(function(o){ gach([R('Năm '+o.y+': độ không chắc chắn của tổng lượng phát thải là ±'+vietSo(o.u.u,1)+' %, tính trên '+vietSo(o.u.phu,1)+' % tổng lượng phát thải có đủ số liệu độ không chắc chắn.')]); });
+  } else p([R('Định lượng độ không chắc chắn: ',{ i:true }),R('chưa định lượng do chưa có số liệu độ không chắc chắn của số liệu hoạt động và hệ số phát thải.')]);
+  B=B.concat(doanVan(S.khongChacChan.dinhLuong));
+
+  B.push({ k:'ky', ten:rong(cs.daiDien.hoTen)?null:cs.daiDien.hoTen.trim() });
+  return B;
+}); }
+
+/* Cot bat buoc cua mot dong so lieu, cung cach voi thieuSo o Buoc 2 */
+function batBuoc(c,so){
+  if(c.req==='nhietTri') return HE_TJ[(so.donVi||'').toLowerCase()]==null;
+  if(c.req==='hoi') return !(so.chiTiet.khoiLuongGio!=null && so.chiTiet.soGio!=null);
+  return !!c.req;
+}
+/* O cua bang so lieu: gia tri theo cot cua bieu */
+function oSoLieu(n,so,c){
+  if(c.n) return { x:giaTriNguon(n,c) };
+  if(c.calc==='tj'){ var tj=tjCua(n,so); return { x:tj?vietSo(tj.v,6):'', can:'right' }; }
+  var v=getP(so,duongDan(c.s));
+  if(rong(v) || v==null) return batBuoc(c,so) ? { r:[Rt()] } : { x:'' };
+  if(c.kieu==='num') return { x:vietSo(v)+(c.donVi && so.donVi?' '+so.donVi:''), can:'right' };
+  if(c.kieu==='date') return { x:dmyv(v) };
+  return { x:String(v) };
+}
+function bangSoLieu(l,ds,y){
+  var b=l.bang, cols=b.cot.filter(function(c){ return c.tt38!==false; });
+  var tieu=(b.so?'Bảng '+b.so+'. ':'')+lv(b.ten)+', năm '+y;
+  var cot=[{ x:'STT', w:7, can:'center' }].concat(cols.map(function(c){ return { x:lv(c.lab), w:12 }; }));
+  var dong=ds.map(function(n,i){
+    var so=laySo(n.id,y,false)||{ gioTri:null, donVi:b.donVi||'', chiTiet:{} };
+    return [{ x:String(i+1), can:'center' }].concat(cols.map(function(c){ return oSoLieu(n,so,c); }));
+  });
+  return { k:'bang', tieu:tieu, cot:cot, dong:dong };
+}
+function bang21(ds,y){
+  var loai=[]; ds.forEach(function(n){ var k=n.phanLoai.trim(); if(k && loai.indexOf(k)<0) loai.push(k); });
+  var dong=loai.map(function(k,i){
+    var tong=null; ds.forEach(function(n){ if(n.phanLoai.trim()!==k) return; var so=laySo(n.id,y,false); if(so && so.gioTri!=null) tong=(tong||0)+so.gioTri; });
+    return [{ x:String(i+1), can:'center' },{ x:k },tong==null?{ r:[Rt()] }:{ x:vietSo(tong,6), can:'right' }];
+  });
+  return { k:'bang', tieu:'Bảng 2.1. Lượng môi chất lạnh nạp hàng năm, năm '+y, cot:[{ x:'STT', w:6, can:'center' },{ x:'Loại môi chất lạnh', w:30 },{ x:'Lượng môi chất nạp (kg)', w:20 }], dong:dong };
+}
+/* Bang tong hop theo bieu E.8 tai lieu quy trinh, mot nam mot bang */
+function bangKetQua(kq,y){
+  var cot=[{ x:'Nguồn phát thải', w:14 },{ x:'Số liệu hoạt động', w:11 },{ x:'Đơn vị', w:8 },{ x:'Hệ số phát thải', w:12 },{ x:'Đơn vị', w:10 },
+           { x:'Khí', w:9 },{ x:'Lượng khí phát thải (tấn)', w:12 },{ x:'GWP', w:8 },{ x:'Phát thải (tấn CO₂tđ)', w:15 }];
+  var ds=kq.dong.filter(function(d){ return d.y===y; }), dong=[], i=0;
+  while(i<ds.length){
+    var n=ds[i].n, j=i; while(j<ds.length && ds[j].n===n) j++;
+    for(var k=i;k<j;k++){
+      var d=ds[k], r=[];
+      if(k===i) r.push({ x:nhanNguon(n), rs:j-i });
+      if(d.loi){
+        var ten=d.khi ? (d.khi==='HFC'?n.phanLoai:KHI_NHAN[d.khi]||d.khi)+': ' : '';
+        r.push({ r:[{ x:d.khongCT?'[Thông tư 38/2023/TT-BCT không có công thức cho loại nguồn này; cơ sở tự tính và bổ sung]':'['+ten+'chưa tính được: '+boCuoi(d.loi)+']', hl:true }], gop:8 });
+        dong.push(r); continue;
+      }
+      var ef, efDv=d.efDv||'';
+      if(d.muc==='5.2' || d.muc==='5.3'){ ef='CF = '+vietSo(d.cf)+' kg/m³; CE = '+vietSo(d.ce)+' %'; efDv=''; }
+      else if(d.muc==='2.1'){ ef='—'; efDv=''; }
+      else ef=vietSo(d.ef,6)+(d.cf!=null?' (CF = '+vietSo(d.cf)+' kg/m³)':'');
+      r.push({ x:vietSo(d.ad,6), can:'right' },{ x:d.adDv },{ x:ef, can:d.ef!=null?'right':'left' },{ x:efDv },
+             { x:d.khi==='HFC'?n.phanLoai.trim():KHI_NHAN[d.khi] },{ x:soLuong(d.luong), can:'right' },
+             d.gwp==null?{ r:[Rt('bộ GWP')] }:{ x:vietSo(d.gwp), can:'right' },
+             { x:d.tco2e==null?'':soVi(d.tco2e), can:'right' });
+      dong.push(r);
+    }
+    i=j;
+  }
+  var o=kq.tong[y], nh=[R('Tổng cộng',{ b:true })];
+  if(o.loi || o.chuaGwp || o.khongCT) nh.push(R(' '),{ x:'[chưa đầy đủ]', hl:true });
+  dong.push([{ r:nh, gop:8, can:'right' },{ r:[R(soVi(o.tong),{ b:true })], can:'right' }]);
+  return { k:'bang', tieu:'Bảng tổng hợp kết quả kiểm kê khí nhà kính năm '+y, cot:cot, dong:dong, nho:true };
+}
+function tinhLaiM06(B){
+  var tl=S.tinhLai;
+  function p(r){ B.push({ k:'p', r:r }); }
+  var dau=R('Tính toán lại kết quả kỳ trước: ',{ i:true });
+  if(tl.tinhTrang==='kyDau') p([dau,R('đây là kỳ báo cáo đầu tiên của cơ sở, không có kết quả kiểm kê kỳ trước phải tính toán lại.')]);
+  else if(tl.tinhTrang==='khongDoi') p([dau,R('trong kỳ báo cáo không xảy ra trường hợp phải tính toán lại kết quả kiểm kê kỳ trước theo khoản 1 Điều 22 Thông tư 38/2023/TT-BCT.')]);
+  else if(tl.tinhTrang==='coDoi'){
+    var ky=tl.kyTruoc, kyX=(ky.namBatDau&&ky.namKetThuc)?'năm '+ky.namBatDau+' và năm '+ky.namKetThuc:null;
+    var r=[dau,R('theo Điều 22 Thông tư 38/2023/TT-BCT, cơ sở tính toán lại kết quả kiểm kê '),kyX?R(kyX):Rt('kỳ trước'),R(' do: ')];
+    if(tl.truongHop.length) r.push(R(tl.truongHop.map(function(k){ return boCuoi(T['b7_'+k][0]).replace(/^[abc]\) /,''); }).join('; ').replace(/^./,function(c){ return c.toLocaleLowerCase('vi'); })+'.'));
+    else r.push(Rt('trường hợp tại khoản 1 Điều 22'));
+    p(r);
+    p([R('Mô tả thay đổi: '),Rv(tl.lyDo,'mô tả thay đổi')]);
+    var nam=kyX?[ky.namBatDau,ky.namKetThuc]:[];
+    if(nam.length){
+      var dong=nam.map(function(y){
+        var cu=tl.ketQuaCu[y], moi=tl.ketQuaMoi[y], d=(cu!=null&&moi!=null)?moi-cu:null;
+        return [{ x:String(y), can:'center' },cu==null?{ r:[Rt()] }:{ x:soVi(cu), can:'right' },moi==null?{ r:[Rt()] }:{ x:soVi(moi), can:'right' },
+                { x:d==null?'':(d>0?'+':'')+soVi(d), can:'right' },{ x:(d==null||!cu)?'':(d>0?'+':'')+vietSo(d/cu*100,2)+' %', can:'right' }];
+      });
+      B.push({ k:'bang', tieu:'Kết quả kiểm kê kỳ trước đã báo cáo và kết quả tính toán lại', cot:[{ x:'Năm', w:10, can:'center' },{ x:'Kết quả đã báo cáo (tấn CO₂tđ)', w:22 },{ x:'Kết quả tính lại (tấn CO₂tđ)', w:22 },{ x:'Chênh lệch (tấn CO₂tđ)', w:20 },{ x:'Chênh lệch (%)', w:14 }], dong:dong });
+    }
+    p([R('Giải thích nguyên nhân chênh lệch: '),Rv(tl.giaiThich,'giải thích chênh lệch')]);
+  }
+  else p([dau,Rt('tình trạng tính toán lại, Bước 7')]);
+}
+
+/* ---------- ve ra .docx ---------- */
+function mau06Docx(B){
+  var CO=14, TH=567, out='';
+  function runsO(o){ return o.r || [{ x:o.x==null?'':String(o.x) }]; }
+  B.forEach(function(k){
+    if(k.k==='mau') out+=DX.p([R(M06.mau,{ b:true })],{ can:'right', truoc:0, sau:120 });
+    else if(k.k==='dau'){
+      var trai=k.ten ? [[[R(k.ten,{ b:true })],{ can:'center', co:13, dong:240 }]]
+                     : [[[R(M06.cho1,{ b:true, hl:true })],{ can:'center', co:13, dong:240 }],[[R(M06.cho2,{ b:true, hl:true })],{ can:'center', co:13, dong:240 }]];
+      trai.push([[],{ vien:true, trai:1300, phai:1300, truoc:0, sau:0, coDau:2, dong:240 }]);
+      var phai=[[[R(M06.qh1,{ b:true })],{ can:'center', co:12, dong:240 }],[[R(M06.qh2,{ b:true })],{ can:'center', co:13, dong:240 }],
+                [[],{ vien:true, trai:1000, phai:1000, truoc:0, sau:0, coDau:2, dong:240 }]];
+      out+=DX.bang({ rong:[3900,DX.RONG-3900], vien:false, co:13, hang:[{ o:[{ doan:trai, can:'center' },{ doan:phai, can:'center' }] }] });
+    }
+    else if(k.k==='tieuDe'){
+      out+=DX.p([R(M06.bc,{ b:true })],{ can:'center', truoc:360, sau:0, co:CO });
+      out+=DX.p(k.r.map(function(r){ var q={}; for(var x in r) q[x]=r[x]; q.b=true; return q; }),{ can:'center', truoc:0, sau:0, co:CO });
+      out+=DX.p([],{ vien:true, trai:Math.round(DX.RONG/2-700), phai:Math.round(DX.RONG/2-700), truoc:0, sau:240, coDau:2, dong:240 });
+    }
+    else if(k.k==='muc') out+=DX.p([R(k.x,{ b:true })],{ thut:TH, giu:true, truoc:180 });
+    else if(k.k==='muc2') out+=DX.p([R(k.x,{ b:true })],{ thut:TH, giu:true, truoc:120 });
+    else if(k.k==='p') out+=DX.p(k.r,{ thut:TH });
+    else if(k.k==='gach') out+=DX.p(k.cap===2?k.r:[R('- ')].concat(k.r),{ thut:k.cap===2?TH*2:TH });
+    else if(k.k==='nho') out+=DX.p(k.r,{ i:true, co:12, thut:TH, truoc:0 });
+    else if(k.k==='bang'){
+      var n=k.cot.length, co=n>6?11:12;
+      out+=DX.p([R(k.tieu,{ b:true })],{ can:'center', giu:true, truoc:160, sau:80, co:13 });
+      var rong=DX.chia(k.cot.map(function(c){ return c.w||10; }));
+      var hang=[{ dau:true, o:k.cot.map(function(c){ return { x:c.x, can:'center' }; }) }];
+      k.dong.forEach(function(d){ hang.push({ o:d.map(function(c){ return { r:runsO(c), can:c.can, gop:c.gop, rs:c.rs, b:c.b }; }) }); });
+      out+=DX.bang({ rong:rong, co:co, hang:hang });
+      out+=DX.p([],{ truoc:0, sau:80, coDau:6, dong:240 });
+    }
+    else if(k.k==='ky'){
+      var ky=[[[R(M06.ky,{ b:true })],{ can:'center', co:CO }]];
+      for(var i=0;i<4;i++) ky.push([[],{ can:'center', co:CO }]);
+      if(k.ten) ky.push([[R(k.ten,{ b:true })],{ can:'center', co:CO }]);
+      out+=DX.p([],{ truoc:120, sau:0 });
+      out+=DX.bang({ rong:[DX.RONG-4800,4800], vien:false, co:CO, hang:[{ o:[{ x:'' },{ doan:ky, can:'center' }] }] });
+    }
+  });
+  return out;
+}
+function xuatDocx(){
+  var B=mau06(), ten=S.coSo.ten||'co so';
+  var blob=DX.tao(mau06Docx(B),'Báo cáo kết quả kiểm kê khí nhà kính, '+ten);
+  var name=tenFile('KNK_Mau06','docx');
+  taiBlob(blob,name); toast(fill(t('b8tDocx'),{f:name}));
+}
+
+/* ---------- ve ra ban xem truoc tren trang ---------- */
+function mau06Html(B){
+  var root=el('div','qt-a4');
+  function vRuns(host,runs){
+    runs.forEach(function(r){
+      if(typeof r==='string') r={ x:r };
+      var e=r.sub?el('sub',null,r.x):r.sup?el('sup',null,r.x):document.createTextNode(r.x);
+      if(r.b || r.i || r.hl){ var w=el('span',r.hl?'qt-a4-o':null); if(r.b) w.style.fontWeight='700'; if(r.i) w.style.fontStyle='italic'; w.appendChild(e); e=w; }
+      host.appendChild(e);
+    });
+    return host;
+  }
+  B.forEach(function(k){
+    if(k.k==='mau') root.appendChild(el('div','qt-a4-mau',M06.mau));
+    else if(k.k==='dau'){
+      var d=el('div','qt-a4-dau'), a=el('div'), b=el('div');
+      if(k.ten) a.appendChild(el('b',null,k.ten));
+      else { var o=el('b','qt-a4-o',M06.cho1+' '+M06.cho2); a.appendChild(o); }
+      a.appendChild(el('i','qt-a4-ke'));
+      b.appendChild(el('b',null,M06.qh1)); b.appendChild(el('b',null,M06.qh2)); b.appendChild(el('i','qt-a4-ke qt-a4-ke2'));
+      d.appendChild(a); d.appendChild(b); root.appendChild(d);
+    }
+    else if(k.k==='tieuDe'){
+      var t0=el('div','qt-a4-td'); t0.appendChild(el('b',null,M06.bc));
+      var t1=el('b'); vRuns(t1,k.r); t0.appendChild(t1); t0.appendChild(el('i','qt-a4-ke')); root.appendChild(t0);
+    }
+    else if(k.k==='muc') root.appendChild(el('p','qt-a4-muc',k.x));
+    else if(k.k==='muc2') root.appendChild(el('p','qt-a4-muc2',k.x));
+    else if(k.k==='p') root.appendChild(vRuns(el('p','qt-a4-p'),k.r));
+    else if(k.k==='gach') root.appendChild(vRuns(el('p','qt-a4-p'+(k.cap===2?' qt-a4-cap2':'')),k.cap===2?k.r:[R('- ')].concat(k.r)));
+    else if(k.k==='nho') root.appendChild(vRuns(el('p','qt-a4-nho'),k.r));
+    else if(k.k==='web') root.appendChild(el('div','qt-a4-web',k.x));
+    else if(k.k==='bang'){
+      root.appendChild(el('p','qt-a4-cap',k.tieu));
+      var w=el('div','qt-tbw'), tb=el('table','qt-a4t'), hr=el('tr');
+      k.cot.forEach(function(c){ hr.appendChild(el('th',null,c.x)); });
+      var th=el('thead'); th.appendChild(hr); tb.appendChild(th);
+      var bd=el('tbody');
+      k.dong.forEach(function(d){
+        var tr=el('tr');
+        d.forEach(function(c){ var td=vRuns(el('td',c.can==='right'?'qt-r':c.can==='center'?'qt-c':null),c.r||[{ x:c.x==null?'':String(c.x) }]); if(c.gop) td.colSpan=c.gop; if(c.rs) td.rowSpan=c.rs; if(c.b) td.style.fontWeight='700'; tr.appendChild(td); });
+        bd.appendChild(tr);
+      });
+      tb.appendChild(bd); w.appendChild(tb); root.appendChild(w);
+    }
+    else if(k.k==='ky'){ var s=el('div','qt-a4-ky'); s.appendChild(el('b',null,M06.ky)); if(k.ten) s.appendChild(el('b','qt-a4-kyten',k.ten)); root.appendChild(s); }
+  });
+  return root;
+}
+
+/* ---- 89_buoc8.js ---- */
+/* ---------- Buoc 8. Ket qua va xuat bao cao ----------
+   Dieu 23 Thong tu 38/2023/TT-BCT: bao cao theo Mau so 06 Phu luc II Nghi dinh 06/2022/ND-CP.
+   Diem e khoan 1 Dieu 11 Nghi dinh 06, bo sung tai diem b khoan 7 Dieu 1 Nghi dinh
+   119/2025/ND-CP: bao cao gom ket qua cua hai nam lien ke nam nop. Doc tu ban goc: Thong
+   tu 38 trang in so 9; Nghi dinh 119 ban .docx.
+   Bang kiem truoc khi nop la Phan F tai lieu quy trinh; ung dung tu kiem nhung muc kiem duoc. */
+Object.assign(T,{
+  b8ccH:['Căn cứ','Legal basis'],
+  b8cc1:['Điều 23 Thông tư 38/2023/TT-BCT: “Cơ sở xây dựng Báo cáo kiểm kê KNK cấp cơ sở theo Mẫu số 06 Phụ lục II Nghị định số 06/2022/NĐ-CP.”',
+         'Article 23 of Circular 38/2023/TT-BCT: the facility prepares its facility-level GHG inventory report on Form 06, Appendix II of Decree 06/2022/ND-CP.'],
+  b8cc2:['Điểm e khoản 1 Điều 11 Nghị định 06/2022/NĐ-CP, bổ sung tại điểm b khoản 7 Điều 1 Nghị định 119/2025/NĐ-CP: “Báo cáo kết quả kiểm kê khí nhà kính định kỳ hai năm một lần của cơ sở bao gồm kết quả kiểm kê khí nhà kính của hai năm liền kề năm nộp báo cáo.”',
+         'Article 11(1)(e) of Decree 06/2022/ND-CP, added by Article 1(7)(b) of Decree 119/2025/ND-CP: the facility’s biennial inventory report covers the two years immediately before the year of submission.'],
+  b8ttH:['Tình trạng hồ sơ','Record status'],
+  b8ttHint:['Bản thảo xuất được bất cứ lúc nào; chỗ còn thiếu ghi [Chưa nhập: …] tô vàng trong file','The draft can be exported at any time; gaps are marked [Chưa nhập: …] and highlighted in the file'],
+  b8cB:['Bước','Step'], b8cT:['Tình trạng','Status'],
+  b8xong:['Đã xong','Done'], b8con:['Còn %n mục','%n items left'], b8den:['Mở','Open'],
+  b8conBuoc:['Còn %n bước chưa xong. File vẫn xuất được, chỗ còn thiếu được đánh dấu để hoàn thiện sau.','%n steps are not complete. Files can still be exported; gaps are marked for later.'],
+  b8duBuoc:['Bước 0 đến Bước 7 đã xong.','Steps 0 to 7 are complete.'],
+  b8kqH:['Kết quả','Results'], b8kqHint:['Tấn CO₂ tương đương','Tonnes CO₂ equivalent'],
+  b8kqGwp:['Bộ GWP: %g. Chi tiết từng dòng ở Bước 4.','GWP set: %g. Row-by-row detail in Step 4.'],
+  b8u:['Độ không chắc chắn năm %y: ±%u %.','Uncertainty %y: ±%u %.'],
+  b8xH:['Xuất file','Export'], b8xHint:['File xuất viết bằng tiếng Việt, vì báo cáo nộp cơ quan nhà nước Việt Nam','Exported files are in Vietnamese, as the report is filed with Vietnamese authorities'],
+  b8docx:['Tải bản thảo Mẫu số 06 (.docx)','Download Form 06 draft (.docx)'],
+  b8xlsx:['Tải bảng tính (.xlsx)','Download workbook (.xlsx)'],
+  b8json:['Tải file dữ liệu (.json)','Download data file (.json)'],
+  b8docxP:['Bản thảo Mẫu số 06: giữ nguyên câu chữ các đề mục của mẫu, tiêu đề ghi cả hai năm của kỳ, khổ A4, chữ Times New Roman 14, số trang từ trang 2. Người có thẩm quyền của cơ sở phải rà soát, hoàn thiện và ký trước khi nộp.',
+           'Form 06 draft: the form’s headings are kept word for word, the title names both years of the period, A4, Times New Roman 14, page numbers from page 2. An authorised person at the facility must review, complete and sign it before submission.'],
+  b8xlsxP:['Bảng tính gồm: trang tổng hợp tính bằng công thức; bảng tính trung gian, mỗi dòng một khí của một nguồn, lượng khí = số liệu hoạt động × hệ số × hệ số đổi đơn vị, phát thải = lượng khí × GWP; các biểu Mục 1 Phụ lục II đã điền cho từng năm; hệ số; biên bản kiểm soát chất lượng; độ không chắc chắn; tính toán lại. Excel tính lại công thức khi mở file.',
+           'The workbook holds: a summary sheet built from formulas; the intermediate calculation, one row per gas per source, gas = activity data × factor × unit factor, emissions = gas × GWP; the filled Section 1 tables of Appendix II for each year; factors; the quality control log; uncertainty; recalculation. Excel recalculates the formulas on opening.'],
+  b8jsonP:['File .json là hồ sơ đầy đủ để nạp lại vào ứng dụng, kể cả ở kỳ sau.','The .json file is the complete record to load back into the app, including next period.'],
+  b8xemH:['Xem trước bản thảo','Draft preview'], b8xemHint:['Cùng nội dung với file .docx. Khung nền xanh là ghi chú của ứng dụng, không in vào file','Same content as the .docx. Blue boxes are app notes and are not printed in the file'],
+  b8webBang:['Ghi chú của ứng dụng, không in vào file .docx: bảng dưới đây là cách trình bày của ứng dụng, không phải bảng bắt buộc của Mẫu số 06; Mẫu số 06 chỉ quy định đề mục.',
+             'App note, not printed in the .docx: the table below is how the app presents the data; Form 06 prescribes headings only, no tables.'],
+  b8tDocx:['Đã tải %f.','Downloaded %f.'], b8tXlsx:['Đã tải %f.','Downloaded %f.'],
+  b8loiX:['Không tạo được file: %e','Could not create the file: %e'],
+  b8fH:['Bảng kiểm trước khi nộp','Pre-submission checklist'], b8fHint:['Phần F tài liệu quy trình; ứng dụng tự kiểm những mục kiểm được','Part F of the procedure document; the app checks what it can'],
+  b8fNd:['Nội dung kiểm','Check'], b8fCc:['Căn cứ','Basis'], b8fKq:['Kết quả','Result'],
+  b8dat:['Đạt','Passed'], b8chua:['Chưa đạt','Not yet'], b8tu:['Tự kiểm','Check yourself'], b8ka:['Không áp dụng','Not applicable'],
+  b8mBuoc:['Bước %n chưa xong','Step %n is not complete'],
+  f1:['Đã xác định đúng nhóm đối tượng A, B hay C','The obligation group A, B or C has been determined'],
+  f2:['Báo cáo có kết quả của cả 2 năm liền kề năm nộp','The report has results for both years before the submission year'],
+  f3:['Đã liệt kê đủ 6 loại nguồn trực tiếp và 2 loại nguồn gián tiếp, hoặc nêu rõ loại nào không có','All 6 direct and 2 indirect source types are listed, or marked as absent'],
+  f4:['Không bỏ sót phát thải gián tiếp từ điện mua ngoài','Indirect emissions from purchased electricity are not omitted'],
+  f5:['Mỗi hệ số phát thải đều ghi được nguồn gốc theo 1 trong 3 bậc','Every emission factor states its origin under one of the 3 tiers'],
+  f6:['Hệ số phát thải lưới điện ghi rõ năm và văn bản công bố','The grid emission factor states its year and the publishing document'],
+  f7:['Đã ghi rõ bộ GWP sử dụng và giữ nhất quán với kỳ trước','The GWP set is stated and consistent with the previous period'],
+  f8:['Không nhân trực tiếp hệ số hiệu chỉnh với số liệu hoạt động','No correction factor is multiplied directly with activity data'],
+  f9:['Có biên bản kiểm soát chất lượng','A quality control log exists'],
+  f10:['Có phần đánh giá độ không chắc chắn','An uncertainty assessment exists'],
+  f11:['Nếu có thay đổi phạm vi, phương pháp hoặc hệ số thì đã tính toán lại kỳ trước','If the boundary, method or factors changed, the previous period has been recalculated'],
+  f12:['Báo cáo theo đúng Mẫu số 06 Phụ lục II Nghị định 06/2022/NĐ-CP','The report follows Form 06, Appendix II of Decree 06/2022/ND-CP'],
+  f13:['Gửi đúng nơi nhận theo nhóm đối tượng','Sent to the right recipient for the group'],
+  f14:['Gửi đúng mốc thời hạn theo nhóm đối tượng','Sent by the deadline for the group'],
+  f15:['Hồ sơ số liệu gốc được lưu giữ tại cơ sở','Source data records are kept at the facility'],
+  f2nam:['năm %y còn %n dòng chưa tính được hoặc không có công thức','%y has %n rows not computed or without a formula'],
+  f4dien:['Đã đánh dấu cơ sở không dùng điện mua ngoài, cần kiểm tra lại.','Marked as using no purchased electricity; check again.'],
+  f7gwp:['Bộ %g. Đối chiếu với bộ đã dùng ở kỳ trước.','Set %g. Compare with the set used last period.'],
+  f12docx:['Bản thảo xuất theo đề mục Mẫu số 06.','The draft follows the Form 06 headings.']
+});
+var PHAN_F_CC=[
+  ['Khoản 4 Điều 11 Nghị định 06/2022/NĐ-CP sửa đổi','Art. 11(4) of Decree 06/2022/ND-CP as amended'],
+  ['Điểm e khoản 1 Điều 11','Art. 11(1)(e)'],
+  ['Điều 16 Thông tư 38/2023/TT-BCT','Art. 16 of Circular 38/2023/TT-BCT'],
+  ['Điểm a khoản 2 Điều 16','Art. 16(2)(a)'],
+  ['Điều 18 Thông tư 38/2023/TT-BCT','Art. 18 of Circular 38/2023/TT-BCT'],
+  ['Công văn của cơ quan quản lý','Official letter of the authority'],
+  ['Điểm c khoản 1 Điều 11','Art. 11(1)(c)'],
+  ['Quyết định 2626/QĐ-BTNMT','Decision 2626/QD-BTNMT'],
+  ['Điều 20 Thông tư 38/2023/TT-BCT','Art. 20 of Circular 38/2023/TT-BCT'],
+  ['Điều 21 Thông tư 38/2023/TT-BCT','Art. 21 of Circular 38/2023/TT-BCT'],
+  ['Điều 22 Thông tư 38/2023/TT-BCT','Art. 22 of Circular 38/2023/TT-BCT'],
+  ['Điều 23 Thông tư 38/2023/TT-BCT','Art. 23 of Circular 38/2023/TT-BCT'],
+  ['Bảng A.2 tài liệu quy trình','Table A.2 of the procedure document'],
+  ['Bảng A.2 tài liệu quy trình','Table A.2 of the procedure document'],
+  ['Điều 17 Thông tư 38/2023/TT-BCT','Art. 17 of Circular 38/2023/TT-BCT']
+];
+
+/* Ket qua tu kiem tung muc Phan F: { kq:'dat'|'chua'|'tu'|'ka', ghi } */
+function kiemPhanF(kq){
+  var ys=namKy(), out=[];
+  function hsDung(){
+    var ds=[];
+    S.nguon.forEach(function(n){ var l=LOAI_BY[n.loai]; (l.hs.khi||[]).forEach(function(k){ (l.hs.theoNam?ys:[null]).forEach(function(y){ var h=layHs(n.id,k,y,false); if(h && h.giaTri!=null) ds.push({ n:n, h:h }); }); }); });
+    return ds;
+  }
+  var nhom=S.coSo.nhom, ghiNhom=nhom ? t('nhom'+nhom+'d') : '';
+  out.push({ kq:nhom?'dat':'chua', ghi:nhom?lv(['Nhóm ','Group '])+nhom:'' });
+  var thieuNam=ys.map(function(y){ var o=kq.tong[y], n=o.loi+o.chuaGwp+o.khongCT; return n ? fill(t('f2nam'),{y:y,n:n}) : ''; }).filter(Boolean);
+  out.push({ kq:(ys.length===2 && S.nguon.length && !thieuNam.length)?'dat':'chua', ghi:!ys.length?t('b2mKy'):!S.nguon.length?t('b2mNguon'):thieuNam.join('; ') });
+  out.push({ kq:LOAI.every(function(l){ return nguonTheoLoai(l.k).length || S.loaiKhongCo.indexOf(l.k)>=0; })?'dat':'chua' });
+  if(nguonTheoLoai('dien').length) out.push({ kq:'dat' });
+  else if(S.loaiKhongCo.indexOf('dien')>=0) out.push({ kq:'tu', ghi:t('f4dien') });
+  else out.push({ kq:'chua' });
+  var hs=hsDung();
+  out.push({ kq:(hs.length && hs.every(function(o){ return !rong(o.h.bac) && !rong(o.h.nguonGoc); }))?'dat':'chua' });
+  var hd=hs.filter(function(o){ return o.n.loai==='dien'; });
+  if(!nguonTheoLoai('dien').length) out.push({ kq:'ka' });
+  else out.push({ kq:(hd.length===nguonTheoLoai('dien').length*ys.length && hd.every(function(o){ return o.h.nam!=null && !rong(o.h.nguonGoc); }))?'dat':'chua' });
+  out.push({ kq:S.gwp?'dat':'chua', ghi:S.gwp?fill(t('f7gwp'),{g:S.gwp}):'' });
+  out.push({ kq:kq.dong.some(function(d){ return d.loi===t('tkHc'); })?'chua':'dat' });
+  out.push({ kq:xong(5)?'dat':'chua' });
+  out.push({ kq:xong(6)?'dat':'chua' });
+  out.push({ kq:xong(7)?'dat':'chua' });
+  out.push({ kq:'dat', ghi:t('f12docx') });
+  out.push({ kq:'tu', ghi:ghiNhom });
+  out.push({ kq:'tu', ghi:ghiNhom });
+  out.push({ kq:'tu' });
+  return out;
+}
+
+VE[8]=function(sec){
+  var kq=tinhToan(), ys=namKy();
+  var cb=theCard(sec,t('b8ccH'));
+  cb.appendChild(el('p',null,t('b8cc1')));
+  cb.appendChild(el('p',null,t('b8cc2')));
+
+  /* tinh trang ho so */
+  cb=theCard(sec,t('b8ttH'),t('b8ttHint')); cb.parentNode.id='b8-tinhtrang';
+  var w=el('div','qt-tbw'), tb=el('table','qt-t'), hr=el('tr');
+  [t('b8cB'),t('b8cT'),''].forEach(function(x){ hr.appendChild(el('th',null,x)); });
+  var th=el('thead'); th.appendChild(hr); tb.appendChild(th);
+  var bd=el('tbody'), con=0;
+  STEPS.slice(0,8).forEach(function(st){
+    var m=THIEU[st.n]?THIEU[st.n]():[], r=el('tr'); r.setAttribute('data-b8',st.n);
+    r.appendChild(el('td',null,st.n+'. '+lv(st.s)));
+    var c=el('td'); c.appendChild(el('span','qt-chip '+(m.length?'qt-cw':'qt-cok'),m.length?fill(t('b8con'),{n:m.length}):t('b8xong'))); r.appendChild(c);
+    r.appendChild(oThaoTac([m.length?nut(t('b8den'),'goBuoc|'+st.n):null]));
+    if(m.length) con++;
+    bd.appendChild(r);
+  });
+  tb.appendChild(bd); w.appendChild(tb); cb.appendChild(w);
+  cb.appendChild(el('div',con?'qt-alert':'qt-info',con?fill(t('b8conBuoc'),{n:con}):t('b8duBuoc')));
+
+  /* ket qua */
+  if(ys.length && S.nguon.length){
+    cb=theCard(sec,t('b8kqH'),t('b8kqHint')); cb.parentNode.id='b8-ketqua';
+    w=el('div','qt-tbw'); tb=el('table','qt-t'); hr=el('tr');
+    [t('b4ct')].concat(ys.map(function(y){ return fill(t('b2nam'),{y:y}); })).forEach(function(x){ hr.appendChild(el('th',null,x)); });
+    th=el('thead'); th.appendChild(hr); tb.appendChild(th); bd=el('tbody');
+    [['tt',t('b4tt')],['gt',t('b4gt')],['tong',t('b4tong')]].forEach(function(x){
+      var r=el('tr'), c0=el('td',null,x[1]); if(x[0]==='tong') c0.style.fontWeight='650'; r.appendChild(c0);
+      ys.forEach(function(y){
+        var o=kq.tong[y], td=el('td','qt-calc',sGon(o[x[0]])); td.setAttribute('data-kq8',y+'|'+x[0]);
+        if(o.loi || o.chuaGwp || o.khongCT){ td.appendChild(document.createTextNode(' ')); td.appendChild(el('span','qt-chip qt-cw',t('b4chuaDu'))); }
+        r.appendChild(td);
+      });
+      bd.appendChild(r);
+    });
+    tb.appendChild(bd); w.appendChild(tb); cb.appendChild(w);
+    cb.appendChild(el('p','qt-note',fill(t('b8kqGwp'),{g:S.gwp||t('b7fChuaGwp')})));
+    ys.forEach(function(y){ var u=uTong(kq,y); if(u) cb.appendChild(el('p','qt-note',fill(t('b8u'),{y:y,u:vietSo(u.u,1)}))); });
+  }
+
+  /* xuat file */
+  cb=theCard(sec,t('b8xH'),t('b8xHint')); cb.parentNode.id='b8-xuat';
+  [['b8docx','xuatDocx','qt-pri','b8docxP'],['b8xlsx','xuatXlsx',null,'b8xlsxP'],['b8json','xuatJson',null,'b8jsonP']].forEach(function(x){
+    var row=el('div','qt-xuat'); row.appendChild(nut(t(x[0]),x[1],x[2]));
+    var p=el('p','qt-note',t(x[3])); row.appendChild(p);
+    if(x[1]==='xuatDocx') row.appendChild(el('p','qt-note',t('s8note')));
+    cb.appendChild(row);
+  });
+
+  /* bang kiem Phan F */
+  cb=theCard(sec,t('b8fH'),t('b8fHint')); cb.parentNode.id='b8-phanf';
+  w=el('div','qt-tbw'); tb=el('table','qt-t'); hr=el('tr');
+  ['#',t('b8fNd'),t('b8fCc'),t('b8fKq')].forEach(function(x,i){ hr.appendChild(el('th',i===0?'qt-stt':null,x)); });
+  th=el('thead'); th.appendChild(hr); tb.appendChild(th); bd=el('tbody');
+  kiemPhanF(kq).forEach(function(o,i){
+    var r=el('tr'); r.setAttribute('data-f',String(i+1));
+    r.appendChild(el('td','qt-stt',String(i+1)));
+    r.appendChild(el('td',null,t('f'+(i+1))));
+    r.appendChild(el('td',null,lv(PHAN_F_CC[i])));
+    var c=el('td'); c.appendChild(el('span','qt-chip '+({ dat:'qt-cok', chua:'qt-cw', tu:'', ka:'' }[o.kq]),t({ dat:'b8dat', chua:'b8chua', tu:'b8tu', ka:'b8ka' }[o.kq])));
+    if(o.ghi) c.appendChild(el('small','qt-fghi',o.ghi));
+    r.appendChild(c); bd.appendChild(r);
+  });
+  tb.appendChild(bd); w.appendChild(tb); cb.appendChild(w);
+
+  /* xem truoc */
+  cb=theCard(sec,t('b8xemH'),t('b8xemHint')); cb.parentNode.id='b8-xemtruoc';
+  cb.appendChild(mau06Html(mau06()));
+};
+THIEU[8]=function(){
+  var m=[];
+  for(var n=0;n<8;n++) if(!xong(n)) m.push(fill(t('b8mBuoc'),{n:n}));
+  return m;
+};
+function chayXuat(fn){ try{ fn(); }catch(e){ loi(fill(t('b8loiX'),{e:e && e.message || String(e)})); } }
+ACT.xuatDocx=function(){ chayXuat(xuatDocx); };
+ACT.xuatXlsx=function(){ chayXuat(xuatXlsx); };
+ACT.xuatJson=function(){ taiVe(); };
 
 /* ---- 90_init.js ---- */
 /* ---------- khoi dong ---------- */
