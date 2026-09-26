@@ -49,15 +49,18 @@ Thay đổi duy nhất là số chia, từ 10⁶ thành 10⁹. Kết quả tính
 
 ---
 
-# 4. Điểm vẫn chưa xác minh
+# 4. Đối chiếu với bản gốc Thông tư 38/2023/TT-BCT
 
-- **Điểm 4 Mục 2 Phụ lục II là phương pháp gì.** Quyết định không nêu tên phương pháp. Các biến enthalpy và hiệu suất lò (η<sub>lò</sub>) khớp với phương pháp tính phát thải gián tiếp từ hơi mua ngoài, như tài liệu quy trình đã phỏng đoán. Vẫn cần đối chiếu với bản gốc Thông tư 38/2023/TT-BCT.
-- **Định nghĩa và đơn vị của từng biến** nằm trong Thông tư 38/2023/TT-BCT, không nằm trong quyết định đính chính. Phải có bản gốc Thông tư mới cài được công thức ở Giai đoạn 3.
-- **Kiểm tra thứ nguyên, mới là suy luận.** Nếu enthalpy tính bằng kJ/kg hơi và EF<sub>nhiên liệu</sub> tính bằng kg CO₂/TJ, thì chia 10⁹ (1 TJ = 10⁹ kJ) cho ra kg CO₂ trên kg hơi, tức tCO₂ trên tấn hơi. Nếu đúng thì đây là lý do của đính chính. Chỉ khẳng định được sau khi đọc định nghĩa biến trong Thông tư.
+Đã đối chiếu, chi tiết ở `TT38_Phu_luc_II.md` mục 3.4 và mục 4.2.
+
+- **Điểm 4 Mục 2 Phụ lục II là phương pháp tính phát thải KNK gián tiếp do sử dụng hơi mua từ bên ngoài.** Tiêu đề điểm 4 trong bản gốc ghi đúng như vậy.
+- **Đơn vị các biến theo bản gốc:** Enthalpy<sub>H,p</sub> tính bằng kJ/kg, η<sub>lò</sub> tính bằng %, EF<sub>nhiên liệu</sub> tính bằng kg/TJ, EF<sub>H,p</sub> tính bằng tấn CO₂tđ/tấn hơi.
+- **Công thức sau đính chính đúng thứ nguyên, với một điều kiện:** η<sub>lò</sub> phải đưa vào dưới dạng phân số, ví dụ 0,85, dù Thông tư ghi đơn vị là %. Nếu đưa số 85 vào thì kết quả nhỏ hơn 100 lần. Phép kiểm tra bằng số nằm ở `TT38_Phu_luc_II.md` mục 4.2.
 
 ---
 
 # 5. Hệ quả cho ứng dụng
 
 - Công thức phát thải từ hơi mua ngoài phải dùng số chia 10⁹.
+- Người dùng nhập hiệu suất nồi hơi theo phần trăm; ứng dụng tự chia 100 trước khi đưa vào công thức, và ghi rõ việc chia này trên màn hình.
 - Chỗ nào trên trang hiện công thức này thì ghi kèm "đã áp dụng đính chính tại Quyết định 334/QĐ-BCT ngày 06/02/2025".
