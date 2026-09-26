@@ -9,9 +9,9 @@
 | `index.html` | Bản đóng gói tự chứa, là file đăng lên GitHub Pages. **Không sửa tay**, sửa trong `src/` rồi dựng lại |
 | `src/index.src.html` | Khung trang, có 3 dấu `/*@@CSS@@*/`, `/*@@DATA@@*/`, `/*@@JS@@*/` |
 | `src/app.css` | Giao diện, tiền tố class `qt-` |
-| `src/js/*.js` | Mã ứng dụng, ghép theo thứ tự tên file vào một hàm tự gọi. `10_core` mô hình dữ liệu, lưu và nạp, điều hướng; `12_nhap` ô nhập gắn với dữ liệu; `15_khung` dòng nhắc, ngôn ngữ; `20_loai` 8 loại nguồn và cột bảng theo Thông tư 38; `30_buoc0` đến `60_buoc3` từng bước; `90_init` khởi động |
+| `src/js/*.js` | Mã ứng dụng, ghép theo thứ tự tên file vào một hàm tự gọi. `10_core` mô hình dữ liệu, lưu và nạp, điều hướng; `12_nhap` ô nhập gắn với dữ liệu; `15_khung` dòng nhắc, ngôn ngữ; `20_loai` 8 loại nguồn và cột bảng theo Thông tư 38; `30_buoc0` đến `60_buoc3` từng bước; `70_tinh` bộ tính theo Mục 2 Phụ lục II; `75_buoc4` Bước 4; `90_init` khởi động |
 | `build.py` | Ghép `src/` thành `index.html`, gán ngày dựng, lấy dữ liệu từ `../knk/index.html` |
-| `tests/giai_doan_1.test.js`, `tests/giai_doan_2.test.js` | Kiểm thử nghiệm thu từng giai đoạn bằng Playwright |
+| `tests/giai_doan_*.test.js` | Kiểm thử nghiệm thu từng giai đoạn bằng Playwright |
 | `Mau_so_06_cau_truc.md` | Cấu trúc Mẫu số 06 Phụ lục II Nghị định 06/2022/NĐ-CP, kết quả Giai đoạn 0 |
 | `QD334_BCT_dinh_chinh.md` | Nội dung đính chính của Quyết định 334/QĐ-BCT |
 | `TT38_Phu_luc_II.md` | Phụ lục II Thông tư 38/2023/TT-BCT, số liệu hoạt động và phương pháp tính |
@@ -32,6 +32,7 @@ Cần Node và gói `playwright` cài toàn cục kèm Chromium.
 python3 build.py
 NODE_PATH=$(npm root -g) node tests/giai_doan_1.test.js
 NODE_PATH=$(npm root -g) node tests/giai_doan_2.test.js
+NODE_PATH=$(npm root -g) node tests/giai_doan_3.test.js
 ```
 
 Kiểm thử chạy trên `index.html` đã đóng gói. Ảnh chụp màn hình lưu vào thư mục `QT_SHOTS`, mặc định là `<tmp>/qt-shots`.
@@ -54,6 +55,14 @@ Một đối tượng JSON, `phienBan: 1`, theo mục 3.3 kế hoạch, bổ sun
 Số lưu dạng số JavaScript. Ô nhập đọc được cả cách viết Việt Nam (`98.300`, `0,6592`) lẫn tiếng Anh, rời ô thì viết lại theo ngôn ngữ đang chọn.
 
 Khi đổi cấu trúc dữ liệu: tăng `PHIEN_BAN` trong `src/js/10_core.js` và thêm hàm vào `NANG_CAP` để file cũ nạp được.
+
+## Tính toán
+
+`src/js/70_tinh.js` tính theo Mục 2 Phụ lục II Thông tư 38/2023/TT-BCT, mỗi dòng là một khí của một nguồn trong một năm: điểm 1 đốt nhiên liệu, điểm 2.1 môi chất lạnh, điểm 3 điện, điểm 4 hơi (kể cả tự tính hệ số theo công thức đã đính chính tại Quyết định 334/QĐ-BCT), điểm 5.1 đến 5.5 khai thác than. Quá trình công nghiệp và chất thải không có công thức trong Thông tư nên không tự tính.
+
+Các chỗ không khớp đơn vị của Thông tư xử lý theo `TT38_Phu_luc_II.md` mục 4: hiệu suất nồi hơi và hiệu suất đốt CH₄ nhập theo % rồi chia 100; khối lượng riêng dùng kg/m³. GWP của CO₂ luôn là 1; CH₄ và N₂O theo bộ AR4 hoặc AR5 chọn ở Bước 4.
+
+Dòng nào không tính đúng được thì ghi lý do, không ra số: thiếu số liệu, hệ số hiệu chỉnh, hệ số theo khối lượng các-bon hoặc ni-tơ, theo % hoặc theo năng lượng, đơn vị mẫu số không khớp công thức, thiếu khối lượng riêng.
 
 ## Lưu dữ liệu
 

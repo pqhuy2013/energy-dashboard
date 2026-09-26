@@ -384,7 +384,7 @@ Tài liệu quy trình, mục G.3, dặn đối chiếu tên cột các biểu �
 
 # 6. Đề xuất bổ sung phép kiểm chứng cho Giai đoạn 3
 
-Ngoài 4 phép thử có sẵn trong kế hoạch. Các con số đầu vào dưới đây là số giả định để thử công thức, không phải số liệu thật của cơ sở nào.
+Ngoài 4 phép thử có sẵn trong kế hoạch. Đã cài ở Giai đoạn 3, xem `tests/giai_doan_3.test.js`; cả 5 phép thử ra đúng kết quả dưới đây. Các con số đầu vào dưới đây là số giả định để thử công thức, không phải số liệu thật của cơ sở nào.
 
 | Phép thử | Kết quả đúng |
 |---|---|

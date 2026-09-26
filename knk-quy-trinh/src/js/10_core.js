@@ -254,7 +254,7 @@ function khuon(){
             linhVuc:'' },
     ky: { namBatDau:null, namKetThuc:null },
     gwp: null,
-    moTa: { ranhGioi:'', haTang:'', heThongDuLieu:'' },
+    moTa: { ranhGioi:'', haTang:'', heThongDuLieu:'', phuongPhap:'' },
     beHapThu: { coHayKhong:null, moTa:'' },
     loaiKhongCo: [],
     nguon: [],

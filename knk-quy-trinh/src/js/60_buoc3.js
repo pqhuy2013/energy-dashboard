@@ -32,7 +32,16 @@ Object.assign(T,{
   b3y_codinh:['Điểm 1 Mục 2 tính theo TJ nhiên liệu, nên dùng hệ số theo kg khí/TJ.','Point 1 of Section 2 works in TJ of fuel, so use factors in kg gas/TJ.'],
   b3y_moichat:['Ứng dụng chưa có bảng GWP của môi chất lạnh; nhập theo báo cáo đánh giá IPCC và ghi nguồn. Môi chất hỗn hợp như R410A thì tính GWP từ thành phần. Bộ GWP phải thống nhất với bộ chọn ở Bước 4, AR4 hoặc AR5.','The app has no refrigerant GWP table yet; enter values from an IPCC assessment report and cite it. For blends such as R410A, compute the GWP from the components. Use the same set as chosen in Step 4, AR4 or AR5.'],
   b3y_dien:['Điểm 3 Mục 2: điện lưới dùng hệ số lưới điện quốc gia công bố cho năm tính toán; điện tự sản xuất hoặc mua trực tiếp dùng hệ số do đơn vị bán điện cung cấp kèm tài liệu minh chứng.','Point 3 of Section 2: grid electricity uses the national grid factor published for the calculation year; self-generated or directly purchased electricity uses the factor supplied by the seller with evidence.'],
-  b3y_hoi:['Điểm 4 Mục 2: hệ số của hơi lấy trực tiếp từ đơn vị cung cấp hơi. Tự tính theo công thức, đã áp dụng đính chính của Quyết định 334/QĐ-BCT, sẽ có ở Giai đoạn 3 của kế hoạch.','Point 4 of Section 2: the steam factor is taken from the steam supplier. Computing it from the formula, with the correction of Decision 334/QD-BCT, comes in phase 3 of the plan.'],
+  b3y_hoi:['Điểm 4 Mục 2: hệ số của hơi lấy trực tiếp từ đơn vị cung cấp hơi, là giá trị đơn vị đó tính theo công thức của Điểm 4. Chưa có số của đơn vị cấp hơi thì ứng dụng tự tính theo cùng công thức.','Point 4 of Section 2: the steam factor is taken from the steam supplier, who computes it with the Point 4 formula. Without the supplier’s figure, the app can compute it with the same formula.'],
+  b3hNcc:['Hệ số do đơn vị cung cấp hơi đưa','Factor supplied by the steam provider'],
+  b3hCt:['Tự tính theo công thức Điểm 4, đã đính chính','Compute with the corrected Point 4 formula'],
+  b3hEta:['Hiệu suất nồi hơi η_lò (%)','Boiler efficiency η (%)'],
+  b3hEf:['Hệ số phát thải CO₂ của nhiên liệu lò hơi (kg CO₂/TJ)','CO₂ factor of the boiler fuel (kg CO₂/TJ)'],
+  b3hEfNg:['Nguồn của hệ số nhiên liệu','Source of the fuel factor'],
+  b3hGhi:['EF_H,p = Entanpi_H,p ÷ η_lò × EF_nhiên liệu ÷ 10⁹, theo Điểm 4 Mục 2 sau đính chính của Quyết định 334/QĐ-BCT ngày 06/02/2025. Entanpi lấy từ bảng 4.2 ở Bước 2 theo từng năm. Hiệu suất nhập theo phần trăm, ứng dụng chia 100 trước khi tính, vì công thức chỉ đúng khi η_lò là phân số. Lò đốt nhiều nhiên liệu thì dùng hệ số bình quân theo tỷ lệ năng lượng.','EF_H,p = Enthalpy_H,p ÷ η × EF_fuel ÷ 10⁹, per Point 4 of Section 2 as corrected by Decision 334/QD-BCT of 6 Feb 2025. Enthalpy comes from table 4.2 in Step 2 for each year. Enter efficiency in percent; the app divides by 100 first, because the formula only holds with η as a fraction. For mixed fuels use an energy-weighted average factor.'],
+  b3hNam:['Năm %y: ','%y: '],
+  trForNL:['Hệ số CO₂ của nhiên liệu lò hơi, cho: %n','CO₂ factor of the boiler fuel, for: %n'],
+  trNLsai:['Hệ số nhiên liệu lò hơi phải tính theo kg CO₂/TJ.','The boiler fuel factor must be in kg CO₂/TJ.'],
   b3y_phattan:['Điểm 5 Mục 2 dùng hệ số theo m³ khí trên tấn than, cùng khối lượng riêng để đổi ra tấn.','Point 5 of Section 2 uses factors in m³ of gas per tonne of coal, with a density to convert to tonnes.'],
   b3mNguon:['Nguồn phát thải (Bước 1)','Emission sources (Step 1)'],
   b3mKy:['Kỳ báo cáo (Bước 0), để gán hệ số điện theo năm','Reporting period (Step 0), for per-year electricity factors'],
@@ -58,17 +67,7 @@ Object.assign(T,{
   trThem:['Hiện thêm','Show more'],
   trDaChon:['Đã gán hệ số %m.','Assigned factor %m.']
 });
-var KHI_NHAN={ CO2:'CO₂', CH4:'CH₄', N2O:'N₂O' };
-var KL=[[/nghìn tấn|thousand ton/i,1000],[/\btấn\b|\bton(ne)?s?\b/i,1],[/\bkg\b/i,0.001],[/\bg\b/i,0.000001]];
-/* Quy doi don vi he so ve tan khi, giong dashboard knk/. null la khong quy doi tu dong duoc. */
-function convInfo(donVi){
-  var num=(donVi||'').split('/')[0];
-  var gas=/CO2/i.test(num)?'CO2':(/CH4/i.test(num)?'CH4':(/N2O/i.test(num)?'N2O':null));
-  if(!gas) return null;
-  if(/m3/i.test(num) && gas==='CH4') return { gas:'CH4', m3:true };
-  for(var i=0;i<KL.length;i++) if(KL[i][0].test(num)) return { gas:gas, f:KL[i][1] };
-  return null;
-}
+var KHI_NHAN={ CO2:'CO₂', CH4:'CH₄', N2O:'N₂O', HFC:'HFC, HCFC' };
 function maHs(r){ return r[0]+'.'+r[1]+(r[2]>1?' ('+r[2]+')':''); }
 function luoiNam(y){ var r=DATA.luoi.filter(function(x){ return x[0]===String(y); })[0]; return (r && r[2]!=null) ? r : null; }
 
@@ -83,12 +82,17 @@ function oHs(n){
   return out;
 }
 function khiNhan(o,n){ return o.khi==='GWP' ? fill(t('b3gwp'),{m:n.phanLoai.trim()||t('b3gwpMc')}) : (KHI_NHAN[o.khi]||o.khi); }
-function hsDu(h,o){ return !!h && h.giaTri!=null && !!h.bac && !rong(h.nguonGoc) && (!o.cf || h.thamSo.cf!=null); }
+function hsDu(h,o){
+  if(h && h.thamSo.cachTinh==='congThuc') return h.thamSo.hieuSuat!=null && h.thamSo.efNhienLieu!=null && !rong(h.thamSo.efNguon);
+  return !!h && h.giaTri!=null && !!h.bac && !rong(h.nguonGoc) && (!o.cf || h.thamSo.cf!=null);
+}
 function hsKhoa(h){ return !!h && (h.bac==='qd2626' || /^luoi:/.test(h.maHeSo)); }
 function macDinhHs(h){
   var n=timNguon(h.nguonId); if(!n) return;
   var c=LOAI_BY[n.loai].hs;
   if(!h.bac && c.bac.length===1) h.bac=c.bac[0];
+  if(rong(h.donVi) && c.mau && h.khi!=='GWP' && h.thamSo.cachTinh!=='congThuc') h.donVi=c.mau;
+  if(n.loai==='hoi' && h.thamSo.cachTinh==='congThuc' && rong(h.nguonGoc)) h.nguonGoc='Tính theo Điểm 4 Mục 2 Phụ lục II Thông tư 38/2023/TT-BCT, đã áp dụng đính chính tại Quyết định 334/QĐ-BCT ngày 06/02/2025';
   if(n.loai==='phattan' && h.khi==='CH4' && h.thamSo.cf==null){ h.thamSo.cf=0.67; h.thamSo.cfNguon='IPCC 2006, Tập 2, Chương 4: 0,67 kg/m³ ở 20 °C và 1 atm'; }
 }
 
@@ -111,6 +115,7 @@ function veHs(cb,l,n){
   var c=l.hs, slots=oHs(n);
   cb.appendChild(el('div','qt-hsn',nhanNguon(n)));
   if(!slots.length){ cb.appendChild(el('p','qt-note',t('b3mKy'))); return; }
+  if(l.k==='hoi' && veHoiCT(cb,n)) return;
   var w=el('div','qt-tbw'), tb=el('table','qt-t'), thead=el('thead'), tr=el('tr');
   var cols=[t('b3cKhi')].concat(c.theoNam?[t('b3cNam')]:[]).concat([t('b3cGt'),t('b3cDv'),t('b3cBac'),t('b3cNg'),'']);
   cols.forEach(function(x){ tr.appendChild(el('th',null,x)); });
@@ -146,7 +151,7 @@ function veHs(cb,l,n){
     }
     tbody.appendChild(r);
     function ghiChu(txt,ok){ var rr=el('tr','qt-tr-note'), td=el('td',ok?'qt-okn':null,txt); td.colSpan=nc; rr.appendChild(td); tbody.appendChild(rr); return td; }
-    if(h && h.bac==='qd2626' && !convInfo(h.donVi)) ghiChu(t('b3kqd'));
+    if(h && h.giaTri!=null && o.khi!=='GWP' && !rong(h.donVi) && !hsQuyDoiDuoc(h.donVi)) ghiChu(t('b3kqd'));
     if(c.luoi && n.phanLoai==='Điện lưới' && !luoiNam(o.nam) && !hsKhoa(h)) ghiChu(fill(t('b3luoiThieu'),{y:o.nam}));
     if(o.cf){
       var td=ghiChu('',true);
@@ -200,7 +205,7 @@ DATA.hs.forEach(function(r){ r._s=nod(r[5]+' '+r[8]+' '+r[3]+' '+r[12]+' '+r[0]+
 ACT.tra=function(p){
   var n=timNguon(p[0]); if(!n) return;
   var c=LOAI_BY[n.loai].hs;
-  UI3.id=p[0]; UI3.khi=p[1]; UI3.nam=p[2]==='-'?null:+p[2];
+  UI3.che='hs'; UI3.id=p[0]; UI3.khi=p[1]; UI3.nam=p[2]==='-'?null:+p[2];
   UI3.q=(n.loai==='codinh'||n.loai==='didong') ? n.phanLoai : (n.loai==='phattan' ? ({hamlo:'ham lo',lothien:'lo thien'}[n.thuocTinh.congNghe]||'') : '');
   UI3.lv=c.lv||''; UI3.nhom=c.nhom||''; UI3.khiLoc=p[1]; UI3.shown=60;
   moTra();
@@ -208,7 +213,7 @@ ACT.tra=function(p){
 function moTra(){
   var n=timNguon(UI3.id), m=$('qt-modal'), b=$('qt-modal-b');
   var h=$('qt-modal-h'); h.innerHTML=''; h.appendChild(document.createTextNode(t('trH')));
-  h.appendChild(el('small',null,fill(t('trFor'),{n:nhanNguon(n),k:KHI_NHAN[UI3.khi]||UI3.khi})));
+  h.appendChild(el('small',null,UI3.che==='efnl' ? fill(t('trForNL'),{n:nhanNguon(n)}) : fill(t('trFor'),{n:nhanNguon(n),k:KHI_NHAN[UI3.khi]||UI3.khi})));
   b.innerHTML='';
   var f=el('div','qt-filt');
   var q=el('input'); q.type='search'; q.value=UI3.q; q.id='tr-q'; q.autocomplete='off';
@@ -254,9 +259,9 @@ function veKqHs(){
     rr.appendChild(el('td',null,r[7]));
     rr.appendChild(el('td','qt-calc',r[10]));
     var dv=el('td',null,L==='vi'?r[12]:r[13]);
-    var ci=convInfo(r[12]);
+    var ci=tuSoDv(tuDv(r[12]));
     if(r[15]!=='hc' && r[11]!=null){
-      if(!ci){ dv.appendChild(document.createTextNode(' ')); dv.appendChild(el('span','qt-chip qt-cw',t('trKqd'))); }
+      if(ci.khong){ dv.appendChild(document.createTextNode(' ')); dv.appendChild(el('span','qt-chip qt-cw',t('trKqd'))); }
       else if(ci.m3){ dv.appendChild(document.createTextNode(' ')); dv.appendChild(el('span','qt-chip',t('trM3'))); }
     }
     rr.appendChild(dv);
@@ -274,12 +279,53 @@ function veKqHs(){
 }
 ACT.traThem=function(){ UI3.shown+=60; veKqHs(); };
 ACT.dongTra=function(){ $('qt-modal').hidden=true; $('qt-modal-b').innerHTML=''; document.body.style.overflow=''; };
+ACT.traNL=function(p){
+  UI3.che='efnl'; UI3.id=p[0]; UI3.khi='CO2'; UI3.nam=null; UI3.q=''; UI3.lv=''; UI3.nhom='Các hoạt động đốt nhiên liệu'; UI3.khiLoc='CO2'; UI3.shown=60;
+  moTra();
+};
 ACT.chonHs=function(p){
   var r=DATA.hs[+p[0]]; if(!r || r[15]==='hc' || r[11]==null) return;
+  if(UI3.che==='efnl'){
+    var u=tuSoDv(tuDv(r[12]));
+    if(u.khong || u.m3 || u.khi!=='CO2' || u.f!==0.001 || mauSoDv(r[12])!=='tj'){ toast(t('trNLsai'),true); return; }
+    var hh=layHs(UI3.id,'CO2',null,true);
+    hh.thamSo.cachTinh='congThuc'; hh.thamSo.efNhienLieu=r[11];
+    hh.thamSo.efNguon='Quyết định 2626/QĐ-BTNMT, Phụ lục '+r[0]+', mục '+r[1]+': '+r[5]+' ('+(r[8]||'')+')';
+    macDinhHs(hh); ACT.dongTra(); daSua(); veLai(); toast(fill(t('trDaChon'),{m:maHs(r)})); return;
+  }
   var h=layHs(UI3.id,UI3.khi,UI3.nam,true);
   h.maHeSo='QĐ2626:'+maHs(r); h.tenHeSo=r[5]; h.giaTri=r[11]; h.donVi=r[12]; h.bac='qd2626';
   h.nguonGoc='Quyết định 2626/QĐ-BTNMT, Phụ lục '+r[0]+', mục '+r[1]+(r[2]>1?', biến thể '+r[2]:'')+'; '+r[14]+' IPCC';
   macDinhHs(h);
   ACT.dongTra(); daSua(); veLai();
   toast(fill(t('trDaChon'),{m:maHs(r)}));
+};
+
+/* Hoi: chon cach lay he so. Tra ve true neu da ve xong (tinh theo cong thuc). */
+function veHoiCT(cb,n){
+  var h=layHs(n.id,'CO2',null,false), ct=!!h && h.thamSo.cachTinh==='congThuc', bp='h|'+n.id+'|CO2|-|';
+  var rg=el('div','qt-radgrp');
+  [['nhaCungCap','b3hNcc'],['congThuc','b3hCt']].forEach(function(x){
+    var lab=el('label','qt-chk'), i=el('input'); i.type='radio'; i.name='hoict-'+n.id; i.value=x[0];
+    i.checked=(x[0]==='congThuc')===ct;
+    i.setAttribute('data-b',bp+'thamSo.cachTinh'); i.setAttribute('data-k','radio');
+    lab.appendChild(i); lab.appendChild(el('span',null,t(x[1]))); rg.appendChild(lab);
+  });
+  cb.appendChild(rg);
+  if(!ct) return false;
+  var g=el('div','qt-grid');
+  g.appendChild(truong(t('b3hEta'), oNhap({ kieu:'num', ph:['85','85'] },bp+'thamSo.hieuSuat',h.thamSo.hieuSuat), true));
+  var ef=oNhap({ kieu:'num' },bp+'thamSo.efNhienLieu',h.thamSo.efNhienLieu);
+  var f=truong(t('b3hEf'), ef, true); var r=el('div','qt-cellrow'); ef.parentNode.replaceChild(r,ef); r.appendChild(ef); r.appendChild(nut(t('b3tra'),'traNL|'+n.id,'qt-pri'));
+  g.appendChild(f);
+  g.appendChild(truong(t('b3hEfNg'), oNhap({ kieu:'text', ph:T.b3ngPh },bp+'thamSo.efNguon',h.thamSo.efNguon), true, null, true));
+  cb.appendChild(g);
+  cb.appendChild(el('p','qt-note',t('b3hGhi')));
+  namKy().forEach(function(y){ var p=el('p','qt-todo'); p.setAttribute('data-calc','efhoi|'+n.id+'|'+y); p.style.margin='6px 0'; cb.appendChild(p); });
+  return true;
+}
+TINH.efhoi=function(a){
+  var n=timNguon(a[0]); if(!n) return '';
+  var y=+a[1], ef=efHoi(n,y,laySo(n.id,y,false));
+  return fill(t('b3hNam'),{y:y})+(ef.loi ? ef.loi : 'EF_H,p = '+ef.ghi+' = '+vietSo(ef.v,4)+' tCO₂/tấn hơi');
 };
