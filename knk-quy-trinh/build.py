@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Dung knk-quy-trinh/index.html tu thu muc src/.
 
-Ghep src/app.css, src/app.js vao src/index.src.html thanh mot file tu chua,
-gan ngay dung vao hang so duy nhat window.__QT_BUILD__, va lay danh sach tinh,
-bo quan ly tu du lieu da nhung trong ../knk/index.html de hai trang dung chung
-mot nguon.
+Ghep src/app.css va cac file src/js/*.js (theo thu tu ten, boc trong mot ham tu
+goi) vao src/index.src.html thanh mot file tu chua, gan ngay dung vao hang so
+duy nhat window.__QT_BUILD__, va lay du lieu tu ../knk/index.html de hai trang
+dung chung mot nguon: danh sach tinh, bo; danh muc 2.441 co so (Quyet dinh
+42/2026/QD-TTg); 110 co so duoc phan bo han ngach (Quyet dinh 699/QD-BNNMT);
+322 he so phat thai (Quyet dinh 2626/QD-BTNMT); he so luoi dien; GWP.
 
 Chay:  python3 build.py
 Ngay dung mac dinh la ngay hom nay; dat bien moi truong QT_BUILD_DATE=YYYY-MM-DD
@@ -27,15 +29,37 @@ def doc(path):
         return f.read()
 
 
-def lay_du_lieu_knk():
-    """Doc window.__KNK_DATA__ trong dashboard knk/, la JSON thuan."""
+def lay_du_lieu_knk(ten):
+    """Doc window.<ten> trong dashboard knk/, la JSON thuan."""
     s = doc(KNK)
-    mark = "window.__KNK_DATA__="
+    mark = "window.%s=" % ten
     i = s.find(mark)
     if i < 0:
-        sys.exit("Khong tim thay window.__KNK_DATA__ trong " + KNK)
+        sys.exit("Khong tim thay window.%s trong %s" % (ten, KNK))
     obj, _ = json.JSONDecoder().raw_decode(s, i + len(mark))
     return obj
+
+
+def du_lieu_ung_dung():
+    d = lay_du_lieu_knk("__KNK_DATA__")
+    d2 = lay_du_lieu_knk("__KNK_DATA2__")
+    # Dong co so trong knk/: [phuLuc, bo, stt, ten, diaChi, nganh, vung, tinh, nhomNganh,
+    # moi2026, nganhHanNgach]. Chi giu cac truong ung dung dung.
+    cs = [[r[0], r[1], r[2], r[3], r[4], r[5], r[7], r[10]] for r in d["cs"]]
+    return {
+        "tinh": d["d"]["tinh"],
+        "bo": d["d"]["bo"],
+        "nganh": d["d"]["nganh"],
+        "cs": cs,
+        "hq": d["hq"],
+        "hqNhom": d["hqNhom"],
+        "hqmap": d["hqmap"],
+        "hqRoi": d["hqRoi"],
+        "hs": d2["hs"],
+        "hsMeta": d2["hsMeta"],
+        "luoi": d2["luoi"],
+        "gwp": d2["gwp"],
+    }
 
 
 def thay_mot_lan(html, mark, noi_dung):
@@ -49,14 +73,20 @@ def main():
     if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", ngay):
         sys.exit("QT_BUILD_DATE phai co dang YYYY-MM-DD")
 
-    knk = lay_du_lieu_knk()
-    data = {"tinh": knk["d"]["tinh"], "bo": knk["d"]["bo"]}
+    data = du_lieu_ung_dung()
 
-    js = doc(os.path.join(SRC, "app.js"))
-    css = doc(os.path.join(SRC, "app.css"))
-    for ten, noi_dung in (("app.js", js), ("app.css", css)):
+    thu_muc_js = os.path.join(SRC, "js")
+    tep_js = sorted(f for f in os.listdir(thu_muc_js) if f.endswith(".js"))
+    phan = []
+    for f in tep_js:
+        noi_dung = doc(os.path.join(thu_muc_js, f))
         if re.search(r"</(script|style)", noi_dung, re.I):
-            sys.exit(ten + " chua chuoi dong the </script> hoac </style>")
+            sys.exit(f + " chua chuoi dong the </script> hoac </style>")
+        phan.append("/* ---- %s ---- */\n%s" % (f, noi_dung.rstrip()))
+    js = '(function(){\n"use strict";\n' + "\n\n".join(phan) + "\n})();"
+    css = doc(os.path.join(SRC, "app.css"))
+    if re.search(r"</style", css, re.I):
+        sys.exit("app.css chua chuoi dong the </style>")
 
     # "</" trong du lieu duoc viet thanh "<\/" de khong dong the script som
     data_js = (

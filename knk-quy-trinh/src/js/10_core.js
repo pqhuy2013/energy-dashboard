@@ -1,11 +1,12 @@
-/* ====================== Quy trinh kiem ke KNK cap co so - app ====================== */
-(function(){
-"use strict";
+/* ====================== Quy trinh kiem ke KNK cap co so: loi ung dung ======================
+ */
 
 /* Ngay dung do build.py gan vao window.__QT_BUILD__. Trang khong tu troi theo dong ho nguoi xem. */
 var BUILD = window.__QT_BUILD__ || '2026-09-26';
 var BUILD_YEAR = +BUILD.slice(0,4);
-var DATA = window.__QT_DATA__ || { tinh:[], bo:[] };
+var DATA = window.__QT_DATA__ || {};
+['tinh','bo','nganh','cs','hq','hqNhom','hqRoi','hs','luoi'].forEach(function(k){ if(!Array.isArray(DATA[k])) DATA[k]=[]; });
+if(!DATA.hqmap) DATA.hqmap={}; if(!DATA.hsMeta) DATA.hsMeta={nhom:[],linhVuc:[],khi:[],bac:[]}; if(!DATA.gwp) DATA.gwp={};
 var PHIEN_BAN = 1;
 var KEY = 'knk-quy-trinh/v1';
 var KEY_META = 'knk-quy-trinh/v1/meta';
@@ -28,6 +29,7 @@ var T = {
   btnnew:['Bắt đầu kỳ mới','Start a new period'],
   btnresume:['Tiếp tục','Continue'],
   btncancel:['Hủy','Cancel'],
+  btnclose:['Đóng','Close'],
   btnsavefirst:['Tải về trước','Download first'],
   btnprev:['← Bước trước','← Previous step'],
   btnnext:['Bước sau →','Next step →'],
@@ -181,13 +183,52 @@ function lv(pair){ return pair[L==='vi'?0:1]; }
 /* ---------- tien ich ---------- */
 function $(id){ return document.getElementById(id); }
 function el(tag,cls,txt){ var e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e; }
-function nod(s){ return (s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toLowerCase(); }
+/* Bo dau tieng Viet de tim kiem. Dai ky tu to hop U+0300..U+036F dung tu ma so
+   de ma nguon khong chua ky tu vo hinh. */
+var DAU_TO_HOP=new RegExp('['+String.fromCharCode(0x300)+'-'+String.fromCharCode(0x36f)+']','g');
+function nod(s){ return (s||'').normalize('NFD').replace(DAU_TO_HOP,'').replace(/đ/g,'d').replace(/Đ/g,'D').toLowerCase(); }
 function isObj(x){ return x!==null && typeof x==='object' && !Array.isArray(x); }
 function clone(x){ return JSON.parse(JSON.stringify(x)); }
 function p2(n){ return (n<10?'0':'')+n; }
 function dmyv(iso){ var p=iso.split('-'); return (+p[2])+'/'+(+p[1])+'/'+p[0]; }
 function gio(iso){ if(!iso) return ''; var d=new Date(iso); if(isNaN(d)) return ''; return p2(d.getHours())+':'+p2(d.getMinutes())+' '+d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear(); }
 function fill(s,m){ return s.replace(/%(\w)/g,function(a,k){ return (k in m) ? m[k] : a; }); }
+function taoId(){ return 'n'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+
+/* ---------- so ----------
+   So luu trong file la so JavaScript. O nhap chap nhan ca cach viet Viet Nam
+   (98.300 ; 0,6592 ; 1.234,5) lan cach viet tieng Anh (98,300 ; 0.6592). Khi chi
+   co mot dau phan cach, dau do la phan cach hang nghin neu dung la dau hang nghin
+   cua ngon ngu dang chon va dung nhom 3 chu so; neu khong thi la dau thap phan.
+   Roi o nhap, so duoc viet lai theo ngon ngu dang chon de nguoi dung thay may da
+   hieu the nao. */
+function nhomNghin(s,sep){
+  var p=s.split(sep); if(p.length<2 || !/^\d{1,3}$/.test(p[0])) return false;
+  for(var i=1;i<p.length;i++) if(!/^\d{3}$/.test(p[i])) return false;
+  return true;
+}
+function docSo(raw){
+  var s=String(raw==null?'':raw).replace(/\s/g,'');
+  if(s==='') return { ok:true, v:null };
+  if(!/^[0-9.,]+$/.test(s) || !/[0-9]/.test(s)) return { ok:false };
+  var d=s.indexOf('.')>=0, c=s.indexOf(',')>=0, n, nghin=(L==='vi')?'.':',';
+  if(d && c){
+    var dec=s.lastIndexOf('.')>s.lastIndexOf(',')?'.':',', th=(dec==='.')?',':'.';
+    var i=s.lastIndexOf(dec), a=s.slice(0,i), b=s.slice(i+1);
+    if(!/^\d*$/.test(b) || !(nhomNghin(a,th) || /^\d+$/.test(a))) return { ok:false };
+    n=+(a.split(th).join('')+'.'+b);
+  } else if(d || c){
+    var ch=d?'.':',', parts=s.split(ch);
+    if(parts.length>2){ if(!nhomNghin(s,ch)) return { ok:false }; n=+parts.join(''); }
+    else if(ch===nghin && nhomNghin(s,ch)) n=+parts.join('');
+    else n=+((parts[0]||'0')+'.'+(parts[1]||'0'));
+  } else n=+s;
+  return isFinite(n) ? { ok:true, v:n } : { ok:false };
+}
+function vietSo(v,maxFrac){
+  if(v==null || v==='' || typeof v!=='number' || !isFinite(v)) return '';
+  return v.toLocaleString(L==='vi'?'vi-VN':'en-US',{ maximumFractionDigits:(maxFrac==null?10:maxFrac) });
+}
 
 /* ---------- bo nho luu tam: moi thao tac deu boc try/catch ----------
    Trong iframe khac nguon goc, Safari chan han, Chrome tach vung rieng. Truy cap
@@ -215,6 +256,7 @@ function khuon(){
     gwp: null,
     moTa: { ranhGioi:'', haTang:'', heThongDuLieu:'' },
     beHapThu: { coHayKhong:null, moTa:'' },
+    loaiKhongCo: [],
     nguon: [],
     soLieu: [],
     heSo: [],
@@ -249,15 +291,56 @@ function chuanHoa(o){
   o.ky.namBatDau=nam(y1); o.ky.namKetThuc=nam(y2);
   if(['A','B','C'].indexOf(o.coSo.nhom)<0) o.coSo.nhom='';
   if(o.gwp!=='AR4' && o.gwp!=='AR5') o.gwp=null;
+  chuanHoaMang(o);
   o.phienBan=PHIEN_BAN;
   return o;
+}
+/* Chuan hoa tung phan tu cua cac mang nguon, soLieu, heSo: bo phan tu hong,
+   ep kieu truong, giu truong la. */
+function chuoi(x){ return (typeof x==='string') ? x : (x==null ? '' : String(x)); }
+function soHoacNull(x){ return (typeof x==='number' && isFinite(x)) ? x : null; }
+function namHoacNull(x){ return (typeof x==='number' && x%1===0 && x>=1990 && x<=2100) ? x : null; }
+function chuanHoaMang(o){
+  var loaiOk={}; LOAI.forEach(function(l){ loaiOk[l.k]=true; });
+  var ids={}, doiId={};
+  /* id nam trong duong dan data-b dang a|b|c: id la hoac trung thi cap id moi va doi theo
+     o so lieu, he so, de khong mat du lieu cua file sua tay */
+  o.nguon.forEach(function(n){
+    if(isObj(n) && typeof n.id==='string' && !/^[A-Za-z0-9_-]{1,64}$/.test(n.id)){ var m=taoId(); doiId[n.id]=m; n.id=m; }
+  });
+  [o.soLieu,o.heSo].forEach(function(ds){ ds.forEach(function(r){ if(isObj(r) && doiId[r.nguonId]) r.nguonId=doiId[r.nguonId]; }); });
+  o.nguon=o.nguon.filter(function(n){
+    if(!isObj(n) || typeof n.id!=='string' || !n.id || ids[n.id] || !loaiOk[n.loai]) return false;
+    ids[n.id]=true;
+    ['phanLoai','thietBi','viTri','ghiChu'].forEach(function(k){ n[k]=chuoi(n[k]); });
+    if(!isObj(n.thuocTinh)) n.thuocTinh={};
+    return true;
+  });
+  o.soLieu=o.soLieu.filter(function(r){
+    if(!isObj(r) || !ids[r.nguonId] || namHoacNull(r.nam)===null) return false;
+    r.gioTri=soHoacNull(r.gioTri);
+    ['donVi','nguonSoLieu','chungTu','nguoiCungCap','cachUocTinh','ghiChu'].forEach(function(k){ r[k]=chuoi(r[k]); });
+    r.laUocTinh=(r.laUocTinh===true);
+    if(!isObj(r.chiTiet)) r.chiTiet={};
+    return true;
+  });
+  o.heSo=o.heSo.filter(function(h){
+    if(!isObj(h) || !ids[h.nguonId] || ['CO2','CH4','N2O','GWP'].indexOf(h.khi)<0) return false;
+    h.nam=namHoacNull(h.nam);
+    h.giaTri=soHoacNull(h.giaTri);
+    ['maHeSo','tenHeSo','donVi','nguonGoc'].forEach(function(k){ h[k]=chuoi(h[k]); });
+    if(['rieng','qd2626','ipcc','muc2'].indexOf(h.bac)<0) h.bac='';
+    if(!isObj(h.thamSo)) h.thamSo={};
+    return true;
+  });
+  o.loaiKhongCo=o.loaiKhongCo.filter(function(k){ return loaiOk[k]; });
 }
 function coNoiDung(o){
   function bo(x){ var c=clone(x); delete c.taoBoi; delete c.ngayCapNhat; return JSON.stringify(c); }
   return bo(o)!==bo(macDinh());
 }
 function getP(o,path){ return path.split('.').reduce(function(a,k){ return a==null?undefined:a[k]; },o); }
-function setP(o,path,v){ var ks=path.split('.'), last=ks.pop(); var a=ks.reduce(function(a,k){ return a[k]; },o); a[last]=v; }
+function setP(o,path,v){ var ks=path.split('.'), last=ks.pop(); var a=ks.reduce(function(a,k){ if(!isObj(a[k])) a[k]={}; return a[k]; },o); a[last]=v; }
 
 /* ---------- trang thai ---------- */
 var S = macDinh();
@@ -279,7 +362,7 @@ function daSua(){
   M.coThayDoi = true;
   clearTimeout(saveTimer);
   saveTimer = setTimeout(luuTam, 400);
-  veStrip(); veMenuState(); veB0();
+  veStrip(); veMenuState(); veB0(); capNhatBuoc();
 }
 
 /* ---------- thong bao ---------- */
@@ -321,6 +404,7 @@ function taiVe(){
   luuTam(); luuMeta(); veStrip();
   toast(fill(t('tSaved'),{f:name}));
 }
+var BOM=new RegExp('^'+String.fromCharCode(0xFEFF));
 function docFile(file){
   hetLoi();
   var f=file.name;
@@ -329,7 +413,7 @@ function docFile(file){
   r.onerror=function(){ loi(fill(t('eRead'),{f:f})); };
   r.onload=function(){
     var o;
-    try{ o=JSON.parse(String(r.result).replace(/^﻿/,'')); }catch(e){ loi(fill(t('eJson'),{f:f})); return; }
+    try{ o=JSON.parse(String(r.result).replace(BOM,'')); }catch(e){ loi(fill(t('eJson'),{f:f})); return; }
     if(!isObj(o) || typeof o.phienBan!=='number' || o.phienBan%1!==0 || o.phienBan<1 || !isObj(o.coSo)){ loi(fill(t('eShape'),{f:f})); return; }
     if(o.phienBan>PHIEN_BAN){ loi(fill(t('eNewer'),{f:f,v:o.phienBan})); return; }
     function napVao(){
@@ -389,10 +473,8 @@ function veMenu(){
   STEPS.forEach(function(st){ ol.appendChild(el('li',null,lv(st.t))); });
   veMenuState();
 }
-function xong(n){
-  if(n===0){ return thieuB0().length===0; }
-  return false;
-}
+var THIEU={};   /* THIEU[n]() tra ve danh sach muc con thieu cua buoc n */
+function xong(n){ var f=THIEU[n]; return f ? f().length===0 : false; }
 function veMenuState(){
   menu.querySelectorAll('.qt-mi').forEach(function(b){
     var n=+b.dataset.go.split('-')[1];
@@ -409,6 +491,7 @@ function tieuDe(id){
 function go(id, noHash){
   if(id!=='dau' && !/^buoc-[0-8]$/.test(id)) id='dau';
   cur=id; hetLoi();
+  if(id!=='dau' && VE[+id.split('-')[1]]) veBuoc(+id.split('-')[1]);
   document.querySelectorAll('.qt-pane').forEach(function(p){ p.classList.toggle('on', p.id==='pane-'+id); });
   $('qt-title').textContent=tieuDe(id);
   if(id!=='dau'){ M.buocCuoi=+id.split('-')[1]; luuMeta(); }
@@ -417,11 +500,43 @@ function go(id, noHash){
   window.scrollTo(0,0);
 }
 
-/* ---------- man hinh buoc 1 den 8, dang xay dung ---------- */
+/* ---------- man hinh that va man hinh cho ----------
+   VE[n](sec) dung lai toan bo man hinh buoc n tu trang thai S. Goi khi vao buoc,
+   khi doi ngon ngu va khi doi cau truc (them, xoa nguon). Go phim trong o nhap thi
+   khong dung lai, chi cap nhat o tinh san va danh sach con thieu (capNhatBuoc). */
+var VE={};
+function veBuoc(n){
+  var sec=$('pane-buoc-'+n); if(!sec || !VE[n]) return;
+  var y=window.scrollY;
+  sec.innerHTML='';
+  VE[n](sec);
+  var th=el('div','qt-alert qt-thieu'); th.dataset.n=n; sec.appendChild(th);
+  sec.appendChild(pager(n));
+  capNhatBuoc();
+  if(cur==='buoc-'+n) window.scrollTo(0,y);
+}
+var TINH={};   /* TINH[ten](doiSo) tra ve chuoi cho o [data-calc="ten|doiSo"] */
+function capNhatBuoc(){
+  document.querySelectorAll('[data-calc]').forEach(function(e){
+    var p=e.dataset.calc.split('|'), f=TINH[p[0]];
+    if(f) e.textContent=f(p.slice(1));
+  });
+  document.querySelectorAll('.qt-thieu').forEach(function(box){
+    var f=THIEU[+box.dataset.n], m=f?f():[];
+    box.hidden=m.length===0; box.innerHTML='';
+    if(!m.length) return;
+    box.appendChild(el('b',null,fill(t('thieuH'),{n:box.dataset.n})));
+    var ul=el('ul','qt-missing');
+    m.slice(0,12).forEach(function(x){ ul.appendChild(el('li',null,x)); });
+    if(m.length>12) ul.appendChild(el('li',null,fill(t('thieuThem'),{n:m.length-12})));
+    box.appendChild(ul);
+  });
+}
 function vePanes(){
   var host=$('qt-panes'); host.innerHTML='';
   STEPS.slice(1).forEach(function(st){
     var sec=el('section','qt-pane'); sec.id='pane-buoc-'+st.n;
+    if(VE[st.n]){ host.appendChild(sec); veBuoc(st.n); return; }
     var card=el('div','qt-card');
     var ch=el('div','qt-ch'); ch.appendChild(el('h3',null,tieuDe('buoc-'+st.n))); card.appendChild(ch);
     var cb=el('div','qt-cb');
@@ -447,155 +562,3 @@ function pager(n){
   if(n<8){ var b=el('button','qt-btn',t('btnnext')); b.type='button'; b.addEventListener('click',function(){ go('buoc-'+(n+1)); }); d.appendChild(b); }
   return d;
 }
-
-/* ---------- buoc 0 ---------- */
-function veSelects(){
-  var tinh=$('f-tinh'), bo=$('f-bo'), ky=$('f-ky');
-  function opts(sel, rows, first, val){
-    sel.innerHTML='';
-    var o=el('option',null,first); o.value=''; sel.appendChild(o);
-    var seen=false;
-    rows.forEach(function(r){ var x=el('option',null,lv(r)); x.value=r[0]; if(r[0]===val) seen=true; sel.appendChild(x); });
-    if(val && !seen){ var y=el('option',null,val); y.value=val; sel.appendChild(y); }
-    sel.value=val||'';
-  }
-  var tinhRows=DATA.tinh.slice().sort(function(a,b){ return a[0].localeCompare(b[0],'vi'); });
-  opts(tinh, tinhRows, t('tinhchoose'), S.coSo.tinh);
-  opts(bo, DATA.bo, t('bochoose'), S.coSo.boQuanLy);
-  /* ky: nam dau tu 2022, nam 2022 la nam dau tien co nghia vu kiem ke co so, toi nam dung - 1 */
-  ky.innerHTML='';
-  var o0=el('option',null,t('kychoose')); o0.value=''; ky.appendChild(o0);
-  var a=S.ky.namBatDau, b=S.ky.namKetThuc, found=false;
-  for(var y=2022; y<=BUILD_YEAR-1; y++){
-    var o=el('option',null,fill(t('kyopt'),{a:y,b:y+1})); o.value=y+'-'+(y+1); ky.appendChild(o);
-    if(a===y && b===y+1) found=true;
-  }
-  if(a && b && !found){ var x=el('option',null,fill(t(b===a+1?'kyopt':'kyodd'),{a:a,b:b})); x.value=a+'-'+b; ky.appendChild(x); }
-  ky.value=(a&&b)?a+'-'+b:'';
-}
-function dienForm(){
-  document.querySelectorAll('#pane-buoc-0 [data-f]').forEach(function(e){
-    var v=getP(S,e.dataset.f);
-    if(e.type==='radio') e.checked=(v===e.value);
-    else if(e.tagName!=='SELECT') e.value=(v==null?'':v);
-  });
-  veSelects(); veB0();
-}
-function thieuB0(){
-  var m=[];
-  if(!S.coSo.nhom) m.push(t('nhomh'));
-  if(!(S.ky.namBatDau&&S.ky.namKetThuc)) m.push(t('kyh'));
-  if(!S.coSo.ten.trim()) m.push(t('ften'));
-  if(!S.coSo.diaChi.trim()) m.push(t('fdiachi'));
-  return m;
-}
-function veB0(){
-  document.querySelectorAll('#qt-nhom .qt-radio').forEach(function(r){ r.classList.toggle('on', r.dataset.v===S.coSo.nhom); });
-  var a=S.ky.namBatDau, b=S.ky.namKetThuc, tp=$('qt-title-preview');
-  tp.innerHTML='';
-  if(a&&b){
-    tp.appendChild(document.createTextNode(t('tpLab')+' '));
-    tp.appendChild(el('b',null,'BÁO CÁO Kết quả kiểm kê khí nhà kính cho năm '+a+' và năm '+b));
-  } else tp.textContent=t('tpNone');
-  var mst=S.coSo.maSoThue.trim();
-  $('w-mst').textContent=(mst && !/^\d{10}(-\d{3})?$/.test(mst)) ? t('wmst') : '';
-  var bo=S.coSo.boQuanLy;
-  $('w-bo').textContent=(bo && bo!==BO_MAC_DINH) ? t('wbo') : '';
-  var miss=thieuB0(), mb=$('qt-b0-miss');
-  $('qt-b0-ok').hidden=miss.length>0;
-  mb.hidden=miss.length===0; mb.innerHTML='';
-  if(miss.length){
-    mb.appendChild(el('b',null,t('b0miss')));
-    var ul=el('ul','qt-missing'); miss.forEach(function(x){ ul.appendChild(el('li',null,x)); }); mb.appendChild(ul);
-  }
-}
-function ganForm(){
-  document.querySelectorAll('#pane-buoc-0 [data-f]').forEach(function(e){
-    var ev=(e.tagName==='SELECT'||e.type==='radio'||e.type==='date')?'change':'input';
-    e.addEventListener(ev,function(){
-      if(e.type==='radio' && !e.checked) return;
-      setP(S,e.dataset.f,e.value); daSua();
-    });
-  });
-  $('f-ky').addEventListener('change',function(){
-    var v=this.value;
-    if(!v){ S.ky.namBatDau=null; S.ky.namKetThuc=null; }
-    else { var p=v.split('-'); S.ky.namBatDau=+p[0]; S.ky.namKetThuc=+p[1]; }
-    daSua();
-  });
-}
-
-/* ---------- dong trang thai ---------- */
-function veStrip(){
-  var s=$('qt-strip'), m=$('qt-strip-msg');
-  s.hidden=false; s.classList.toggle('qt-dirty', M.coThayDoi);
-  if(M.coThayDoi) m.textContent=t('stripDirty');
-  else if(M.taiVeLuc) m.textContent=fill(t('stripSaved'),{t:gio(M.taiVeLuc)});
-  else if(M.napTuFile) m.textContent=fill(t('stripLoaded'),{f:M.napTuFile,t:gio(M.napLuc)});
-  else m.textContent=t('stripBlank');
-}
-function veNavFoot(){
-  var st=$('qt-store-state');
-  st.className=store.ok?'':'qt-bad';
-  st.textContent=store.ok ? t('storeOk')+(M.luuTamLuc?' '+fill(t('storeLast'),{t:gio(M.luuTamLuc)}):'') : t('storeBad');
-  $('qt-build').textContent=fill(t('build'),{d:dmyv(BUILD)});
-}
-function veHome(){
-  $('qt-home-nostore').hidden=store.ok;
-  var c=$('qt-c-resume');
-  if(SAVED){
-    c.hidden=false;
-    var ky=(SAVED.s.ky.namBatDau&&SAVED.s.ky.namKetThuc)?SAVED.s.ky.namBatDau+'–'+SAVED.s.ky.namKetThuc:t('noky');
-    $('qt-resume-info').textContent=fill(t('resumeinfo'),{ n:SAVED.s.coSo.ten.trim()||t('noname'), k:ky, t:gio(SAVED.m.luuTamLuc||SAVED.s.ngayCapNhat) });
-  } else c.hidden=true;
-}
-
-/* ---------- ngon ngu ---------- */
-function applyLang(){
-  document.documentElement.lang=L;
-  document.querySelectorAll('[data-i]').forEach(function(e){ e.textContent=t(e.dataset.i); });
-  $('qt-vi').classList.toggle('on',L==='vi'); $('qt-en').classList.toggle('on',L==='en');
-  document.title = L==='vi' ? 'Quy trình kiểm kê khí nhà kính cấp cơ sở' : 'Facility GHG inventory procedure';
-  veMenu(); vePanes(); veSelects(); veB0(); veStrip(); veNavFoot(); veHome();
-  go(cur,true);
-}
-function setLang(l){ L=l; store.set(KEY_LANG,l); applyLang(); }
-
-function veHet(){ dienForm(); veStrip(); veNavFoot(); veHome(); veMenuState(); }
-
-/* ---------- khoi dong ---------- */
-function init(){
-  store.probe();
-  var l=store.get(KEY_LANG); if(l==='en'||l==='vi') L=l;
-  /* phien luu tam tu lan truoc */
-  var raw=store.get(KEY), rawM=store.get(KEY_META);
-  if(raw){
-    try{
-      var o=JSON.parse(raw), m=rawM?JSON.parse(rawM):{};
-      if(isObj(o) && typeof o.phienBan==='number' && o.phienBan<=PHIEN_BAN && isObj(o.coSo)){
-        o=chuanHoa(o);
-        if(coNoiDung(o)){ S=o; SAVED={ s:o, m:isObj(m)?m:{} }; if(isObj(m)) Object.keys(M).forEach(function(k){ if(k in m) M[k]=m[k]; }); }
-      }
-    }catch(e){ /* du lieu luu tam hong: bo qua, bat dau ho so trong */ }
-  }
-  if(inFrame()){ $('qt-frame').hidden=false; $('qt-full').hidden=false; }
-  $('qt-home').addEventListener('click',function(){ go('dau'); });
-  $('qt-vi').addEventListener('click',function(){ setLang('vi'); });
-  $('qt-en').addEventListener('click',function(){ setLang('en'); });
-  $('qt-save').addEventListener('click',taiVe);
-  $('qt-strip-save').addEventListener('click',taiVe);
-  $('qt-open').addEventListener('click',moFile);
-  $('qt-load').addEventListener('click',moFile);
-  $('qt-file').addEventListener('change',function(){ if(this.files && this.files[0]) docFile(this.files[0]); });
-  $('qt-new').addEventListener('click',kyMoi);
-  $('qt-resume').addEventListener('click',function(){ go('buoc-'+(M.buocCuoi||0)); });
-  $('qt-full').addEventListener('click',moToanManHinh);
-  ganForm();
-  window.addEventListener('hashchange',function(){ go(location.hash.slice(1),true); });
-  var h=location.hash.slice(1);
-  cur=(h==='dau'||/^buoc-[0-8]$/.test(h))?h:'dau';
-  applyLang();
-  dienForm();
-}
-init();
-})();
