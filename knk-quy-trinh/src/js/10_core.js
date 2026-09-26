@@ -261,8 +261,8 @@ function khuon(){
     soLieu: [],
     heSo: [],
     qc: [],
-    khongChacChan: { dinhTinh:[], dinhLuong:'' },
-    tinhLai: { coHayKhong:null, lyDo:'', ketQuaCu:null, ketQuaMoi:null },
+    khongChacChan: { dinhTinh:{ a:'', b:'', c:'', d:'', dd:'', e:'' }, dinhLuong:'', bangU:[] },
+    tinhLai: { tinhTrang:'', truongHop:[], lyDo:'', kyTruoc:{ namBatDau:null, namKetThuc:null }, ketQuaCu:{}, ketQuaMoi:{}, giaiThich:'', fileKyTruoc:'' },
     ngayCapNhat: null
   };
 }
@@ -334,13 +334,24 @@ function chuanHoaMang(o){
     return true;
   });
   o.loaiKhongCo=o.loaiKhongCo.filter(function(k){ return loaiOk[k]; });
+  o.qc=o.qc.filter(isObj);
+  o.qc.forEach(function(q){ ['ma','noiDung','nguoiKiem','ngay','ketQua','loiPhatHien','cachXuLy'].forEach(function(k){ q[k]=chuoi(q[k]); }); });
+  var kc=o.khongChacChan;
+  Object.keys(kc.dinhTinh).forEach(function(k){ kc.dinhTinh[k]=chuoi(kc.dinhTinh[k]); });
+  kc.bangU=kc.bangU.filter(function(u){ return isObj(u) && ids[u.nguonId] && typeof u.khi==='string'; });
+  kc.bangU.forEach(function(u){ u.muc=chuoi(u.muc); u.uAd=soHoacNull(u.uAd); u.uEf=soHoacNull(u.uEf); });
+  var tl=o.tinhLai;
+  if(['kyDau','khongDoi','coDoi'].indexOf(tl.tinhTrang)<0) tl.tinhTrang='';
+  tl.truongHop=tl.truongHop.filter(function(x){ return ['a','b','c'].indexOf(x)>=0; });
+  tl.kyTruoc.namBatDau=namHoacNull(tl.kyTruoc.namBatDau); tl.kyTruoc.namKetThuc=namHoacNull(tl.kyTruoc.namKetThuc);
+  ['ketQuaCu','ketQuaMoi'].forEach(function(k){ var m={}; Object.keys(tl[k]).forEach(function(y){ var v=soHoacNull(tl[k][y]); if(/^\d{4}$/.test(y) && v!=null) m[y]=v; }); tl[k]=m; });
 }
 function coNoiDung(o){
   function bo(x){ var c=clone(x); delete c.taoBoi; delete c.ngayCapNhat; return JSON.stringify(c); }
   return bo(o)!==bo(macDinh());
 }
 function getP(o,path){ return path.split('.').reduce(function(a,k){ return a==null?undefined:a[k]; },o); }
-function setP(o,path,v){ var ks=path.split('.'), last=ks.pop(); var a=ks.reduce(function(a,k){ if(!isObj(a[k])) a[k]={}; return a[k]; },o); a[last]=v; }
+function setP(o,path,v){ var ks=path.split('.'), last=ks.pop(); var a=ks.reduce(function(a,k){ if(a[k]===null || typeof a[k]!=='object') a[k]={}; return a[k]; },o); a[last]=v; }
 
 /* ---------- trang thai ---------- */
 var S = macDinh();

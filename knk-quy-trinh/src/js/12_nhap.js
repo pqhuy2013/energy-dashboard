@@ -58,6 +58,7 @@ function banGhi(b,tao){
   if(p[0]==='n'){ var n=timNguon(p[1]); return n ? { o:n, path:duongDan(p[2]) } : null; }
   if(p[0]==='s'){ var n2=timNguon(p[1]); return n2 ? { o:laySo(p[1],+p[2],tao), path:duongDan(p[3]) } : null; }
   if(p[0]==='h'){ var n3=timNguon(p[1]); return n3 ? { o:layHs(p[1],p[2],p[3]==='-'?null:+p[3],tao), path:p[4] } : null; }
+  if(p[0]==='u'){ var n4=timNguon(p[1]); return n4 ? { o:layU(p[1],p[2],p[3],tao), path:p[4] } : null; }
   return null;
 }
 function onNhap(ev){
@@ -67,6 +68,17 @@ function onNhap(ev){
   var doiCauTruc=(k==='sel'||k==='bool'||k==='radio'||k==='date');
   if(ev.type==='input' && doiCauTruc) return;
   if(ev.type==='change' && k==='text') return;
+  if(b.indexOf('th|')===0){
+    var th=b.slice(3), ds=S.tinhLai.truongHop, j=ds.indexOf(th);
+    if(e.checked && j<0) ds.push(th);
+    if(!e.checked && j>=0) ds.splice(j,1);
+    ds.sort(); daSua(); veLai(); return;
+  }
+  if(b==='ky7'){
+    var kp=e.value ? e.value.split('-') : [null,null];
+    S.tinhLai.kyTruoc.namBatDau=kp[0]?+kp[0]:null; S.tinhLai.kyTruoc.namKetThuc=kp[1]?+kp[1]:null;
+    daSua(); veLai(); return;
+  }
   if(b.indexOf('k|')===0){
     var lk=b.slice(2), i=S.loaiKhongCo.indexOf(lk);
     if(e.checked && i<0) S.loaiKhongCo.push(lk);
