@@ -140,7 +140,7 @@ Nêu ra để quyết định cách xử lý, không tự sửa mẫu.
 
 **5.1. Tiêu đề ghi một năm, quy định hiện hành đòi hai năm.** Tiêu đề mẫu là "Kết quả kiểm kê khí nhà kính cho năm...". Điểm e khoản 1 Điều 11, do Nghị định 119/2025/NĐ-CP bổ sung, quy định báo cáo định kỳ hai năm một lần "bao gồm kết quả kiểm kê khí nhà kính của hai năm liền kề năm nộp báo cáo". Mẫu không được sửa theo.
 
-*Đề xuất, chờ anh Huy chốt:* giữ nguyên câu chữ tiêu đề, điền vào chỗ trống cả hai năm, ví dụ "cho năm 2024 và năm 2025". Trong phần III, trình bày số liệu và kết quả tách riêng từng năm.
+*Đã chốt ngày 26/9/2026:* giữ nguyên câu chữ tiêu đề, điền vào chỗ trống cả hai năm của kỳ, ví dụ "cho năm 2024 và năm 2025". Ứng dụng lấy từ `ky.namBatDau` và `ky.namKetThuc`, không ghi cố định. Trong phần III, trình bày số liệu và kết quả tách riêng từng năm.
 
 **5.2. Mục II.3 có "bể hấp thụ", Thông tư 38/2023/TT-BCT không có.** Điều 16 Thông tư 38/2023/TT-BCT chỉ liệt kê nguồn phát thải: 6 loại trực tiếp và 2 loại gián tiếp.
 
@@ -148,7 +148,7 @@ Nêu ra để quyết định cách xử lý, không tự sửa mẫu.
 
 **5.3. Mẫu không có bảng, nhưng bản thảo cần bảng.** Mục III.2 và III.3 khó trình bày bằng lời khi có nhiều nguồn và hai năm.
 
-*Đề xuất:* bản thảo .docx giữ nguyên toàn bộ đề mục ở mục 3. Dưới III.2 chèn các bảng số liệu hoạt động dựng theo Phần E tài liệu quy trình. Dưới III.3 chèn bảng tổng hợp dựng theo bảng E.8, mỗi năm một bảng, ghi rõ đơn vị và bộ GWP. Đây là cách trình bày của ứng dụng, không phải bảng bắt buộc của mẫu, nên trên trang ứng dụng phải nói rõ điều này.
+*Đã chốt ngày 26/9/2026:* bản thảo .docx giữ nguyên toàn bộ đề mục ở mục 3. Dưới III.2 chèn các bảng số liệu hoạt động, dựng theo các bảng Mục 1 Phụ lục II Thông tư 38/2023/TT-BCT (xem `TT38_Phu_luc_II.md`). Dưới III.3 chèn bảng tổng hợp dựng theo bảng E.8, mỗi năm một bảng, ghi rõ đơn vị và bộ GWP. Dòng ghi chú "bảng là cách trình bày của ứng dụng, không phải bảng bắt buộc của mẫu" **chỉ hiện trên trang web**, không in vào file .docx dùng để nộp.
 
 ---
 

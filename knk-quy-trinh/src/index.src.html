@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quy trình kiểm kê khí nhà kính cấp cơ sở</title>
+<link rel="icon" href="data:,">
+<style>/*@@CSS@@*/</style>
+</head>
+<body>
+<div class="qt-app">
+<aside class="qt-nav">
+  <button class="qt-brand" id="qt-home" type="button">
+    <h1 data-i="brand">Kiểm kê KNK cấp cơ sở</h1>
+    <span class="qt-sub" data-i="brandsub">Quy trình 8 bước theo Thông tư 38/2023/TT-BCT</span>
+  </button>
+  <nav class="qt-menu" id="qt-menu"></nav>
+  <div class="qt-navfoot">
+    <p id="qt-store-state"></p>
+    <p id="qt-build"></p>
+  </div>
+</aside>
+<main class="qt-main">
+  <div class="qt-top">
+    <div class="qt-bar">
+      <h2 id="qt-title"></h2>
+      <div class="qt-acts">
+        <button class="qt-btn qt-hot" id="qt-full" type="button" hidden data-i="btnfull">Mở toàn màn hình</button>
+        <button class="qt-btn qt-pri" id="qt-save" type="button" data-i="btnsave">Tải file .json</button>
+        <button class="qt-btn" id="qt-open" type="button" data-i="btnopen">Nạp file .json</button>
+        <input type="file" id="qt-file" accept=".json,application/json" hidden>
+      </div>
+      <div class="qt-lang">
+        <button id="qt-vi" class="on" type="button">VI</button>
+        <button id="qt-en" type="button">EN</button>
+      </div>
+    </div>
+    <div class="qt-frame" id="qt-frame" hidden>
+      <span data-i="framemsg">Trang đang chạy trong khung nhúng của một trang khác. Trình duyệt có thể chặn hoặc tách riêng bộ nhớ lưu tạm. Bấm Mở toàn màn hình để làm việc ổn định hơn, và luôn tải file .json về máy.</span>
+    </div>
+    <div class="qt-strip" id="qt-strip" hidden>
+      <span id="qt-strip-msg"></span>
+      <button class="qt-btn" id="qt-strip-save" type="button" data-i="btnsave">Tải file .json</button>
+    </div>
+  </div>
+
+  <div class="qt-wrap">
+    <div class="qt-errbox" id="qt-err" role="alert" hidden></div>
+    <div class="qt-confirm" id="qt-confirm" hidden>
+      <p id="qt-confirm-msg"></p>
+      <div class="qt-acts" id="qt-confirm-acts"></div>
+    </div>
+
+    <!-- ============ MAN HINH MO ============ -->
+    <section class="qt-pane" id="pane-dau">
+      <div class="qt-hero">
+        <h3 data-i="homeh">Kiểm kê khí nhà kính cấp cơ sở</h3>
+        <p data-i="homep1">Ứng dụng dẫn cơ sở đi qua 8 bước kiểm kê khí nhà kính theo Điều 15 Thông tư 38/2023/TT-BCT, tính ra tấn CO₂ tương đương, rồi xuất bản thảo báo cáo theo Mẫu số 06 Phụ lục II Nghị định 06/2022/NĐ-CP cùng bảng tính Excel lưu hồ sơ.</p>
+        <p data-i="homep2">Số liệu bạn nhập chỉ nằm trong trình duyệt này. Muốn làm tiếp ở lần sau hoặc trên máy khác, hãy tải file .json về và giữ lại.</p>
+      </div>
+      <div class="qt-alert" id="qt-home-nostore" hidden data-i="homenostore">Trình duyệt đang chặn bộ nhớ lưu tạm, thường gặp khi trang được nhúng trong trang khác hoặc ở chế độ riêng tư. Ứng dụng vẫn chạy bình thường, nhưng đóng trang là mất số liệu chưa tải về. Hãy tải file .json về sau mỗi lần làm việc.</div>
+      <div class="qt-choices">
+        <div class="qt-choice qt-main-choice" id="qt-c-resume" hidden>
+          <h4 data-i="resumeh">Tiếp tục phiên đang làm dở</h4>
+          <p id="qt-resume-info"></p>
+          <div><button class="qt-btn qt-pri qt-big" id="qt-resume" type="button" data-i="btnresume">Tiếp tục</button></div>
+        </div>
+        <div class="qt-choice">
+          <h4 data-i="newh">Bắt đầu kỳ kiểm kê mới</h4>
+          <p data-i="newp">Mở hồ sơ trống, bắt đầu từ Bước 0 là thông tin cơ sở và nhóm đối tượng.</p>
+          <div><button class="qt-btn qt-big" id="qt-new" type="button" data-i="btnnew">Bắt đầu kỳ mới</button></div>
+        </div>
+        <div class="qt-choice">
+          <h4 data-i="loadh">Nạp file đã lưu</h4>
+          <p data-i="loadp">Mở file .json đã tải về từ lần làm việc trước, kể cả file của kỳ trước để dùng lại danh mục nguồn phát thải.</p>
+          <div><button class="qt-btn qt-big" id="qt-load" type="button" data-i="btnopen">Nạp file .json</button></div>
+        </div>
+      </div>
+      <div class="qt-card">
+        <div class="qt-ch"><h3 data-i="stepsh">Chín màn hình của ứng dụng</h3><span class="qt-hint" data-i="stepshint">Đi lại tự do giữa các bước, không phải làm theo thứ tự</span></div>
+        <div class="qt-cb"><ol class="qt-steps" id="qt-steplist" start="0"></ol></div>
+      </div>
+      <div class="qt-info" data-i="scope">Ứng dụng hiện phục vụ cơ sở ngành Công Thương, theo quy trình 8 bước của Thông tư 38/2023/TT-BCT. Cơ sở ngành Xây dựng làm theo Thông tư 13/2024/TT-BXD với 10 bước, chưa được hỗ trợ.</div>
+    </section>
+
+    <!-- ============ BUOC 0 ============ -->
+    <section class="qt-pane" id="pane-buoc-0">
+      <div class="qt-card">
+        <div class="qt-ch"><h3 data-i="nhomh">Nhóm đối tượng</h3><span class="qt-hint" data-i="nhomhint">Khoản 4 Điều 11 Nghị định 06/2022/NĐ-CP, sửa đổi bởi Nghị định 119/2025/NĐ-CP</span></div>
+        <div class="qt-cb">
+          <p data-i="nhomp">Ba nhóm có kỳ số liệu đầu tiên, nơi nộp và mốc nộp khác nhau. Chọn nhóm của cơ sở. Tra danh mục Quyết định 42/2026/QĐ-TTg và Quyết định 699/QĐ-BNNMT để gợi ý nhóm sẽ có ở bản sau.</p>
+          <div class="qt-radios" id="qt-nhom">
+            <label class="qt-radio" data-v="A"><input type="radio" name="nhom" value="A" data-f="coSo.nhom"><div><b data-i="nhomA">Nhóm A</b><span data-i="nhomAd"></span><small data-i="nhomAc"></small></div></label>
+            <label class="qt-radio" data-v="B"><input type="radio" name="nhom" value="B" data-f="coSo.nhom"><div><b data-i="nhomB">Nhóm B</b><span data-i="nhomBd"></span><small data-i="nhomBc"></small></div></label>
+            <label class="qt-radio" data-v="C"><input type="radio" name="nhom" value="C" data-f="coSo.nhom"><div><b data-i="nhomC">Nhóm C</b><span data-i="nhomCd"></span><small data-i="nhomCc"></small></div></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="qt-card">
+        <div class="qt-ch"><h3 data-i="kyh">Kỳ báo cáo</h3><span class="qt-hint" data-i="kyhint">Điểm e khoản 1 Điều 11, bổ sung bởi Nghị định 119/2025/NĐ-CP</span></div>
+        <div class="qt-cb">
+          <div class="qt-grid">
+            <div class="qt-f">
+              <label for="f-ky"><span data-i="kylab">Hai năm của kỳ số liệu</span><span class="qt-req">*</span></label>
+              <select id="f-ky"></select>
+              <span class="qt-help" data-i="kyhelp">Báo cáo định kỳ hai năm một lần gồm kết quả kiểm kê của hai năm liền kề năm nộp báo cáo.</span>
+            </div>
+          </div>
+          <div class="qt-title-preview" id="qt-title-preview"></div>
+        </div>
+      </div>
+
+      <div class="qt-card">
+        <div class="qt-ch"><h3 data-i="i1h">Thông tin cơ sở</h3><span class="qt-hint" data-i="i1hint">Mục I.1 Mẫu số 06: tên cơ sở, địa chỉ, giấy phép kinh doanh</span></div>
+        <div class="qt-cb">
+          <div class="qt-grid">
+            <div class="qt-f qt-wide"><label for="f-ten"><span data-i="ften">Tên cơ sở</span><span class="qt-req">*</span></label><input id="f-ten" type="text" data-f="coSo.ten" autocomplete="organization"></div>
+            <div class="qt-f qt-wide"><label for="f-diachi"><span data-i="fdiachi">Địa chỉ</span><span class="qt-req">*</span></label><input id="f-diachi" type="text" data-f="coSo.diaChi" autocomplete="street-address"></div>
+            <div class="qt-f"><label for="f-tinh" data-i="ftinh">Tỉnh, thành phố</label><select id="f-tinh" data-f="coSo.tinh"></select><span class="qt-help" data-i="ftinhhelp">Theo địa giới hành chính sau sáp nhập năm 2025</span></div>
+            <div class="qt-f"><label for="f-mst" data-i="fmst">Mã số thuế</label><input id="f-mst" type="text" inputmode="numeric" data-f="coSo.maSoThue"><span class="qt-warnmsg" id="w-mst"></span></div>
+            <div class="qt-f"><label for="f-gpso" data-i="fgpso">Số giấy phép kinh doanh</label><input id="f-gpso" type="text" data-f="coSo.giayPhep.so"></div>
+            <div class="qt-f"><label for="f-gpngay" data-i="fgpngay">Ngày cấp</label><input id="f-gpngay" type="date" data-f="coSo.giayPhep.ngayCap"></div>
+            <div class="qt-f"><label for="f-gpnoi" data-i="fgpnoi">Nơi cấp</label><input id="f-gpnoi" type="text" data-f="coSo.giayPhep.noiCap"></div>
+            <div class="qt-f"><label for="f-bo" data-i="fbo">Bộ quản lý lĩnh vực</label><select id="f-bo" data-f="coSo.boQuanLy"></select><span class="qt-warnmsg" id="w-bo"></span></div>
+            <div class="qt-f"><label for="f-pl" data-i="fpl">Phụ lục trong danh mục</label><input id="f-pl" type="text" data-f="coSo.phuLuc"><span class="qt-help" data-i="fplhelp">Phụ lục chứa tên cơ sở trong Quyết định 42/2026/QĐ-TTg, ví dụ II</span></div>
+            <div class="qt-f"><label for="f-stt" data-i="fstt">Số thứ tự trong phụ lục</label><input id="f-stt" type="text" inputmode="numeric" data-f="coSo.stt"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="qt-card">
+        <div class="qt-ch"><h3 data-i="i2h">Người đại diện theo pháp luật</h3><span class="qt-hint" data-i="i2hint">Mục I.2 Mẫu số 06, đồng thời là người ký ở cuối báo cáo</span></div>
+        <div class="qt-cb">
+          <div class="qt-grid">
+            <div class="qt-f"><label for="f-dd" data-i="fdd">Họ và tên</label><input id="f-dd" type="text" data-f="coSo.daiDien.hoTen" autocomplete="name"></div>
+            <div class="qt-f"><label for="f-cv" data-i="fcv">Chức vụ</label><input id="f-cv" type="text" data-f="coSo.daiDien.chucVu" autocomplete="organization-title"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="qt-card">
+        <div class="qt-ch"><h3 data-i="i3h">Lĩnh vực hoạt động kinh doanh, sản xuất</h3><span class="qt-hint" data-i="i3hint">Mục I.3 Mẫu số 06</span></div>
+        <div class="qt-cb">
+          <div class="qt-grid">
+            <div class="qt-f qt-wide"><label for="f-lv" class="qt-lbl" data-i="flv">Mô tả ngắn ngành nghề, sản phẩm chính</label><textarea id="f-lv" data-f="coSo.linhVuc"></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="qt-okbox" id="qt-b0-ok" hidden data-i="b0ok">Bước 0 đã đủ thông tin bắt buộc.</div>
+      <div class="qt-alert" id="qt-b0-miss" hidden></div>
+    </section>
+
+    <div id="qt-panes"></div>
+  </div>
+
+  <footer class="qt-foot">
+    <p data-i="foot1">Ứng dụng là công cụ hỗ trợ tính toán, không thay thế trách nhiệm của cơ sở. Người dùng tự chịu trách nhiệm kiểm tra kết quả. Văn bản có hiệu lực pháp lý là bản gốc của các nghị định, thông tư. Bản thảo báo cáo xuất ra phải được người có thẩm quyền của cơ sở rà soát trước khi nộp.</p>
+    <p data-i="foot2">Số liệu bạn nhập không được gửi đi đâu. Số liệu chỉ nằm trong trình duyệt này và trong file bạn tự tải về.</p>
+  </footer>
+</main>
+</div>
+<div class="qt-toast" id="qt-toast" role="status" aria-live="polite"></div>
+<script>/*@@DATA@@*/</script>
+<script>/*@@JS@@*/</script>
+</body>
+</html>
