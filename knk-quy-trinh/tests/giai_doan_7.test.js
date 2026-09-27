@@ -173,6 +173,17 @@ const choLuu = page => page.waitForTimeout(700);   /* luu tam sau 400 ms */
   await p3.click('#knk-en');
   ok(/Open the procedure app/.test(await p3.innerText('#det-qt')), 'nhãn tiếng Anh sau khi đổi ngôn ngữ');
   await p3.click('#knk-vi');
+  /* co so nganh thep khong co ten trong QD 699: nhan nhom va chu thich theo diem c, giong ung dung */
+  await p3.fill('#f-q', 'thep viet nga');
+  await p3.click('#tb-cs tr[data-k="II|62"]');
+  const nv = await p3.$eval('#det-cs', e => e.innerText);
+  ok(/Nhóm B hoặc nhóm A, tùy cơ sở có thuộc điểm c hay không/.test(nv) && !/Nhóm B hoặc C/.test(nv), 'ngành hạn ngạch, không có trong QĐ 699: nhãn nhóm B hoặc nhóm A');
+  ok(/Điểm c khoản 4 Điều 11/.test(nv) && /không nêu điều kiện phải có tên trong Quyết định 699/.test(nv) && /chỉ áp dụng cho cơ sở được phân bổ hạn ngạch/.test(nv) && /Không thuộc, ví dụ chỉ đúc hoặc gia công sản phẩm thép, thì theo nghĩa vụ nhóm A/.test(nv), 'chú thích nêu điểm c, nhóm A chỉ khi không thuộc điểm c');
+  await p3.$eval('.knk-old', e => e.scrollIntoView({ block: 'center' }));
+  await p3.screenshot({ path: path.join(SHOTS, 'g7-knk-diemc.png') });
+  await p3.click('#knk-en');
+  ok(/Group B or group A, depending on whether point c applies/.test(await p3.$eval('#det-cs', e => e.innerText)), 'nhãn tiếng Anh theo điểm c');
+  await p3.click('#knk-vi');
   await p3.fill('#f-q', 'vat lieu xay dung cao bang');
   await p3.click('#tb-cs tr[data-k="III.B|1"]');
   ok(await p3.$$eval('#det-qt', xs => xs.length) === 0, 'cơ sở ngành Xây dựng không có nút');

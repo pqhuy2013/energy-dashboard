@@ -55,7 +55,7 @@ NODE_PATH=$(npm root -g) node tests/giai_doan_7.test.js
 
 Ba bộ `hoi_quy_*.test.js` giữ các lỗi tìm được trong đợt rà soát Giai đoạn 6 khỏi quay lại: `hoi_quy_nhap` (đọc số, ô ngày, nạp file sửa tay, lưu tạm), `hoi_quy_buoc` (từng bước), `hoi_quy_file` (file .docx, .xlsx). Mỗi mục trượt trên bản trước khi sửa và đạt trên bản hiện tại; đặt `QT_URL=file:///…/index.html` để chạy trên một bản khác.
 
-`giai_doan_7.test.js` kiểm đường nối từ dashboard `knk/`: nút trong khung chi tiết cơ sở, bốn trường hợp của tham số `?phuluc=&stt=`, thẻ trên trang chủ `../index.html`. Địa chỉ GitHub Pages của ứng dụng được chuyển sang `index.html` trên máy, nên bộ này chạy được trước khi đăng.
+`giai_doan_7.test.js` kiểm đường nối từ dashboard `knk/`: nút trong khung chi tiết cơ sở, bốn trường hợp của tham số `?phuluc=&stt=`, nhãn và chú thích nhóm của cơ sở ngành hạn ngạch không có trong Quyết định 699 (theo điểm c, giống Bước 0), thẻ trên trang chủ `../index.html`. Địa chỉ GitHub Pages của ứng dụng được chuyển sang `index.html` trên máy, nên bộ này chạy được trước khi đăng.
 
 Kiểm thử chạy trên `index.html` đã đóng gói. Ảnh chụp màn hình lưu vào thư mục `QT_SHOTS`, mặc định là `<tmp>/qt-shots`.
 
