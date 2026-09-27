@@ -48,11 +48,14 @@ NODE_PATH=$(npm root -g) node tests/toan_luong.test.js
 NODE_PATH=$(npm root -g) node tests/hoi_quy_nhap.test.js
 NODE_PATH=$(npm root -g) node tests/hoi_quy_buoc.test.js
 NODE_PATH=$(npm root -g) node tests/hoi_quy_file.test.js
+NODE_PATH=$(npm root -g) node tests/giai_doan_7.test.js
 ```
 
 `toan_luong.test.js` là bộ nghiệm thu Giai đoạn 6: một người dùng làm trọn một kỳ 2024–2025 từ hồ sơ trống, chỉ qua giao diện, qua đủ 9 màn hình; bốn phép kiểm chứng số học của kế hoạch; xuất và nạp lại file; chuyển VI sang EN rồi về VI trên từng màn hình; khổ 375 px ở hai ngôn ngữ; chặn mọi yêu cầu mạng ra ngoài; không lỗi console.
 
 Ba bộ `hoi_quy_*.test.js` giữ các lỗi tìm được trong đợt rà soát Giai đoạn 6 khỏi quay lại: `hoi_quy_nhap` (đọc số, ô ngày, nạp file sửa tay, lưu tạm), `hoi_quy_buoc` (từng bước), `hoi_quy_file` (file .docx, .xlsx). Mỗi mục trượt trên bản trước khi sửa và đạt trên bản hiện tại; đặt `QT_URL=file:///…/index.html` để chạy trên một bản khác.
+
+`giai_doan_7.test.js` kiểm đường nối từ dashboard `knk/`: nút trong khung chi tiết cơ sở, bốn trường hợp của tham số `?phuluc=&stt=`, thẻ trên trang chủ `../index.html`. Địa chỉ GitHub Pages của ứng dụng được chuyển sang `index.html` trên máy, nên bộ này chạy được trước khi đăng.
 
 Kiểm thử chạy trên `index.html` đã đóng gói. Ảnh chụp màn hình lưu vào thư mục `QT_SHOTS`, mặc định là `<tmp>/qt-shots`.
 
@@ -130,4 +133,8 @@ Bộ ghi .xlsx phát triển từ `xlsx.js` của `qcvn04-2017/index.html`; bộ
 ## Tham số địa chỉ
 
 - `#dau` là màn hình mở, `#buoc-0` đến `#buoc-8` là 9 màn hình.
-- Dự kiến cho Giai đoạn 7, khi nối từ dashboard `knk/`: `?phuluc=II&stt=15`, trùng tên với `coSo.phuLuc` và `coSo.stt`. Chưa cài.
+- `?phuluc=II&stt=15`: mở từ nút Mở ứng dụng quy trình trong khung chi tiết cơ sở của dashboard `knk/`, nút chỉ hiện với cơ sở do Bộ Công Thương quản lý. Hai tham số trùng tên với `coSo.phuLuc`, `coSo.stt`; phụ lục không phân biệt hoa thường, số thứ tự bỏ số 0 ở đầu. Ứng dụng đọc xong thì bỏ hai tham số khỏi địa chỉ, giữ các tham số khác, nên tải lại trang không lặp lại việc điền.
+  - Hồ sơ trống: điền thông tin cơ sở từ danh mục như nút Điền thông tin từ danh mục, mở Bước 0 với khung chi tiết cơ sở và gợi ý nhóm. Nhóm vẫn do cơ sở chọn.
+  - Hồ sơ đang mở đã là của cơ sở này (trùng phụ lục và số thứ tự, hoặc trùng tên khi hồ sơ chưa ghi phụ lục): mở lại bước đang làm.
+  - Hồ sơ của cơ sở khác: không ghi đè. Bước 0 hiện cơ sở trong liên kết cùng hai nút: Lập hồ sơ mới cho cơ sở này (hỏi tải hồ sơ đang mở về trước, như nút Bắt đầu kỳ mới) và Giữ hồ sơ đang mở (về bước đang làm).
+  - Không có dòng nào khớp: báo ở ô tra cứu, hồ sơ giữ nguyên.

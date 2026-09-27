@@ -9,7 +9,7 @@ export NODE_PATH="${NODE_PATH:-$(npm root -g)}"
 
 python3 build.py --kiem || { echo "index.html chua dung lai tu src/: chay python3 build.py truoc"; exit 1; }
 
-BO="giai_doan_1 giai_doan_2 giai_doan_3 giai_doan_4 giai_doan_5 toan_luong hoi_quy_nhap hoi_quy_buoc hoi_quy_file"
+BO="giai_doan_1 giai_doan_2 giai_doan_3 giai_doan_4 giai_doan_5 toan_luong hoi_quy_nhap hoi_quy_buoc hoi_quy_file giai_doan_7"
 truot=0
 for b in $BO; do
   log="$(mktemp)"

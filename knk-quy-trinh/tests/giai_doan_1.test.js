@@ -126,7 +126,7 @@ async function choLoi(page, doan) {
     ok(await paneOn(page, 'dau'), 'mở trang thấy màn hình mở');
     ok(await page.isHidden('#qt-c-resume'), 'chưa có phiên lưu tạm thì không hiện nút Tiếp tục');
     ok(await page.isHidden('#qt-full'), 'mở thẳng, không trong khung nhúng, thì ẩn nút Mở toàn màn hình');
-    ok((await text(page, '#qt-build')).includes('26/9/2026') || !BUILD, 'chân thanh bên hiện ngày dựng lấy từ hằng số dựng');
+    ok(!!BUILD && (await text(page, '#qt-build')).includes(BUILD.split('-').reverse().map(Number).join('/')), 'chân thanh bên hiện ngày dựng lấy từ hằng số dựng');
     ok((await page.$$('#qt-menu .qt-mi')).length === 9, 'thanh bên có 9 màn hình');
     await page.screenshot({ path: path.join(SHOTS, '01_man_hinh_mo.png'), fullPage: true });
 

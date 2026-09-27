@@ -110,7 +110,13 @@ Object.assign(T,{
   traDaDien:['Đã điền %n trường từ danh mục.','Filled %n fields from the list.'],
   traDaNhom:['Đã chọn nhóm %g.','Group %g selected.'],
   traNganh:['Ngành nghề','Activity'],
-  traBo:['Bộ quản lý','Ministry']
+  traBo:['Bộ quản lý','Ministry'],
+  lkDien:['Đã điền thông tin cơ sở theo liên kết từ dashboard danh mục cơ sở. Kiểm tra lại, chọn nhóm đối tượng theo gợi ý ở dưới rồi chọn kỳ báo cáo.','The facility details were filled in from the facility-list dashboard link. Check them, choose the group using the suggestion below, then choose the reporting period.'],
+  lkKhong:['Liên kết mở ứng dụng chỉ tới Phụ lục %p, số thứ tự %s, nhưng danh mục Quyết định 42/2026/QĐ-TTg không có dòng này. Tra cơ sở theo tên hoặc mã số thuế ở ô dưới.','The link points to Appendix %p, No. %s, but Decision 42/2026/QD-TTg has no such row. Look up the facility by name or tax code below.'],
+  lkKhac:['Trình duyệt này đang giữ hồ sơ của %t. Ứng dụng không ghi đè hồ sơ đó bằng cơ sở trong liên kết, cơ sở này hiện ở dưới. Chọn lập hồ sơ mới thì ứng dụng hỏi tải hồ sơ đang mở về máy trước.','This browser holds a record for %t. The app does not overwrite it with the facility in the link, which is shown below. If you start a new record, the app first offers to download the open one.'],
+  lkMoi:['Lập hồ sơ mới cho cơ sở này','Start a new record for this facility'],
+  lkGiu:['Giữ hồ sơ đang mở','Keep the open record'],
+  lkTrung:['Hồ sơ đang mở đã là của cơ sở này, mở lại bước đang làm.','The open record is already for this facility; reopened the step in progress.']
 });
 var TRA=null, traChon=-1;
 function dungTra(){
@@ -151,11 +157,17 @@ function veTra(){
   var cb=el('div','qt-cb');
   var f=el('div','qt-f'), lab=el('label',null,t('traLab')); lab.htmlFor='tra-q';
   var inp=el('input'); inp.type='search'; inp.id='tra-q'; inp.placeholder=t('traPh'); inp.value=giu; inp.autocomplete='off';
+  if(LK) cb.appendChild(veLk());
   f.appendChild(lab); f.appendChild(inp); cb.appendChild(f);
   cb.appendChild(el('div','qt-kq')).id='tra-kq';
   var ct=el('div','qt-ct'); ct.id='tra-ct'; ct.hidden=true; cb.appendChild(ct);
   card.appendChild(cb); host.appendChild(card);
-  inp.addEventListener('input',function(){ traChon=-1; veKq(); });
+  inp.addEventListener('input',function(){
+    traChon=-1;
+    /* go tra cuu moi thi thong bao lien ket het y nghia, tru thong bao con cho chon */
+    if(LK && LK.kieu!=='khac'){ LK=null; var n=host.querySelector('.qt-lk'); if(n) n.remove(); }
+    veKq();
+  });
   veKq();
 }
 function veKq(){
@@ -234,6 +246,67 @@ ACT.traDien=function(){
   var ms=[]; it.hq.forEach(function(j){ var m=DATA.hq[j][4]; if(ms.indexOf(m)<0) ms.push(m); });
   if(ms.length===1 && !c.maSoThue.trim()) dat('maSoThue',ms[0]);
   dienForm(); if(n) daSua();
+  /* nguoi dung tu dien de len ho so dang mo: thong bao "dang giu ho so cua co so khac" khong con dung */
+  if(LK && LK.kieu==='khac'){ LK=null; veTra(); }
   toast(fill(t('traDaDien'),{n:n})+(ms.length>1?' '+t('traMstNhieu'):''));
 };
 ACT.traNhom=function(p){ S.coSo.nhom=p[0]; dienForm(); daSua(); toast(fill(t('traDaNhom'),{g:p[0]})); };
+
+/* ---------- lien ket tu dashboard knk/: ?phuluc=II&stt=15 ----------
+   docLienKet chay truoc khi dung man hinh: tim dong danh muc, xep loai, bo hai tham so
+   khoi dia chi va chon man hinh mo. apLienKet chay sau khi dung man hinh.
+   dien:  ho so trong, dien thong tin co so tu danh muc; nhom van do co so chon.
+   trung: ho so dang mo da la cua co so nay, mo lai buoc dang lam.
+   khac:  dang co ho so cua co so khac, khong ghi de, chi hien co so o o tra cuu.
+   khong: khong co dong nao ung voi phu luc va so thu tu. */
+var LK=null;
+function docLienKet(){
+  var sp; try{ sp=new URLSearchParams(location.search); }catch(e){ return null; }
+  if(!sp.has('phuluc') && !sp.has('stt')) return null;
+  var pl=(sp.get('phuluc')||'').trim().toUpperCase(), so=(sp.get('stt')||'').trim();
+  if(/^\d{1,5}$/.test(so)) so=String(+so);
+  sp.delete('phuluc'); sp.delete('stt');
+  var i=-1;
+  DATA.cs.some(function(r,j){ if(String(r[0])===pl && String(r[2])===so){ i=j; return true; } return false; });
+  var lk={ pl:pl, stt:so, cs:i, bc:(+M.buocCuoi>=0 && +M.buocCuoi<=8)?+M.buocCuoi:0 };
+  if(i<0) lk.kieu='khong';
+  else if(!coNoiDung(S)) lk.kieu='dien';
+  else {
+    var c=S.coSo, r=DATA.cs[i];
+    var cung=(c.phuLuc && c.stt) ? (c.phuLuc===pl && c.stt===so) : (!!c.ten.trim() && nod(c.ten.trim())===nod(r[3]));
+    lk.kieu=cung?'trung':'khac';
+  }
+  cur=lk.kieu==='trung' ? 'buoc-'+lk.bc : 'buoc-0';
+  var q=sp.toString();
+  try{ history.replaceState(null,'',location.pathname+(q?'?'+q:'')+'#'+cur); }catch(e){}
+  return lk;
+}
+function apLienKet(lk){
+  if(lk.kieu==='trung'){ toast(t('lkTrung')); return; }
+  LK=lk;
+  if(lk.cs>=0){
+    dungTra(); traChon=lk.cs;   /* TRA[i] ung voi DATA.cs[i] */
+    var q=$('tra-q'); if(q) q.value=DATA.cs[lk.cs][3];
+    if(lk.kieu==='dien') ACT.traDien();
+  }
+  veTra();
+}
+function veLk(){
+  var d=el('div',(LK.kieu==='dien'?'qt-info':'qt-alert')+' qt-lk');
+  if(LK.kieu==='dien') d.textContent=t('lkDien');
+  else if(LK.kieu==='khong') d.textContent=fill(t('lkKhong'),{ p:LK.pl||'…', s:LK.stt||'…' });
+  else {
+    d.appendChild(el('p',null,fill(t('lkKhac'),{t:S.coSo.ten.trim()||t('noname')})));
+    var a=el('div','qt-acts');
+    a.appendChild(nut(t('lkMoi'),'lkMoi','qt-pri'));
+    a.appendChild(nut(t('lkGiu'),'lkGiu',''));
+    d.appendChild(a);
+  }
+  return d;
+}
+ACT.lkMoi=function(){
+  var i=LK.cs;
+  kyMoi(function(){ traChon=i; LK={ kieu:'dien', cs:i }; ACT.traDien(); veTra(); });
+};
+ACT.lkGiu=function(){ var bc=LK.bc; LK=null; veTra(); go('buoc-'+bc); };
+KHI_DOI_HO_SO.push(function(){ if(LK){ LK=null; veTra(); } });

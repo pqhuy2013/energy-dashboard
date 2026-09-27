@@ -36,11 +36,14 @@ function init(){
   document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='hidden') xaLuu(); });
   var h=location.hash.slice(1);
   cur=(h==='dau'||/^buoc-[0-8]$/.test(h))?h:'dau';
+  var lk=docLienKet();   /* ?phuluc=&stt= tu dashboard knk/, co thi doi man hinh mo */
   try{ applyLang(); dienForm(); }
   catch(e){
     /* ban luu tam lam hong man hinh: bo ban do, mo ho so trong thay vi de trang trang */
     S=macDinh(); SAVED=null; store.del(KEY); doiHoSo();
+    if(lk && lk.cs>=0){ lk.kieu='dien'; cur='buoc-0'; }
     applyLang(); dienForm();
   }
+  if(lk) apLienKet(lk);
 }
 init();

@@ -552,13 +552,15 @@ function docFile(file){
 }
 function moFile(){ var i=$('qt-file'); i.value=''; i.click(); }
 
-function kyMoi(){
+/* sau: viec lam tiep tren ho so trong, vi du dien co so tu lien ket; nut Bat dau ky moi truyen su kien nen phai kiem kieu */
+function kyMoi(sau){
   function lam(){
     S=macDinh();
     M={ coThayDoi:false, luuTamLuc:null, taiVeLuc:null, napTuFile:null, napLuc:null, buocCuoi:0 };
     doiHoSo();
     SAVED=null; store.del(KEY); luuMeta();
     veHet(); go('buoc-0'); toast(t('tNew'));
+    if(typeof sau==='function') sau();
   }
   if(coNoiDung(S)){
     hoi(t('cfNew')+(M.coThayDoi?' '+t('cfDirty'):''), [

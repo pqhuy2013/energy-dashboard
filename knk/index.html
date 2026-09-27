@@ -55,6 +55,7 @@ body{background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMac
 .knk-tools{display:flex;gap:6px}
 .knk-btn{background:var(--surface);border:1px solid var(--line2);border-radius:5px;padding:4px 9px;font:inherit;font-size:11.5px;color:var(--ink2);cursor:pointer;white-space:nowrap}
 .knk-btn:hover{background:var(--surface2);color:var(--ink)}
+a.knk-btn{display:inline-block;text-decoration:none}
 .knk-cvw{position:relative;height:300px}
 .knk-cvw.knk-tall{height:430px}
 /* ============ alert ============ */
@@ -576,6 +577,9 @@ var T = {
  dPl:['Vị trí trong văn bản','Location in the decision'], dTrang:['Trạng thái danh mục','List status'],
  dNv:['Nghĩa vụ và mốc thời hạn','Obligations and deadlines'], dTt:['Thông tư kỹ thuật áp dụng','Technical circular that applies'],
  dCanCu:['Căn cứ','Legal basis'], dNote:['Lưu ý','Note'],
+ dQt:['Lập hồ sơ kiểm kê cấp cơ sở','Prepare the facility inventory'],
+ dQtP:['Ứng dụng quy trình kiểm kê theo Thông tư 38/2023/TT-BCT, mở ra với thông tin cơ sở này điền sẵn. Số liệu chỉ lưu trên trình duyệt của người dùng.','The inventory procedure app under Circular 38/2023/TT-BCT opens with this facility filled in. Data stay in the user’s browser.'],
+ dQtBtn:['Mở ứng dụng quy trình','Open the procedure app'],
  noteB:['Nhãn nhóm hạn ngạch ở đây là ước tính theo ngành nghề ghi trong danh mục. Danh sách 110 cơ sở được phân bổ hạn ngạch chính thức nằm ở Quyết định 699/QĐ-BNNMT ngày 27/2/2026. Nếu cơ sở của bạn không có trong quyết định đó thì áp dụng nghĩa vụ nhóm A.','The quota-group label here is inferred from the activity recorded in the list. The official list of 110 facilities allocated quotas is in Decision 699/QD-BNNMT of 27 Feb 2026. If your facility is not in that decision, group A obligations apply.'],
  vTomtat:['Tóm tắt','Summary'], vQuanhe:['Quan hệ với văn bản khác','Relations to other documents'],
  vDieukhoan:['Điều khoản then chốt','Key clauses'], vNguon:['Xem toàn văn','Full text'],
@@ -977,6 +981,8 @@ function hqOf(r){ var k=CSPOS.get(r); if(k===undefined) return [];
   var v=HQMAP[String(k)]; return v?v.map(function(i){ return HQ[i]; }):[]; }
 function mtFor(grp){ return MT.filter(function(m){ return m.nhom===grp; }); }
 var TTBO={'Công Thương':'TT38','Xây dựng':'TT13','Giao thông vận tải':'TT63','Nông nghiệp và Môi trường':'TT17'};
+/* Ung dung quy trinh kiem ke hien chi phuc vu nganh Cong Thuong (Thong tu 38/2023/TT-BCT); dia chi tuyet doi de chay ca khi nhung vao WordPress */
+var QT_URL='https://pqhuy2013.github.io/energy-dashboard/knk-quy-trinh/';
 function detailCs(r){
   var box=document.getElementById('det-cs');
   var hqr=hqOf(r);
@@ -1022,6 +1028,10 @@ function detailCs(r){
   if(tt){ h+='<div class="knk-sec"><h5>'+t('dTt')+'</h5><div class="knk-ob"><b>'+esc(tt.so_hieu)+'</b><br>'+esc(tt.ten_day_du)+
     '<span class="knk-src">'+t('vHieuLuc')+' '+dmy(tt.ngay_hieu_luc)+' · '+esc(vbTT(tt).s)+'</span></div>'+
     '<button class="knk-btn" data-goto="'+tt.id+'">'+ (L==='vi'?'Mở văn bản':'Open document') +'</button></div>'; }
+  if(TTBO[bo]==='TT38'){
+    h+='<div class="knk-sec"><h5>'+t('dQt')+'</h5><div class="knk-ob">'+esc(t('dQtP'))+'</div>'+
+       '<a class="knk-btn" id="det-qt" href="'+QT_URL+'?phuluc='+encodeURIComponent(r[0])+'&amp;stt='+encodeURIComponent(r[2])+'" target="_blank" rel="noopener">'+t('dQtBtn')+' &rarr;</a></div>';
+  }
   h+='</div>';
   box.innerHTML=h;
   var g=box.querySelector('[data-goto]');
